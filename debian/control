@@ -5,6 +5,7 @@ Priority: required
 Standards-Version: 3.7.2.0
 Maintainer: Ubuntu Core Developers <ubuntu-devel-discuss@lists.ubuntu.com>
 XSBC-Original-Maintainer: LaMont Jones <lamont@debian.org>
+XS-Vcs-Git: git://git.debian.org/~lamont/util-linux.git
 
 Package: util-linux
 Architecture: any
