@@ -4,6 +4,7 @@ Section: base
 Priority: required
 Standards-Version: 3.7.2.0
 Maintainer: LaMont Jones <lamont@debian.org>
+XS-Vcs-Git: git://git.debian.org/~lamont/util-linux.git
 
 Package: util-linux
 Architecture: any
