@@ -7,6 +7,10 @@
 
 DISTRO :=$(shell lsb_release -is 2>/dev/null || echo Debian)
 
+ifneq (,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
+STRIP=y
+endif
+
 ifndef DEB_HOST_ARCH
 DEB_BUILD_ARCH := $(shell dpkg --print-installation-architecture)
 DEB_HOST_ARCH = $(DEB_BUILD_ARCH)
@@ -84,6 +88,9 @@ endif
 	mv debian/util-linux/usr/share/man/man8/linux64.8 debian/util-linux/usr/share/man/man1/linux64.1
 	# the version in bsdmainutils seems newer.
 	rm -f debian/bsdutils/usr/bin/look debian/bsdutils/usr/share/man/man1/look.1
+	# Alternatives
+	mv debian/util-linux/usr/bin/rename debian/util-linux/usr/bin/rename.ul
+	mv debian/util-linux/usr/share/man/man1/rename.1 debian/util-linux/usr/share/man/man1/rename.ul.1
 	#
 	#
 	mv debian/util-linux/usr/share/getopt/* debian/util-linux/usr/share/doc/util-linux/examples
@@ -99,37 +106,37 @@ ifneq ($(DISTRO),Debian)
 	    install -m 644 debian/hwclock.rules debian/util-linux/etc/udev/rules.d/85-hwclock.rules; \
 	fi
 endif
-	ln debian/util-linux/sbin/*fdisk debian/fdisk-udeb/usr/sbin
-	mv debian/fdisk-udeb/usr/sbin/cfdisk debian/cfdisk-udeb/usr/sbin
+	cd debian; if [ -f util-linux/bin/fdisk ]; then \
+	    ln util-linux/sbin/*fdisk fdisk-udeb/usr/sbin; \
+	    mv fdisk-udeb/usr/sbin/cfdisk cfdisk-udeb/usr/sbin; \
+	fi
 	cd debian/util-linux-locales && find usr/share/locale -type f | while read x; do ln $$x ../cfdisk-udeb/$$x; done
 ifeq ($(DEB_HOST_ARCH_OS),linux)
 ifeq ($(arch),$(findstring $(arch),powerpc ppc64))
 	mv -f debian/util-linux/sbin/fdisk debian/util-linux/sbin/ddisk
 	mv -f debian/util-linux/usr/share/man/man8/fdisk.8 debian/util-linux/usr/share/man/man8/ddisk.8
 else
-	(cd debian/util-linux && if [ -f sbin/hwclock ] ; then ln -sf hwclock.8.gz usr/share/man/man8/clock.8.gz; fi)
+	cd debian/util-linux && if [ -f sbin/hwclock ] ; then ln -sf hwclock.8.gz usr/share/man/man8/clock.8.gz; fi
 endif
-	(cd debian/util-linux/sbin ; mv agetty getty)
-	(cd debian/util-linux/usr/share/man/man8 ; mv agetty.8 getty.8)
+	cd debian/util-linux/sbin ; mv agetty getty
+	cd debian/util-linux/usr/share/man/man8 ; mv agetty.8 getty.8
 	install -m 644 debian/mount.fstab debian/mount/usr/share/doc/mount/examples/fstab
 endif
 ifeq ($(DEB_HOST_GNU_SYSTEM),gnu)
-	(cd debian/util-linux/sbin ; mv mkswap mkswap.linux)
-	(cd debian/util-linux/usr/share/man/man8 ; mv mkswap.8 mkswap.linux.8)
+	cd debian/util-linux/sbin ; mv mkswap mkswap.linux
+	cd debian/util-linux/usr/share/man/man8 ; mv mkswap.8 mkswap.linux.8
 endif
 	dh_compress -i -a
 	dh_fixperms -i -a -Xusr/bin/wall -Xbin/mount -Xbin/umount
 	rm -rf debian/*-udeb/usr/share/doc
+	dh_link -i -a
 
 
 # Build architecture-independent files here.
 binary-indep: build install
 	dh_testdir -i
 	dh_testroot -i
-	dh_link -i
 	dh_installdeb -i
-	#for i in $$(sed -n '/^Package:/s/^.* //p' debian/control); do cat debian/vars.in >> debian/$$i.substvars; done
-	#cat debian/vars.in >> debian/substvars
 	dh_gencontrol -i -- -VUpstream=$(Upstream)
 	dh_md5sums -i
 	dh_builddeb -i
@@ -139,13 +146,10 @@ binary-arch: build install
 	dh_testdir -a
 	dh_testroot -a
 	dh_installinit -a -- defaults 15 85
-	dh_link -a
-	dh_strip -a
+	[ -n "$(STRIP)" ] || dh_strip -a
 	dh_makeshlibs -a
 	dh_installdeb -a
 	dh_shlibdeps -a
-	#for i in $$(sed -n '/^Package:/s/^.* //p' debian/control); do cat debian/vars.in >> debian/$$i.substvars; done
-	#cat debian/vars.in >> debian/substvars
 ifneq ($(DEB_HOST_ARCH_OS),linux)
 	echo util-linux:Conflicts=getty >> debian/util-linux.substvars
 endif

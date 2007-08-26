@@ -1,3 +1,19 @@
+util-linux (2.13~rc3-9ubuntu1) gutsy; urgency=low
+
+  * New Debian version: remaining ubuntu changes:
+    - use libvolume-id instead of libblkid
+    - udev hooks
+
+ -- LaMont Jones <lamont@debian.org>  Sun, 26 Aug 2007 11:40:34 -0600
+
+util-linux (2.13~rc3-9) unstable-UNRELEASED; urgency=low
+
+  * debian/rules: cleanup and support nostrip option
+  * build: fdisk (and therefore the udebs) do not get built on m68k.
+  * build: /usr/bin/rename needs to be an alternative.  Closes: #439647
+
+ -- LaMont Jones <lamont@debian.org>  Sun, 26 Aug 2007 11:12:59 -0600
+
 util-linux (2.13~rc3-8ubuntu1) gutsy; urgency=low
 
   * Ubuntu uses udev, not libblkid.
