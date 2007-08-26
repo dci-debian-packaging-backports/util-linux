@@ -5,7 +5,7 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-DISTRO=$(shell lsb_release -is 2>/dev/null || echo Debian)
+DISTRO :=$(shell lsb_release -is 2>/dev/null || echo Debian)
 
 ifndef DEB_HOST_ARCH
 DEB_BUILD_ARCH := $(shell dpkg --print-installation-architecture)
