@@ -1,10 +1,27 @@
-util-linux (2.13~rc3-9ubuntu1) gutsy; urgency=low
+util-linux (2.13~rc3-10ubuntu1) gutsy; urgency=low
 
   * New Debian version: remaining ubuntu changes:
     - use libvolume-id instead of libblkid
     - udev hooks
 
- -- LaMont Jones <lamont@debian.org>  Sun, 26 Aug 2007 11:40:34 -0600
+ -- LaMont Jones <lamont@ubuntu.com>  Mon, 27 Aug 2007 11:19:50 -0600
+
+util-linux (2.13~rc3-10) unstable; urgency=low
+
+  * Changes from upstream:
+    - docs: update AUTHORS file
+    - Revert "mount: improve error message when helper program not present"
+      for translation freeze (reopens LP #131367)  Will be fixed in 2.13.1
+      and 2.14.
+    - po: update cs.po, sv.po (from translationproject.org)
+    - taskset: check for existence of sched_getaffinity
+    - setarch: add parisc/parisc64 support
+    - mount: free loop device on failure
+    - mount: avoid duplicates for root fs in mtab
+  * Revert "umount: only call update_mtab if mtab_is_writable().", since the
+    fix is already present in a different way.
+
+ -- LaMont Jones <lamont@debian.org>  Mon, 27 Aug 2007 03:39:49 -0600
 
 util-linux (2.13~rc3-9) unstable; urgency=low
 
