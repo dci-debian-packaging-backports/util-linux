@@ -1,10 +1,19 @@
-util-linux (2.13-2ubuntu1) gutsy; urgency=low
+util-linux (2.13-3ubuntu1) gutsy; urgency=low
 
   * New Debian version: remaining ubuntu changes:
     - use libvolume-id instead of libblkid
     - udev hooks
 
- -- LaMont Jones <lamont@ubuntu.com>  Mon, 27 Aug 2007 22:13:18 -0600
+ -- LaMont Jones <lamont@ubuntu.com>  Thu, 06 Sep 2007 14:38:14 -0600
+
+util-linux (2.13-3) unstable; urgency=low
+
+  * flock.1: typo in man page.  Closes: #440011
+  * mount: chain of symlinks to fstab causes use of pointer after free
+    Closes: #440562
+  * Replaces: sparc-utils (for sparc{32,64}.  Closes: #440966
+
+ -- LaMont Jones <lamont@debian.org>  Wed, 29 Aug 2007 07:09:06 -0600
 
 util-linux (2.13-2) unstable; urgency=low
 
