@@ -1,8 +1,5 @@
 util-linux (2.14~a0-0ubuntu1) gutsy; urgency=low
 
-  * New Debian version: remaining ubuntu changes:
-    - use libvolume-id instead of libblkid
-    - udev hooks
 
  -- LaMont Jones <lamont@ubuntu.com>  Wed, 12 Sep 2007 07:06:07 -0600
 
@@ -18,18 +15,41 @@ FILLER (2.14~a0-0) UNRELEASED; urgency=low
 
  -- FILLER Jones <lamont@debian.org>  Fri, 07 Sep 2007 08:52:55 -0600
 
+util-linux (2.13-6ubuntu1) gutsy; urgency=low
+
+  * New Debian version: remaining ubuntu changes:
+    - use libvolume-id instead of libblkid
+    - udev hooks
+
+ -- LaMont Jones <lamont@ubuntu.com>  Fri, 21 Sep 2007 10:39:12 -0600
+
 util-linux (2.13-6) unstable; urgency=low
 
   * sparc-utils 'sparc64' binary sets ADDR_LIMIT_32BIT.  Closes: LP#141524
 
  -- LaMont Jones <lamont@debian.org>  Fri, 21 Sep 2007 10:36:39 -0600
 
+util-linux (2.13-5ubuntu1) gutsy; urgency=low
+
+  * New Debian version: remaining ubuntu changes:
+    - use libvolume-id instead of libblkid
+    - udev hooks
+
+ -- LaMont Jones <lamont@debian.org>  Wed, 12 Sep 2007 10:36:46 -0600
+
 util-linux (2.13-5) unstable; urgency=low
 
   * build: cfdisk doesn't exist on some architectures.
 
  -- LaMont Jones <lamont@debian.org>  Wed, 12 Sep 2007 10:33:06 -0600
->>>>>>> master:debian/changelog
+
+util-linux (2.13-4ubuntu1) gutsy; urgency=low
+
+  * New Debian version: remaining ubuntu changes:
+    - use libvolume-id instead of libblkid
+    - udev hooks
+
+ -- LaMont Jones <lamont@ubuntu.com>  Wed, 12 Sep 2007 06:46:59 -0600
 
 util-linux (2.13-4) unstable; urgency=low
 
