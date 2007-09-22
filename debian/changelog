@@ -1,5 +1,8 @@
 util-linux (2.14~a0-0ubuntu1) gutsy; urgency=low
 
+  * New Debian version: remaining ubuntu changes:
+    - use libvolume-id instead of libblkid
+    - udev hooks
 
  -- LaMont Jones <lamont@ubuntu.com>  Wed, 12 Sep 2007 07:06:07 -0600
 
