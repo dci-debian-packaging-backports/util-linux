@@ -3,6 +3,7 @@ util-linux (2.13-8ubuntu1) gutsy; urgency=low
   * New Debian version: remaining ubuntu changes:
     - use libvolume-id instead of libblkid
     - udev hooks
+    - deliver hwclockfirst.sh on ubuntu as well.  LP: #63175
 
  -- LaMont Jones <lamont@ubuntu.com>  Fri, 21 Sep 2007 10:39:12 -0600
 
