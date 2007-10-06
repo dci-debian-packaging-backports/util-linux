@@ -1,3 +1,12 @@
+util-linux (2.12r-19+lenny1) testing-security; urgency=high
+
+  * Non-maintainer upload by the testing security team
+  * Include CVE-2007-5191.dpatch to fix privilege escalation in the
+    mount and umount binaries
+    Fixes: CVE-2007-5191
+
+ -- Steffen Joeris <white@debian.org>  Sat, 06 Oct 2007 07:14:52 +0000
+
 util-linux (2.12r-19) unstable; urgency=low
 
   * mips/mipsel buildds use sudo.  Fix install target so that mount.deb
