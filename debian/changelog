@@ -1,10 +1,9 @@
 util-linux (2.14~a0-0ubuntu1) gutsy-UNRELEASED; urgency=low
 
-  * New Debian version: remaining ubuntu changes:
-    - use libvolume-id instead of libblkid
-    - udev hooks
+  * Start new release
+  * DO NOT EDIT: changelog is built from commit messages
 
- -- LaMont Jones <lamont@ubuntu.com>  Wed, 12 Sep 2007 07:06:07 -0600
+ -- LaMont Jones <lamont@ubuntu.com>  Fri, 19 Oct 2007 10:42:14 -0600
 
 util-linux (2.14~a0-0) experimental-UNRELEASED; urgency=low
 
@@ -18,7 +17,7 @@ util-linux (2.13-9) unstable-UNRELEASED; urgency=low
   * Start new release
   * DO NOT EDIT: changelog is built from commit messages
 
- -- LaMont Jones <lamont@ubuntu.com>  Fri, 21 Sep 2007 10:39:12 -0600
+ -- LaMont Jones <lamont@debian.org>  Thu, 04 Oct 2007 14:34:37 -0600
 
 util-linux (2.13-8ubuntu1) gutsy; urgency=low
 
@@ -27,7 +26,7 @@ util-linux (2.13-8ubuntu1) gutsy; urgency=low
     - udev hooks
     - deliver hwclockfirst.sh on ubuntu as well.  LP: #63175
 
- -- LaMont Jones <lamont@debian.org>  Mon, 01 Oct 2007 22:17:42 -0600
+ -- LaMont Jones <lamont@ubuntu.com>  Fri, 21 Sep 2007 10:39:12 -0600
 
 util-linux (2.13-8) unstable; urgency=low
 
