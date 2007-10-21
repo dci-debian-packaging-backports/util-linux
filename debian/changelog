@@ -1,7 +1,8 @@
-util-linux (2.13-9ubuntu1) hardy-UNRELEASED; urgency=low
+util-linux (2.13-9ubuntu1) hardy; urgency=low
 
-  * Start new release
-  * DO NOT EDIT: changelog is built from commit messages
+  * New Debian version: remaining ubuntu changes:
+    - use libvolume-id instead of libblkid
+    - udev hooks
 
  -- LaMont Jones <lamont@ubuntu.com>  Fri, 19 Oct 2007 10:42:14 -0600
 
