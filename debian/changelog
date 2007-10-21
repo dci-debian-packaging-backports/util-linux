@@ -1,9 +1,9 @@
-util-linux (2.14~a0-0ubuntu1) gutsy-UNRELEASED; urgency=low
+util-linux (2.14~a0-0ubuntu1) grumpy-UNRELEASED; urgency=low
 
   * Start new release
   * DO NOT EDIT: changelog is built from commit messages
 
- -- LaMont Jones <lamont@ubuntu.com>  Fri, 19 Oct 2007 10:42:14 -0600
+ -- LaMont Jones <lamont@debian.org>  Sat, 20 Oct 2007 22:22:13 -0600
 
 util-linux (2.14~a0-0) experimental-UNRELEASED; urgency=low
 
@@ -11,6 +11,14 @@ util-linux (2.14~a0-0) experimental-UNRELEASED; urgency=low
   * DO NOT EDIT: changelog is built from commit messages
 
  -- LaMont Jones <lamont@debian.org>  Thu, 11 Oct 2007 21:01:08 -0600
+
+util-linux (2.13-9ubuntu1) hardy; urgency=low
+
+  * New Debian version: remaining ubuntu changes:
+    - use libvolume-id instead of libblkid
+    - udev hooks
+
+ -- LaMont Jones <lamont@ubuntu.com>  Fri, 19 Oct 2007 10:42:14 -0600
 
 util-linux (2.13-9) unstable; urgency=low
 
