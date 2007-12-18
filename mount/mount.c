@@ -1249,7 +1249,8 @@ try_mount_one (const char *spec0, const char *node0, const char *types0,
 	       "       need a /sbin/mount.<type> helper program)"));
 
 	} else if (S_ISBLK(statbuf.st_mode)
-			 && (fd = open(spec, O_RDONLY | O_NONBLOCK)) >= 0) {
+	                 && (fd = open(spec, O_RDONLY | O_NONBLOCK)) >= 0) {
+
 	  if (blkdev_get_size(fd, &size) == 0) {
 	    if (size == 0 && !loop)
 	      error(_(
