@@ -1,3 +1,11 @@
+util-linux (2.13.1-2ubuntu1) hardy; urgency=low
+
+  * New Debian version: remaining ubuntu changes:
+    - use libvolume-id instead of libblkid
+    - udev hooks
+
+ -- LaMont Jones <lamont@ubuntu.com>  Thu, 06 Mar 2008 20:36:42 -0700
+
 util-linux (2.13.1-2) unstable; urgency=low
 
   [Frans Pop]
