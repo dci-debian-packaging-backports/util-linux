@@ -41,6 +41,11 @@ get_mtab_info(void) {
 	}
 }
 
+void
+reset_mtab_info(void) {
+        have_mtab_info = 0;
+}
+
 int
 mtab_does_not_exist(void) {
 	get_mtab_info();
@@ -92,12 +97,6 @@ fstab_head() {
 	if (!got_fstab)
 		read_fstab();
 	return &fstab;
-}
-
-static void
-my_free(const void *s) {
-	if (s)
-		free((void *) s);
 }
 
 static void
@@ -329,7 +328,7 @@ getfs_by_specdir (const char *spec, const char *dir) {
 
 			if (streq(dr, dir))
 				ok = 1;
-			my_free(dr);
+			free(dr);
 			if (!ok)
 				continue;
 		}
@@ -349,7 +348,7 @@ getfs_by_specdir (const char *spec, const char *dir) {
 				if (has_uuid(spec, fs + 5))
 					ok = 1;
 			}
-			my_free(fs);
+			free(fs);
 			if (!ok)
 				continue;
 		}
@@ -399,7 +398,7 @@ getfs_by_spec (const char *spec) {
 		else if (!strcmp(name,"UUID"))
 			mc = getfs_by_uuid (value);
 
-		free((void *) name);
+		free(name);
 		return mc;
 	}
 
@@ -420,9 +419,28 @@ getfs_by_devname (const char *devname) {
 	struct mntentchn *mc, *mc0;
 
 	mc0 = fstab_head();
+
+	/* canonical devname in fstab */
 	for (mc = mc0->nxt; mc && mc != mc0; mc = mc->nxt)
 		if (streq(mc->m.mnt_fsname, devname))
 			return mc;
+
+	/* noncanonical devname in fstab */
+	for (mc = mc0->nxt; mc && mc != mc0; mc = mc->nxt) {
+		char *fs;
+
+		if (strncmp(mc->m.mnt_fsname, "LABEL=", 6) == 0 ||
+				strncmp(mc->m.mnt_fsname, "UUID=", 5) == 0)
+			continue;
+
+		fs = canonicalize(mc->m.mnt_fsname);
+		if (streq(fs, devname)) {
+			free(fs);
+			return mc;
+		}
+		free(fs);
+	}
+
 	return NULL;
 }
 
