@@ -1,3 +1,11 @@
+util-linux (2.13.1-4ubuntu1) hardy; urgency=low
+
+  * New Debian version: remaining ubuntu changes:
+    - use libvolume-id instead of libblkid
+    - udev hooks
+
+ -- LaMont Jones <lamont@ubuntu.com>  Fri, 11 Apr 2008 21:03:50 -0600
+
 util-linux (2.13.1-4) unstable; urgency=low
 
   * meta: Drop bashism in preinst.  Closes: #472248
