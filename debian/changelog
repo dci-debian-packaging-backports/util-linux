@@ -1,3 +1,33 @@
+util-linux (2.13.1-5ubuntu1) hardy; urgency=low
+
+  * New Debian version: remaining ubuntu changes:
+    - use libvolume-id instead of libblkid
+    - udev hooks
+
+ -- LaMont Jones <lamont@ubuntu.com>  Fri, 11 Apr 2008 21:03:50 -0600
+
+util-linux (2.13.1-5) unstable; urgency=low
+
+  * Switch to upstream's more-correct fix for LP#206113
+  * mkswap: when writing the signature page, handle EINTR returns.  LP: #206113
+
+ -- LaMont Jones <lamont@debian.org>  Mon, 14 Apr 2008 18:18:30 -0600
+
+util-linux (2.13.1-4ubuntu1) hardy; urgency=low
+
+  * New Debian version: remaining ubuntu changes:
+    - use libvolume-id instead of libblkid
+    - udev hooks
+
+ -- LaMont Jones <lamont@ubuntu.com>  Fri, 11 Apr 2008 21:03:50 -0600
+
+util-linux (2.13.1-4) unstable; urgency=low
+
+  * meta: Drop bashism in preinst.  Closes: #472248
+  * mkswap: when writing the signature page, handle EINTR returns.  LP: #206113
+
+ -- LaMont Jones <lamont@debian.org>  Fri, 11 Apr 2008 21:01:29 -0600
+
 util-linux (2.13.1-3ubuntu1) hardy; urgency=low
 
   * New Debian version: remaining ubuntu changes:
