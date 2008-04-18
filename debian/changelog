@@ -1,3 +1,11 @@
+util-linux (2.14~rc1-1ubuntu1) intrepid; urgency=low
+
+  * New Debian version: remaining ubuntu changes:
+    - use libvolume-id instead of libblkid
+    - udev hooks
+
+ -- LaMont Jones <lamont@ubuntu.com>  Thu, 17 Apr 2008 22:41:15 -0600
+
 util-linux (2.14~rc1-1) experimental; urgency=low
 
   * New upstream version
