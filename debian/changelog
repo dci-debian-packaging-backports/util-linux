@@ -1,10 +1,28 @@
-util-linux (2.14~rc1-1ubuntu1) intrepid; urgency=low
+util-linux (2.14~rc2-0ubuntu1) intrepid; urgency=low
 
   * New Debian version: remaining ubuntu changes:
     - use libvolume-id instead of libblkid
     - udev hooks
 
  -- LaMont Jones <lamont@ubuntu.com>  Thu, 17 Apr 2008 22:41:15 -0600
+
+util-linux (2.14~rc2-0) experimental; urgency=low
+
+  [Steve Grubb]
+
+  * login: audit log injection attack via login
+
+  [Karel Zak]
+
+  * po: merge changes
+   - po: update it.po (from translationproject.org) (Marco Colombo)
+   - po: update nl.po (from translationproject.org) (Benno Schulenberg)
+  * ionice: update man page to reflect IDLE class change in  2.6.25
+  * scriptreplay: gettextize a forgotten messages
+  * docs: update v2.14 ReleaseNotes
+  * build-sys: release++
+
+ -- LaMont Jones <lamont@debian.org>  Mon, 28 Apr 2008 19:51:41 -0600
 
 util-linux (2.14~rc1-1) experimental; urgency=low
 
@@ -14,7 +32,7 @@ util-linux (2.14~rc1-1) experimental; urgency=low
 
  -- LaMont Jones <lamont@debian.org>  Thu, 17 Apr 2008 18:19:27 -0600
 
-util-linux (2.13.1.1-0) unstable; urgency=low
+util-linux (2.13.1.1-1) unstable; urgency=low
 
   [Steve Grubb]
 
@@ -33,7 +51,7 @@ util-linux (2.13.1.1-0) unstable; urgency=low
   * control: drop -1 version from libslang2-dev build-dep
   * control: standards-version 3.7.3.0
 
- -- LaMont Jones <lamont@debian.org>  Tue, 22 Apr 2008 22:44:08 -0600
+ -- LaMont Jones <lamont@debian.org>  Mon, 28 Apr 2008 19:47:33 -0600
 
 util-linux (2.13.1-5ubuntu1) hardy; urgency=low
 
