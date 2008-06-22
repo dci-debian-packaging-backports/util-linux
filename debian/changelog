@@ -4,7 +4,7 @@ util-linux (2.14-1ubuntu1) intrepid; urgency=low
     - use libvolume-id instead of libblkid
     - udev hooks
 
- -- LaMont Jones <lamont@ubuntu.com>  Thu, 22 May 2008 10:20:03 -0600
+ -- LaMont Jones <lamont@ubuntu.com>  Sun, 22 Jun 2008 08:20:03 -0600
 
 util-linux (2.14-1) unstable; urgency=low
 
