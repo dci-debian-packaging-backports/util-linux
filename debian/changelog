@@ -1,3 +1,11 @@
+util-linux (2.14-1ubuntu2) intrepid; urgency=low
+
+  * Disable the fallback clause when /dev/rtc cannot be opened. hwclock
+    should not access the x86 RTC using I/O instructions unless explicitly
+    requested from the command line (--directisa).
+
+ -- Tim Gardner <tim.gardner@canonical.com>  Wed, 24 Sep 2008 13:35:15 -0600
+
 util-linux (2.14-1ubuntu1) intrepid; urgency=low
 
   * New Debian version: remaining ubuntu changes:
