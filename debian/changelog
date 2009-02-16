@@ -168,6 +168,14 @@ util-linux (2.14.2~rc2-1) unstable; urgency=low
 
  -- LaMont Jones <lamont@debian.org>  Fri, 30 Jan 2009 08:14:49 -0700
 
+util-linux (2.14-1ubuntu3) jaunty; urgency=low
+
+  * debian/rules: Install rules into /lib/udev/rules.d instead
+  * debian/util-linux.dirs: Create new location, don't create old.
+  * debian/util-linux.preinst: Remove the old rules if unmodified.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Wed, 07 Jan 2009 10:47:13 +0000
+
 util-linux (2.14-1ubuntu2) intrepid; urgency=low
 
   * Disable the fallback clause when /dev/rtc cannot be opened. hwclock
