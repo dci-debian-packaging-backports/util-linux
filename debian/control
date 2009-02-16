@@ -19,6 +19,7 @@ Suggests: util-linux-locales, kbd | console-tools, dosfstools
 Replaces: schedutils, miscutils, setterm, fdisk, linux32, sparc-utils, ${util-linux:Conflicts}
 Conflicts: schedutils, setterm, fdisk, kbd (<< 1.05-3), console-tools (<< 1:0.2.3-21), linux32, ${util-linux:Conflicts}
 Provides: schedutils, linux32
+Breaks: udev (<< 136-1)
 Description: Miscellaneous system utilities
  This package contains a number of important utilities, most of which
  are oriented towards maintenance of your system.  Some of the more
