@@ -1,3 +1,9 @@
+util-linux (2.14.2-1ubuntu2) jaunty; urgency=low
+
+  * Re-apply changes from 2.14-1ubuntu3 and 2.14-1ubuntu4
+
+ -- Scott James Remnant <scott@ubuntu.com>  Mon, 16 Feb 2009 23:05:33 +0000
+
 util-linux (2.14.2-1ubuntu1) jaunty; urgency=low
 
   * New Debian version: remaining ubuntu changes:
