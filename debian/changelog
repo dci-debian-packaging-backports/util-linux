@@ -1,3 +1,26 @@
+util-linux (2.14.2-1ubuntu3) jaunty; urgency=low
+
+  * Run autoreconf again.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Tue, 17 Feb 2009 13:01:31 +0000
+
+util-linux (2.14.2-1ubuntu2) jaunty; urgency=low
+
+  * Re-apply changes from 2.14-1ubuntu3 and 2.14-1ubuntu4
+
+ -- Scott James Remnant <scott@ubuntu.com>  Mon, 16 Feb 2009 23:05:33 +0000
+
+util-linux (2.14.2-1ubuntu1) jaunty; urgency=low
+
+  * New Debian version: remaining ubuntu changes:
+    - use libvolume-id instead of libblkid
+    - udev hooks
+    - Disable the fallback clause when /dev/rtc cannot be opened. hwclock
+      should not access the x86 RTC using I/O instructions unless explicitly
+      requested from the command line (--directisa).
+
+ -- LaMont Jones <lamont@ubuntu.com>  Fri, 30 Jan 2009 08:14:49 -0700
+
 util-linux (2.14.2-1) unstable; urgency=low
 
   [LaMont Jones]
@@ -26,6 +49,17 @@ util-linux (2.14.2-1) unstable; urgency=low
   * po: update nl.po (from translationproject.org) (Benno Schulenberg)
 
  -- LaMont Jones <lamont@debian.org>  Fri, 13 Feb 2009 12:25:27 -0700
+
+util-linux (2.14.2~rc2-1ubuntu1) jaunty; urgency=low
+
+  * New Debian version: remaining ubuntu changes:
+    - use libvolume-id instead of libblkid
+    - udev hooks
+    - Disable the fallback clause when /dev/rtc cannot be opened. hwclock
+      should not access the x86 RTC using I/O instructions unless explicitly
+      requested from the command line (--directisa).
+
+ -- LaMont Jones <lamont@ubuntu.com>  Fri, 30 Jan 2009 08:14:49 -0700
 
 util-linux (2.14.2~rc2-1) unstable; urgency=low
 
@@ -186,6 +220,31 @@ util-linux (2.14.2~rc2-1) unstable; urgency=low
 
  -- LaMont Jones <lamont@debian.org>  Fri, 30 Jan 2009 08:14:49 -0700
 
+<<<<<<< HEAD:debian/changelog
+=======
+util-linux (2.14-1ubuntu4) jaunty; urgency=low
+
+  * Add Breaks so the right version of udev gets used.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Fri, 09 Jan 2009 11:58:58 +0000
+
+util-linux (2.14-1ubuntu3) jaunty; urgency=low
+
+  * debian/rules: Install rules into /lib/udev/rules.d instead
+  * debian/util-linux.dirs: Create new location, don't create old.
+  * debian/util-linux.preinst: Remove the old rules if unmodified.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Wed, 07 Jan 2009 10:47:13 +0000
+
+util-linux (2.14-1ubuntu2) intrepid; urgency=low
+
+  * Disable the fallback clause when /dev/rtc cannot be opened. hwclock
+    should not access the x86 RTC using I/O instructions unless explicitly
+    requested from the command line (--directisa).
+
+ -- Tim Gardner <tim.gardner@canonical.com>  Wed, 24 Sep 2008 13:35:15 -0600
+
+>>>>>>> ubuntu/stable/v2.14:debian/changelog
 util-linux (2.14-1ubuntu1) intrepid; urgency=low
 
   * New Debian version: remaining ubuntu changes:
