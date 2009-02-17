@@ -1,8 +1,8 @@
-util-linux (2.14.2-1ubuntu3) hardy; urgency=low
+util-linux (2.14.2-1ubuntu3) jaunty; urgency=low
 
-  * rebuild to catch autocrap files.
+  * Run autoreconf again.
 
- -- LaMont Jones <lamont@ubuntu.com>  Tue, 17 Feb 2009 06:04:36 -0700
+ -- Scott James Remnant <scott@ubuntu.com>  Tue, 17 Feb 2009 13:01:31 +0000
 
 util-linux (2.14.2-1ubuntu2) jaunty; urgency=low
 
