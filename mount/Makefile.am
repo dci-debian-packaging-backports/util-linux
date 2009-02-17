@@ -8,13 +8,18 @@ dist_man_MANS = fstab.5 mount.8 swapoff.8 swapon.8 umount.8 losetup.8
 
 utils_common = sundries.c xmalloc.c realpath.c fsprobe.c
 
+if !HAVE_VERSIONSORT
+fallback =  ../lib/strverscmp.c
+endif
+
 headers_common = fstab.h mount_mntent.h mount_constants.h \
 	lomount.h fsprobe.h realpath.h xmalloc.h \
 	getusername.h loop.h sundries.h
 
 mount_common = fstab.c mount_mntent.c getusername.c lomount.c rmd160.c \
 	$(utils_common) $(headers_common) ../lib/env.c ../lib/linux_version.c \
-	../lib/blkdev.c
+	../lib/blkdev.c $(fallback)
+
 
 mount_SOURCES = mount.c $(mount_common) ../lib/setproctitle.c
 mount_CFLAGS = $(SUID_CFLAGS) $(AM_CFLAGS)
@@ -24,11 +29,13 @@ umount_SOURCES = umount.c $(mount_common)
 umount_CFLAGS = $(SUID_CFLAGS) $(AM_CFLAGS)
 umount_LDFLAGS = $(SUID_LDFLAGS) $(AM_LDFLAGS)
 
-swapon_SOURCES = swapon.c swap_constants.h $(utils_common)
+swapon_SOURCES = swapon.c swap_constants.h $(utils_common) \
+	../lib/linux_version.c ../lib/blkdev.c
 
 losetup_SOURCES = lomount.c sundries.c xmalloc.c realpath.c \
-	loop.h lomount.h xmalloc.h sundries.h realpath.h rmd160.c
+	loop.h lomount.h xmalloc.h sundries.h realpath.h rmd160.c $(fallback)
 losetup_CPPFLAGS = -DMAIN $(AM_CPPFLAGS)
+
 
 mount_LDADD = $(LDADD_common)
 umount_LDADD = $(LDADD_common)
@@ -36,12 +43,13 @@ swapon_LDADD = $(LDADD_common)
 
 LDADD_common =
 LDADD_common_static =
+mount_static_LDADD =
 
 if HAVE_STATIC_MOUNT
 bin_PROGRAMS += mount.static
 mount_static_SOURCES = $(mount_SOURCES)
 mount_static_LDFLAGS = $(LDFLAGS_STATIC)
-mount_static_LDADD = $(LDADD_common_static)
+mount_static_LDADD += $(LDADD_common_static)
 endif
 
 if HAVE_STATIC_UMOUNT
@@ -66,19 +74,13 @@ endif
 
 if HAVE_SELINUX
 mount_LDADD += $(SELINUX_LIBS)
-mount_static_LDADD = $(SELINUX_LIBS_STATIC)
+mount_static_LDADD += $(SELINUX_LIBS_STATIC)
 endif
 
 if HAVE_VOLUME_ID
 utils_common += fsprobe_volumeid.c
-swapon_SOURCES += ../lib/linux_version.c ../lib/blkdev.c
 LDADD_common += $(VOLUMEID_LIBS)
 LDADD_common_static += $(VOLUMEID_LIBS_STATIC)
-endif
-
-if HAVE_PIVOT_ROOT
-sbin_PROGRAMS += pivot_root
-dist_man_MANS += pivot_root.8
 endif
 
 noinst_PROGRAMS = mtab_lock_test

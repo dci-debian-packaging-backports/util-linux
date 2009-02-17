@@ -30,9 +30,9 @@
 #include <getopt.h>
 #include <time.h>
 #include <sys/file.h>
-#include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
+
 #include "xstrncpy.h"
 #include "nls.h"
 #include "pathnames.h"
@@ -72,7 +72,6 @@
 #ifdef	SYSV_STYLE
 #define	ISSUE "/etc/issue"		/* displayed before the login prompt */
 #include <sys/utsname.h>
-#include <time.h>
 #endif
 
 #define LOGIN " login: "		/* login prompt */
@@ -716,7 +715,7 @@ termio_init(tp, speed, op)
     }
 
     tp->c_iflag = tp->c_lflag = tp->c_oflag = 0;
-#ifndef __GNU__
+#ifdef HAVE_STRUCT_TERMIOS_C_LINE
     tp->c_line = 0;
 #endif
     tp->c_cc[VMIN] = 1;
@@ -891,6 +890,7 @@ do_prompt(op, tp)
 		  case 'd':
 		  case 't':
 		    {
+		      /* TODO: use nl_langinfo() */
 		      char *weekday[] = { "Sun", "Mon", "Tue", "Wed", "Thu",
 					  "Fri", "Sat" };
 		      char *month[] = { "Jan", "Feb", "Mar", "Apr", "May",

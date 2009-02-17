@@ -1,9 +1,11 @@
-v2.15:
-=====
+ * use TZ=UTC for tests
 
  * add NLS and err.h stuff to schedutils (chrt.c, taskset.c)
 
- * add libfsprobe (see topic/fsprobe branch)
+ * move libblkid to util-linux-ng (see the topic/blkid branch)
+
+ * add mllockall() and SCHED_FIFO to hwclock,
+   see http://lkml.org/lkml/2008/10/12/132
 
  * swapon -s  -- LABELs support
 
@@ -53,8 +55,8 @@ v2.15:
 		try to mount all unmounted entries
 	  } while (not all mounted && at least one new was successfully mounted)
 
-v2.??:
-=====
+ * agetty: use nl_langinfo() for days and months rather than hardcoded
+   English names.
 
  * rewrite ipcs to use /proc/sys/kernel rather than unreliable syscalls
    (there are problems with 32bit userspace on 64bit kernel)
@@ -70,4 +72,15 @@ v2.??:
 	It might be worth a thought implementing v3 support
 	(though I am not really sure how much people us minix fs ;-)
 	This might require some major code cleanup in mkfs.minix.
+
+ * rtcwake does not support wake from S5/off
+   http://bugzilla.redhat.com/show_bug.cgi?id=449115
+
+ * add SELinux security contexts support to the 'ipcs' utility
+   http://bugzilla.redhat.com/show_bug.cgi?id=225342
+
+   Would be great to list the current system IPC Objects with their respective
+   security labels (where allowed) with something like 'ipcs -Z' - following the
+   way other tools reports those.
+
 

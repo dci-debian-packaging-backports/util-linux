@@ -1,5 +1,5 @@
 /*
- * fsck.c - a file system consistency checker for Linux.
+ * fsck.minix.c - a file system consistency checker for Linux.
  *
  * (C) 1991, 1992 Linus Torvalds. This file may be redistributed
  * as per the GNU copyleft.
@@ -100,6 +100,7 @@
 #include <termios.h>
 #include <mntent.h>
 #include <sys/stat.h>
+#include <sys/param.h>
 #include <signal.h>
 
 #include "minix.h"
@@ -169,17 +170,14 @@ static unsigned char * zone_count = NULL;
 static void recursive_check(unsigned int ino);
 static void recursive_check2(unsigned int ino);
 
-#include "bitops.h"
-
-#define inode_in_use(x) (bit(inode_map,(x)))
-#define zone_in_use(x) (bit(zone_map,(x)-FIRSTZONE+1))
+#define inode_in_use(x) (isset(inode_map,(x)))
+#define zone_in_use(x) (isset(zone_map,(x)-FIRSTZONE+1))
 
 #define mark_inode(x) (setbit(inode_map,(x)),changed=1)
 #define unmark_inode(x) (clrbit(inode_map,(x)),changed=1)
 
 #define mark_zone(x) (setbit(zone_map,(x)-FIRSTZONE+1),changed=1)
 #define unmark_zone(x) (clrbit(zone_map,(x)-FIRSTZONE+1),changed=1)
-
 
 static void
 reset(void) {

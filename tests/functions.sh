@@ -22,14 +22,14 @@ TS_VERBOSE="no"
 
 function ts_skip {
 	echo " IGNORE ($1)"
-	if [ -n "$2" ] && [ -b "$2" ]; then
+	if [ -n "$2" -a -b "$2" ]; then
 		ts_device_deinit "$2"
 	fi
 	exit 0
 }
 
 function ts_skip_nonroot {
-	if [ $UID != 0 ]; then
+	if [ $UID -ne 0 ]; then
 		ts_skip "not root permissions"
 	fi
 }
@@ -242,6 +242,17 @@ function ts_device_has {
 function ts_device_has_uuid {
 	ts_uuid_by_devname "$1" | egrep -q '^[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}$'
 	return $?
+}
+
+function ts_is_mounted {
+	local DEV=$1
+
+	grep -q $DEV /proc/mounts && return 0
+
+	if [ "${DEV#/dev/loop/}" != "$DEV" ]; then
+		return grep -q "/dev/loop${DEV#/dev/loop/}" /proc/mounts
+	fi
+	return 1
 }
 
 function ts_swapoff {

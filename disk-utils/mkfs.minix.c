@@ -1,5 +1,5 @@
 /*
- * mkfs.c - make a linux (minix) file-system.
+ * mkfs.minix.c - make a linux (minix) file-system.
  *
  * (C) 1991 Linus Torvalds. This file may be redistributed as per
  * the Linux copyright.
@@ -69,6 +69,7 @@
 #include <termios.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
+#include <sys/param.h>
 #include <mntent.h>
 #include <getopt.h>
 
@@ -76,10 +77,6 @@
 #include "minix.h"
 #include "nls.h"
 #include "pathnames.h"
-
-#ifndef __GNUC__
-#error "needs gcc for the bitop-__asm__'s"
-#endif
 
 #define MINIX_ROOT_INO 1
 #define MINIX_BAD_INO 2
@@ -135,10 +132,8 @@ static unsigned short good_blocks_table[MAX_GOOD_BLOCKS];
 static int used_good_blocks = 0;
 static unsigned long req_nr_inodes = 0;
 
-#include "bitops.h"
-
-#define inode_in_use(x) (bit(inode_map,(x)))
-#define zone_in_use(x) (bit(zone_map,(x)-FIRSTZONE+1))
+#define inode_in_use(x) (isset(inode_map,(x)))
+#define zone_in_use(x) (isset(zone_map,(x)-FIRSTZONE+1))
 
 #define mark_inode(x) (setbit(inode_map,(x)))
 #define unmark_inode(x) (clrbit(inode_map,(x)))
@@ -654,9 +649,14 @@ main(int argc, char ** argv) {
 	    die(_("cannot determine sector size for %s"));
     if (BLOCK_SIZE < sectorsize)
 	    die(_("block size smaller than physical sector size of %s"));
-    if (!BLOCKS && blkdev_get_size(DEV, &BLOCKS) == -1)
-	die(_("cannot determine size of %s"));
+    if (!BLOCKS) {
+	    if (blkdev_get_size(DEV, &BLOCKS) == -1)
+		die(_("cannot determine size of %s"));
+	    BLOCKS /= BLOCK_SIZE;
+    }
   } else if (!S_ISBLK(statbuf.st_mode)) {
+    if (!BLOCKS)
+	    BLOCKS = statbuf.st_size / BLOCK_SIZE;
     check=0;
   } else if (statbuf.st_rdev == 0x0300 || statbuf.st_rdev == 0x0340)
     die(_("will not try to make filesystem on '%s'"));

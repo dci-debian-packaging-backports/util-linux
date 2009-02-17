@@ -142,7 +142,7 @@ wchar_t		wbuf[READBUF];		/* used in several widechar routines */
 
 const char *copyright =
 "@(#)pg 1.44 2/8/02. Copyright (c) 2000-2001 Gunnar Ritter. ";
-const char *helpscreen = "All rights reserved.\n\
+const char *helpscreen = N_("All rights reserved.\n\
 -------------------------------------------------------\n\
   h                       this screen\n\
   q or Q                  quit program\n\
@@ -164,7 +164,7 @@ Many commands accept preceding numbers, for example:\n\
 +1<newline> (next page); -1<newline> (previous page); 1<newline> (first page).\n\
 \n\
 See pg(1) for more information.\n\
--------------------------------------------------------\n";
+-------------------------------------------------------\n");
 
 #ifndef HAVE_FSEEKO
   static int fseeko(FILE *f, off_t off, int whence) {
@@ -220,7 +220,8 @@ smalloc(size_t s)
 {
         char *m = (char *)malloc(s);
         if (m == NULL) {
-                write(2, "Out of memory\n", 14);
+		char *p = _("Out of memory\n");
+                write(2, p, strlen(p));
                 quit(++exitstatus);
         }
         return m;
@@ -1239,7 +1240,7 @@ newcmd:
 					rerror = regcomp(&re, p,
 						REG_NOSUB | REG_NEWLINE);
 					if (rerror != 0) {
-						mesg("RE error: ");
+						mesg(_("RE error: "));
 						regerror(rerror, &re,
 								b, READBUF);
 						mesg(b);
@@ -1247,7 +1248,7 @@ newcmd:
 					}
 					remembered = 1;
 				} else if (remembered == 0) {
-					mesg("No remembered search string");
+					mesg(_("No remembered search string"));
 					goto newcmd;
 				}
 				line -= pagelen;
@@ -1502,12 +1503,15 @@ found_bw:
 				}
 				goto newcmd;
 			case 'h':
+			{
 				/*
 				 * Help!
 				 */
+				char *help = _(helpscreen);
 				write(1, copyright + 4, strlen(copyright + 4));
-				write(1, helpscreen, strlen(helpscreen));
+				write(1, help, strlen(help));
 				goto newcmd;
+			}
 			case 'n':
 				/*
 				 * Next file.

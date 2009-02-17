@@ -9,6 +9,8 @@ TS_TESTUSER=${TS_TESTUSER:-"test"}
 # helpers
 TS_HELPER_SYSINFO="$TS_TOPDIR/helpers/test_sysinfo"
 TS_HELPER_PATHS="$TS_TOPDIR/helpers/test_pathnames"
+TS_HELPER_BYTESWAP="$TS_TOPDIR/helpers/test_byteswap"
+TS_HELPER_MD5="$TS_TOPDIR/helpers/test_md5"
 
 # external commands
 TS_ECMD_BLKID="@BLKID@"
@@ -25,6 +27,9 @@ TS_CMD_MTABLOCK=${TS_CMD_MTABLOCK:-"$TOPDIR/mount/mtab_lock_test"}
 
 TS_CMD_MKSWAP=${TS_CMD_MKSWAP:-"$TOPDIR/disk-utils/mkswap"}
 TS_CMD_MKCRAMFS=${TS_CMD_MKCRAMFS:-"$TOPDIR/disk-utils/mkfs.cramfs"}
+TS_CMD_MKMINIX=${TS_CMD_MKMINIX:-"$TOPDIR/disk-utils/mkfs.minix"}
+TS_CMD_FSCKCRAMFS=${TS_CMD_FSCKCRAMFS:-"$TOPDIR/disk-utils/fsck.cramfs"}
+TS_CMD_FSCKMINIX=${TS_CMD_FSCKMINIX:-"$TOPDIR/disk-utils/fsck.minix"}
 
 TS_CMD_IPCS=${TS_CMD_IPCS:-"$TOPDIR/sys-utils/ipcs"}
 

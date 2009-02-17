@@ -922,18 +922,18 @@ save_adjtime(const struct adjtime adjtime, const bool testing) {
 
       adjfile = fopen(adj_file_name, "w");
       if (adjfile == NULL) {
-        outsyserr("Could not open file with the clock adjustment parameters "
-               "in it (%s) for writing", adj_file_name);
+        outsyserr(_("Could not open file with the clock adjustment parameters "
+               "in it (%s) for writing"), adj_file_name);
 	err = 1;
       } else {
         if (fputs(newfile, adjfile) < 0) {
-	  outsyserr("Could not update file with the clock adjustment "
-		    "parameters (%s) in it", adj_file_name);
+	  outsyserr(_("Could not update file with the clock adjustment "
+		    "parameters (%s) in it"), adj_file_name);
 	  err = 1;
         }
         if (fclose(adjfile) < 0) {
-          outsyserr("Could not update file with the clock adjustment "
-		    "parameters (%s) in it", adj_file_name);
+          outsyserr(_("Could not update file with the clock adjustment "
+		    "parameters (%s) in it"), adj_file_name);
 	  err = 1;
         }
       }
@@ -987,8 +987,8 @@ do_adjustment(struct adjtime *adjtime_p,
     adjtime_p->dirty = TRUE;
   } else if (adjtime_p->last_adj_time == 0) {
     if (debug)
-      printf("Not setting clock because last adjustment time is zero, "
-	     "so history is bad.");
+      printf(_("Not setting clock because last adjustment time is zero, "
+	     "so history is bad."));
   } else {
     int adjustment;
     /* Number of seconds we must insert in the Hardware Clock */
@@ -1031,8 +1031,18 @@ determine_clock_access_method(const bool user_requests_ISA) {
   if (!ur)
 	  ur = probe_for_kd_clock();
 
+  /*
+   * This final clause is a really bad idea on x86/AT PCs. You run the
+   * risk of a race condition with another copy of hwclock
+   * that already has /dev/rtc open. The fallback case on
+   * x86 is to then raise I/O priviledge level and access
+   * the RTC CMOS directly using I/O instructions. Simultaneous
+   * access like that can really hose the RTC.
+   */
+#if !defined(__i386__)
   if (!ur && !user_requests_ISA)
 	  ur = probe_for_cmos_clock();
+#endif
 
   if (debug) {
 	  if (ur)

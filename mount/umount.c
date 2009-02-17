@@ -74,8 +74,8 @@ int nomtab = 0;
 /* Call losetup -d for each unmounted loop device. */
 int delloop = 0;
 
-/* True if ruid != euid.  */
-int suid = 0;
+/* True if (ruid != euid) or (0 != ruid), i.e. only "user" umounts permitted. */
+int restricted = 1;
 
 /* Last error message */
 int complained_err = 0;
@@ -185,7 +185,7 @@ static void complain(int err, const char *dev) {
 static int
 umount_one (const char *spec, const char *node, const char *type,
 	    const char *opts, struct mntentchn *mc) {
-	int umnt_err, umnt_err2;
+	int umnt_err = 0;
 	int isroot;
 	int res;
 	int status;
@@ -217,7 +217,6 @@ umount_one (const char *spec, const char *node, const char *type,
 	if (delloop && is_loop_device(spec) && !is_loop_autoclear(spec))
 		myloop = 1;
 
-	umnt_err = umnt_err2 = 0;
 	if (lazy) {
 		res = umount2 (node, MNT_DETACH);
 		if (res < 0)
@@ -240,27 +239,10 @@ umount_one (const char *spec, const char *node, const char *type,
 	} else
 		res = umount (node);
 
-	if (res < 0) {
+	if (res < 0)
 		umnt_err = errno;
-		/* A device might have been mounted on a node that has since
-		   been deleted or renamed, so if node fails, also try spec. */
-		/* Note that this is incorrect in case spec was mounted
-		   several times. */
-		/* if (umnt_err == ENOENT || umnt_err == EINVAL) */
-		if (umnt_err != EBUSY && strcmp(node, spec)) {
-			if (verbose)
-				printf (_("could not umount %s - trying %s instead\n"),
-					node, spec);
-			res = umount (spec);
-			if (res < 0)
-				umnt_err2 = errno;
-			/* Do not complain about remote NFS mount points */
-			if (errno == ENOENT && index(spec, ':'))
-				umnt_err2 = 0;
-		}
-	}
 
-	if (res < 0 && remount && (umnt_err == EBUSY || umnt_err2 == EBUSY)) {
+	if (res < 0 && remount && umnt_err == EBUSY) {
 		/* Umount failed - let us try a remount */
 		res = mount(spec, node, NULL,
 			    MS_MGC_VAL | MS_REMOUNT | MS_RDONLY, NULL);
@@ -333,10 +315,7 @@ umount_one (const char *spec, const char *node, const char *type,
 
 	if (res >= 0)
 		return 0;
-
-	if (umnt_err2)
-		complain(umnt_err2, spec);
-	if (umnt_err && umnt_err != umnt_err2)
+	if (umnt_err)
 		complain(umnt_err, node);
 	return 1;
 }
@@ -474,12 +453,31 @@ umount_file (char *arg) {
 		printf(_("Trying to umount %s\n"), file);
 
 	mc = getmntdirbackward(file, NULL);
-	if (!mc)
+	if (!mc) {
 		mc = getmntdevbackward(file, NULL);
+		if (mc) {
+			struct mntentchn *mc1;
+
+			mc1 = getmntdirbackward(mc->m.mnt_dir, NULL);
+			if (!mc1)
+				/* 'mc1' must exist, though not necessarily
+				    equals to `mc'. Otherwise we go mad. */
+				die(EX_SOFTWARE,
+				    _("umount: confused when analyzing mtab"));
+
+			if (strcmp(file, mc1->m.mnt_fsname)) {
+				/* Something was stacked over `file' on the
+				   same mount point. */
+				die(EX_FAIL, _("umount: cannot umount %s -- %s is "
+				    "mounted over it on the same point."),
+				    file, mc1->m.mnt_fsname);
+			}
+		}
+	}
 	if (!mc && verbose)
 		printf(_("Could not find %s in mtab\n"), file);
 
-	if (suid) {
+	if (restricted) {
 		char *mtab_user = NULL;
 
 		if (!mc)
@@ -516,8 +514,8 @@ umount_file (char *arg) {
 		   /dev/sda4 /mnt/zip auto user,noauto  0 0
 		   then "mount /dev/sda4" followed by "umount /mnt/zip"
 		   used to fail. So, we must not look for file, but for
-		   the pair (spec,file) in fstab. */
-		fs = getfs_by_specdir(mc->m.mnt_fsname, mc->m.mnt_dir);
+		   the pair (dev,file) in fstab. */
+		fs = getfs_by_devdir(mc->m.mnt_fsname, mc->m.mnt_dir);
 		if (!fs) {
 			if (!getfs_by_spec (file) && !getfs_by_dir (file))
 				die (2,
@@ -642,10 +640,18 @@ main (int argc, char *argv[]) {
 			usage (stderr, 1);
 		}
 
-	if (getuid () != geteuid ()) {
-		suid = 1;
-		if (all || types || nomtab || force || remount)
-			die (2, _("umount: only root can do that"));
+	{
+		const uid_t ruid = getuid();
+		const uid_t euid = geteuid();
+
+		/* if we're really root and aren't running setuid */
+		if (((uid_t)0 == ruid) && (ruid == euid)) {
+			restricted = 0;
+		}
+	}
+
+	if (restricted && (all || types || nomtab || force || remount)) {
+		die (2, _("umount: only root can do that"));
 	}
 
 	argc -= optind;
