@@ -1,3 +1,30 @@
+util-linux (2.14.2-1ubuntu4) UNRELEASED; urgency=low
+
+  * Apply my patch to step the system clock on startup without reference
+    to the hardware clock, used when the hardware clock is not in UTC.
+
+  * debian/hwclock.rules: Replace with a rule that reads /etc/default/rcS
+    and calls hwclock --systz
+  * debian/hwclock.udev: Drop since the udev rule invokes hwclock directly.
+  * debian/rules:
+    - Don't install hwclock.udev since it's dropped
+    - Don't generate hwclockfirst.sh
+    - Don't add startup symlinks for hwclock.sh
+  * debian/hwclock.sh:
+    - Always pass --rtc to hwclock calls.
+    - Call hwclock --systohc with --noadjfile unless the file is writable.
+    - Change LSB header, this is no longer installed on startup.
+  * debian/util-linux.postinst:
+    - Drop code for hwclockfirst.sh, remove on upgrade
+    - Don't put start links in for hwclock.sh
+    - Remove /etc/adjtime if the appropriate init script line has never been
+      uncommented, combined with the init script patch, this file should now
+      never be created
+  * debian/util-linux.postrm: No hwclockfirst.sh to remove on purge.
+  * debian/README.Debian.hwclock: Update documentation.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Mon, 16 Feb 2009 14:46:06 +0000
+
 util-linux (2.14.2-1ubuntu3) jaunty; urgency=low
 
   * Run autoreconf again.
