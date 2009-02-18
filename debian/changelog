@@ -1,4 +1,4 @@
-util-linux (2.14.2-1ubuntu4) UNRELEASED; urgency=low
+util-linux (2.14.2-1ubuntu4) jaunty; urgency=low
 
   * Apply my patch to step the system clock on startup without reference
     to the hardware clock, used when the hardware clock is not in UTC.
