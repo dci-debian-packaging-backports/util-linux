@@ -34,6 +34,11 @@ if [ "$1" = "configure" ] && dpkg --compare-versions "$2" lt "2.14.2-1ubuntu4"; 
 	# Remove old init script
 	update-rc.d -f hwclockfirst.sh remove 2>/dev/null > /dev/null
 	rm -f /etc/init.d/hwclockfirst.sh
+
+	# Remove adjtime file if unused
+	if ! grep -qe '^[^#]*/sbin/hwclock.*--adjust' /etc/init.d/hwclock.sh; then
+		rm -f /etc/adjtime
+	fi
 fi
 
 if [ -x /usr/sbin/update-mime ]; then
