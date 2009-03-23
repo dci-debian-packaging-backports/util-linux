@@ -37,7 +37,7 @@ ifeq ($(DEB_HOST_ARCH_OS),linux)
 CONFOPTS += --with-selinux
 endif
 ifneq ($(DISTRO),Debian)
-CONFOPTS += --with-fsprobe=builtin
+CONFOPTS += --with-fsprobe=builtin --enable-fsck
 endif
 
 build: build-stamp
