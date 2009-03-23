@@ -107,15 +107,9 @@ endif
 	install -m 644 debian/mime.util-linux debian/util-linux/usr/lib/mime/packages/util-linux
 	if [ -f debian/util-linux/sbin/hwclock ] ; then \
 	    install -m 755 debian/hwclock.sh debian/util-linux/etc/init.d/hwclock.sh; \
-	    install -m 755 debian/hwclock.sh debian/util-linux/etc/init.d/hwclockfirst.sh; \
-	    sed -i -e '/^FIRST=/s/no/yes/' -e '/Provides:/s/ck/ckfirst/' \
-	    	-e '/Required-Stop:/s/.local_fs/umountroot/' \
-		-e '/Default-Start:/a# Default-Stop:' -e '/Default-Stop:/d' \
-		debian/util-linux/etc/init.d/hwclockfirst.sh; \
 	fi
 ifneq ($(DISTRO),Debian)
 	if [ -f debian/util-linux/sbin/hwclock ] ; then \
-	    install -m 755 debian/hwclock.udev debian/util-linux/lib/udev/set_hwclock && \
 	    install -m 644 debian/hwclock.rules debian/util-linux/lib/udev/rules.d/85-hwclock.rules; \
 	fi
 endif
@@ -158,7 +152,7 @@ binary-indep: build install
 binary-arch: build install
 	dh_testdir -s
 	dh_testroot -s
-	dh_installinit -s -- defaults 15 85
+	dh_installinit -s -- stop 25 0 6 .
 	[ -n "$(STRIP)" ] || dh_strip -s
 	dh_makeshlibs -s
 	dh_installdeb -s
