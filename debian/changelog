@@ -1,3 +1,10 @@
+util-linux (2.15~rc1-1ubuntu1~blkid1) jaunty; urgency=low
+
+  * Use the built-in blkid library.
+  * Build fsck, replacing e2fsprogs.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Mon, 23 Mar 2009 18:43:53 +0000
+
 util-linux (2.15~rc1-1) experimental; urgency=low
 
   [Vincent Deffontaines]
