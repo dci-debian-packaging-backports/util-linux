@@ -1,3 +1,13 @@
+util-linux (2.15~rc1-1ubuntu1~blkid2) jaunty; urgency=low
+
+  * debian/rules: Fixed udeb and development libraries.
+  * Provide separate copyright file for libblkid.
+  * Create dpkg symbols file for libblkid1.
+  * Place blkid.tab in /dev
+  * blkid: exit 0 when using -L, -U or -g
+
+ -- Scott James Remnant <scott@ubuntu.com>  Tue, 24 Mar 2009 11:20:39 +0000
+
 util-linux (2.15~rc1-1ubuntu1~blkid1) jaunty; urgency=low
 
   * Use the built-in blkid library.
