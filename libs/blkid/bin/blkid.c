@@ -531,6 +531,7 @@ int main(int argc, char **argv)
 	err = 2;
 	if (gc) {
 		blkid_gc_cache(cache);
+		err = 0;
 		goto exit;
 	}
 	if (output_format & OUTPUT_PRETTY_LIST)
@@ -566,8 +567,10 @@ int main(int argc, char **argv)
 		 * Evaluate API
 		 */
 		char *res = blkid_evaluate_spec(search_type, search_value, NULL);
-		if (res)
+		if (res) {
 			printf("%s\n", res);
+			err = 0;
+		}
 	} else if (lookup) {
 		/*
 		 * Classic (cache based) API
