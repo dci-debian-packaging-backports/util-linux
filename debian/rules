@@ -124,6 +124,9 @@ ifneq ($(DISTRO),Debian)
 	rmdir debian/util-linux/usr/lib/pkgconfig
 	rmdir debian/util-linux/usr/include/blkid
 	rmdir debian/util-linux/usr/include
+	# overwrite copyright
+	install -m 644 debian/libblkid.copyright debian/libblkid1/usr/share/doc/libblkid1/copyright
+	install -m 644 debian/libblkid.copyright debian/libblkid-dev/usr/share/doc/libblkid-dev/copyright
 endif
 	cd debian; if [ -f util-linux/sbin/fdisk ]; then \
 	    ln util-linux/sbin/*fdisk fdisk-udeb/usr/sbin; \
