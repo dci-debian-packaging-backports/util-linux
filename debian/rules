@@ -112,11 +112,15 @@ ifneq ($(DISTRO),Debian)
 	if [ -f debian/util-linux/sbin/hwclock ] ; then \
 	    install -m 644 debian/hwclock.rules debian/util-linux/lib/udev/rules.d/85-hwclock.rules; \
 	fi
+	# copy library and symlink into udeb
 	ln debian/libblkid1/lib/libblkid.so.1.* debian/libblkid1-udeb/lib
-	ln -s libblkid.so.1.* debian/libblkid1-udeb/lib/libblkid1.so
+	ln debian/libblkid1/lib/libblkid.so.1   debian/libblkid1-udeb/lib
+	# move development pieces from /lib into /usr/lib
+	TARGET=$$(cd debian/libblkid1/lib; echo libblkid.so.1.*) && \
+	       ln -s /lib/$$TARGET debian/libblkid-dev/usr/lib/libblkid.so
 	mv debian/libblkid1/lib/*.a debian/libblkid-dev/usr/lib
 	mv debian/libblkid1/lib/*.la debian/libblkid-dev/usr/lib
-	mv debian/libblkid1/lib/*.so debian/libblkid-dev/usr/lib
+	rm debian/libblkid1/lib/*.so
 	rmdir debian/util-linux/usr/lib/pkgconfig
 	rmdir debian/util-linux/usr/include/blkid
 	rmdir debian/util-linux/usr/include
