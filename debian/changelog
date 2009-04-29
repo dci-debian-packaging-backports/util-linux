@@ -1,3 +1,10 @@
+util-linux (2.15~rc1-1ubuntu1~blkid3) jaunty; urgency=low
+
+  * Add dependency on uuid-dev to libblkid-dev otherwise pkg-config won't
+    work and ironically e2fsprogs (and thus uuid-dev) ftbfs.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Tue, 24 Mar 2009 12:06:54 +0000
+
 util-linux (2.15~rc1-1ubuntu1~blkid2) jaunty; urgency=low
 
   * debian/rules: Fixed udeb and development libraries.
