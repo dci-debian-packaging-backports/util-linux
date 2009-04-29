@@ -25,6 +25,41 @@ util-linux (2.15~rc2-1ubuntu1) karmic; urgency=low
       expect device names to survive a reboot
     - Drop build-dep on libblkid-dev and use --with-fsprobe=builtin
 
+  Also include the following updates from GIT:
+
+  [Aurelien Jarno]
+
+  * lib: do not include <linux/fd.h> in ismounted.c
+  * chrt: add a comment about non POSIX 1003.1b attributes in chrt.1
+  * agetty: IUCLC and OLCUC are Linux extensions
+
+  [Eric Sandeen]
+
+  * blkid: remove whole-disk entries from cache when partitions are found
+
+  [Karel Zak]
+
+  * blkid: rename blkid_debug_init to blkid_init_debug
+  * docs: add a note about /proc/sys/kernel/random/uuid
+  * ionice: change Jens Axboe's email
+  * losetup: mount endless loop hang.  novell: #449646
+  * cfdisk: fix "cannot seek on disk drive" bug.  Closes: #511161
+  * blkid: split SONAME and LIBBLKID_VERSION
+  * blockdev: fix possible buffer overflow
+  * fdisk: fix max. ptname
+  * sfdisk: fix possible buffer overflow
+  * docs: add entry about /proc/partitions parsing
+  * blkid: rename blkid_evaluate_spec to blkid_evaluate_tag
+  * tests: fix -regex in run.sh
+  * blkid: linux_raid - fix logic for volumes with size == 0
+  * po: merge changes
+
+  [localization folks]
+
+  * po: update fr.po (from translationproject.org) (Nicolas Provost)
+  * po: update cs.po (from translationproject.org) (Petr Pisar)
+  * po: update id.po (from translationproject.org) (Arif E. Nugroho)
+
  -- Scott James Remnant <scott@ubuntu.com>  Tue, 24 Mar 2009 12:06:54 +0000
 
 util-linux (2.15~rc2-1) experimental; urgency=low
