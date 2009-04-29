@@ -6,7 +6,6 @@ util-linux (2.15~rc2-1ubuntu1) karmic; urgency=low
       second (or third) time.
       - Call hwclock --systz from udev rules to set the system timezone
         and step the system clock if it was not originally set to UTC.
-      - Drop the debian/hwclock.udev helper
       - hwclock.sh init script is not called on startup, remove start
         links on upgrade
       - hwclockfirst.sh init script removed
