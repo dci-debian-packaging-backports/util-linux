@@ -16,14 +16,15 @@ util-linux (2.15~rc2-1ubuntu1) karmic; urgency=low
       - Remove /etc/adjtime on upgrade if it was not used.
     - Install udev rules into /lib/udev/rules.d not /etc/udev.rules.d
       - Breaks to force upgrade of udev
-    - Change source section from "base" to "utils" to work around Soyuz.
-    - mount breaks nfs-common to force an upgrade
-    - Build the fsck binary
-      - Replaces e2fsprogs
-    - Build the blkid library and tools
-      - Install custom blkid.conf to use /dev/.blkid.tab since we don't
-        expect device names to survive a reboot
-      - Drop build-dep on libblkid-dev and use --with-fsprobe=builtin
+
+  * Change source section from "base" to "utils" to work around Soyuz.
+  * mount breaks nfs-common to force an upgrade
+  * Build the fsck binary
+    - Replaces e2fsprogs
+  * Build the blkid library and tools
+    - Install custom blkid.conf to use /dev/.blkid.tab since we don't
+      expect device names to survive a reboot
+    - Drop build-dep on libblkid-dev and use --with-fsprobe=builtin
 
  -- Scott James Remnant <scott@ubuntu.com>  Tue, 24 Mar 2009 12:06:54 +0000
 
