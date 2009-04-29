@@ -528,12 +528,13 @@ int main(int argc, char **argv)
 	if (!lowprobe && !eval && blkid_get_cache(&cache, read) < 0)
 		goto exit;
 
-	err = 2;
 	if (gc) {
 		blkid_gc_cache(cache);
 		err = 0;
 		goto exit;
 	}
+	err = 2;
+
 	if (output_format & OUTPUT_PRETTY_LIST)
 		pretty_print_dev(NULL);
 
@@ -568,8 +569,8 @@ int main(int argc, char **argv)
 		 */
 		char *res = blkid_evaluate_spec(search_type, search_value, NULL);
 		if (res) {
-			printf("%s\n", res);
 			err = 0;
+			printf("%s\n", res);
 		}
 	} else if (lookup) {
 		/*

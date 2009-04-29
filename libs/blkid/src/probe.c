@@ -67,7 +67,7 @@ static const struct blkid_idinfo *idinfos[] =
 	&jfs_idinfo,
 	&udf_idinfo,
 	&iso9660_idinfo,
-	/* TODO: zfs */
+	&zfs_idinfo,
 	&hfsplus_idinfo,
 	&hfs_idinfo,
 	&ufs_idinfo,
@@ -136,7 +136,7 @@ int blkid_known_fstype(const char *fstype)
  */
 blkid_probe blkid_new_probe(void)
 {
-	blkid_debug_init(0);
+	blkid_init_debug(0);
 	return calloc(1, sizeof(struct blkid_struct_probe));
 }
 
@@ -258,6 +258,7 @@ int blkid_probe_set_device(blkid_probe pr, int fd,
 	pr->fd = fd;
 	pr->off = off;
 	pr->size = 0;
+	pr->idx = 0;
 
 	if (size)
 		pr->size = size;
@@ -284,7 +285,6 @@ int blkid_probe_set_device(blkid_probe pr, int fd,
 
 	DBG(DEBUG_LOWPROBE, printf("ready for low-probing, offset=%zd, size=%zd\n",
 				pr->off, pr->size));
-	pr->idx = 0;
 	return 0;
 }
 
@@ -452,6 +452,9 @@ int blkid_do_probe(blkid_probe pr)
 
 	if (pr->idx)
 		i = pr->idx + 1;
+
+	if (i < 0 && i >= ARRAY_SIZE(idinfos))
+		return -1;
 
 	DBG(DEBUG_LOWPROBE, printf("--> starting probing loop\n"));
 

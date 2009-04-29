@@ -1,26 +1,43 @@
-util-linux (2.15~rc1-1ubuntu1~blkid3) jaunty; urgency=low
+util-linux (2.15~rc2-1ubuntu1) karmic; urgency=low
 
-  * Add dependency on uuid-dev to libblkid-dev otherwise pkg-config won't
-    work and ironically e2fsprogs (and thus uuid-dev) ftbfs.
+  * Merge from Debian, remaining changes:
 
  -- Scott James Remnant <scott@ubuntu.com>  Tue, 24 Mar 2009 12:06:54 +0000
 
-util-linux (2.15~rc1-1ubuntu1~blkid2) jaunty; urgency=low
+util-linux (2.15~rc2-1) experimental; urgency=low
 
-  * debian/rules: Fixed udeb and development libraries.
-  * Provide separate copyright file for libblkid.
-  * Create dpkg symbols file for libblkid1.
-  * Place blkid.tab in /dev
-  * blkid: exit 0 when using -L, -U or -g
+  [Aurelien Jarno]
 
- -- Scott James Remnant <scott@ubuntu.com>  Tue, 24 Mar 2009 11:20:39 +0000
+  * lib: do not include <linux/fd.h> in ismounted.c
 
-util-linux (2.15~rc1-1ubuntu1~blkid1) jaunty; urgency=low
+  [Matthew Garrett]
 
-  * Use the built-in blkid library.
-  * Build fsck, replacing e2fsprogs.
+  * mount: Add strictatime support
 
- -- Scott James Remnant <scott@ubuntu.com>  Mon, 23 Mar 2009 18:43:53 +0000
+  [Andreas Dilger]
+
+  * blkid: add ZSF support
+
+  [Scott James Remnant]
+
+  * blkid: fix exit codes in blkid(8)
+
+  [Karel Zak]
+
+  * blkid: check idinfo[] index
+  * blkid: add ZSF test
+  * blkid: update TODO
+  * blkid: add TODO note about blkid_evaluate_spec_to_buffer()
+  * blkid: add new requirements to TODO list
+  * login: use open(2) rather then access(2) for $HOME/.hushlogin
+  * docs: update AUTHORS file
+  * blkid: add tst_types.c to Makefile.am
+  * docs: update v2.15 ReleaseNotes
+  * build-sys: release++ (v2.15-rc2)
+  * blkid: rename blkid_debug_init to blkid_init_debug
+  * po: merge changes
+
+ -- Scott James Remnant <scott@ubuntu.com>  Wed, 29 Apr 2009 12:36:23 +0100
 
 util-linux (2.15~rc1-1) experimental; urgency=low
 
