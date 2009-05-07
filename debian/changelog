@@ -1,3 +1,20 @@
+util-linux (2.15-1ubuntu1) karmic; urgency=low
+
+  * Merge from Debian, remaining changes:
+    - The Ubuntu kernel already sets the system clock from the hardware
+      clock at boot time, so there is no need for hwclock to do it a
+      second (or third) time.
+      - Call hwclock --systz from udev rules to set the system timezone
+        and step the system clock if it was not originally set to UTC.
+      - hwclock.sh init script is not called on startup, remove start
+        links on upgrade
+      - hwclockfirst.sh init script removed
+    - Remove /etc/adjtime on upgrade if it was not used.
+    - Install udev rules into /lib/udev/rules.d not /etc/udev.rules.d
+      - Breaks to force upgrade of udev
+
+ -- Scott James Remnant <scott@ubuntu.com>  Thu, 07 May 2009 12:42:36 +0100
+
 util-linux (2.15-1) unstable; urgency=low
 
   [Aurelien Jarno]
