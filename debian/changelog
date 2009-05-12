@@ -1,3 +1,10 @@
+util-linux (2.15-1ubuntu2) karmic; urgency=low
+
+  * Add util-linux-udeb, containing blkid.
+  * Restore correct shlibs for libblkid1-udeb.
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Tue, 12 May 2009 10:48:35 +0100
+
 util-linux (2.15-1ubuntu1) karmic; urgency=low
 
   * Merge from Debian, remaining changes:

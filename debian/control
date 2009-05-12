@@ -119,3 +119,13 @@ Description: block device id library - headers and static libraries
  system instead.
  .
  This package contains the development environment for the blkid library.
+
+Package: util-linux-udeb
+Architecture: any
+Priority: optional
+Section: debian-installer
+Depends: ${shlibs:Depends}
+XC-Package-Type: udeb
+Description: Miscellaneous system utilities
+ This is a minimal version of util-linux for debian-installer. It only
+ contains the blkid binary at the moment.

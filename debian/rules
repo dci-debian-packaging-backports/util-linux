@@ -131,6 +131,7 @@ else
 	mv debian/libblkid1/lib/*.a debian/libblkid-dev/usr/lib
 	mv debian/libblkid1/lib/*.la debian/libblkid-dev/usr/lib
 	rm debian/libblkid1/lib/*.so
+	ln debian/util-linux/sbin/blkid debian/util-linux-udeb/sbin
 	rmdir debian/util-linux/usr/lib/pkgconfig
 	rmdir debian/util-linux/usr/include/blkid
 	rmdir debian/util-linux/usr/include
