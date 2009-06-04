@@ -117,18 +117,18 @@ else
 	    install -m 644 debian/hwclock.rules debian/util-linux/lib/udev/rules.d/85-hwclock.rules; \
 	fi
 	# blkid.conf file and blkid.tab symlink
-	install -m 644 debian/blkid.conf debian/libblkid1/etc
+	install -m 644 debian/blkid.conf debian/libblkid1/etc/
 	ln -s /dev/.blkid.tab debian/libblkid1/etc/blkid.tab
 	# copy library and symlink into udeb
-	ln debian/libblkid1/lib/libblkid.so.1.* debian/libblkid1-udeb/lib
-	ln debian/libblkid1/lib/libblkid.so.1   debian/libblkid1-udeb/lib
+	ln debian/libblkid1/lib/libblkid.so.1.* debian/libblkid1-udeb/lib/
+	ln debian/libblkid1/lib/libblkid.so.1   debian/libblkid1-udeb/lib/
 	# move development pieces from /lib into /usr/lib
 	TARGET=$$(cd debian/libblkid1/lib; echo libblkid.so.1.*) && \
 	       ln -s /lib/$$TARGET debian/libblkid-dev/usr/lib/libblkid.so
-	mv debian/libblkid1/lib/*.a debian/libblkid-dev/usr/lib
-	mv debian/libblkid1/lib/*.la debian/libblkid-dev/usr/lib
+	mv debian/libblkid1/lib/*.a debian/libblkid-dev/usr/lib/
+	mv debian/libblkid1/lib/*.la debian/libblkid-dev/usr/lib/
 	rm debian/libblkid1/lib/*.so
-	ln debian/util-linux/sbin/blkid debian/util-linux-udeb/sbin
+	ln debian/util-linux/sbin/blkid debian/util-linux-udeb/sbin/
 	rmdir debian/util-linux/usr/lib/pkgconfig
 	rmdir debian/util-linux/usr/include/blkid
 	rmdir debian/util-linux/usr/include
@@ -144,7 +144,7 @@ else
 endif
 	cd debian; if [ -f util-linux/sbin/fdisk ]; then \
 	    ln util-linux/sbin/*fdisk fdisk-udeb/usr/sbin/; \
-	    S=fdisk-udeb/usr/sbin/cfdisk; if [ -f $$S ]; then mv $$S cfdisk-udeb/usr/sbin; fi; \
+	    S=fdisk-udeb/usr/sbin/cfdisk; if [ -f $$S ]; then mv $$S cfdisk-udeb/usr/sbin/; fi; \
 	fi
 	cd debian/util-linux-locales && find usr/share/locale -type f | while read x; do ln $$x ../cfdisk-udeb/$$x; done
 ifeq ($(DEB_HOST_ARCH_OS),linux)
