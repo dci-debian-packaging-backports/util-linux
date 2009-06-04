@@ -1,3 +1,10 @@
+util-linux (2.15.1~rc1-1ubuntu2) karmic; urgency=low
+
+  * meta: fix util-linux-udeb package metadata.
+  * meta: cleanup rules targets
+
+ -- LaMont Jones <lamont@ubuntu.com>  Thu, 04 Jun 2009 04:08:48 -0600
+
 util-linux (2.15.1~rc1-1ubuntu1) karmic; urgency=low
 
   * Merge from Debian, remaining changes:
