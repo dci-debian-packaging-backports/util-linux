@@ -1,4 +1,4 @@
-util-linux (2.15.1-1ubuntu1) UNRELEASED; urgency=low
+util-linux (2.15.1-1ubuntu1) karmic; urgency=low
 
   * Merge from Debian, remaining changes:
     - Since udev is required in Ubuntu, the hwclock.sh init script is
@@ -13,7 +13,7 @@ util-linux (2.15.1-1ubuntu1) UNRELEASED; urgency=low
     - No lsb_release call in mount.preinst since we'd need Pre-Depends
       (LP: #383697).
 
- -- Scott James Remnant <scott@ubuntu.com>  Tue, 14 Jul 2009 18:10:02 +0100
+ -- Scott James Remnant <scott@ubuntu.com>  Tue, 14 Jul 2009 18:24:58 +0100
 
 util-linux (2.15.1-1) unstable; urgency=low
 
