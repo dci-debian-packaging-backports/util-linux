@@ -1,21 +1,19 @@
-util-linux (2.15.1~rc1-1ubuntu1) karmic; urgency=low
+util-linux (2.15.1-1ubuntu1) karmic; urgency=low
 
   * Merge from Debian, remaining changes:
-    - The Ubuntu kernel already sets the system clock from the hardware
-      clock at boot time, so there is no need for hwclock to do it a
-      second (or third) time.
-      - Call hwclock --systz from udev rules to set the system timezone
-        and step the system clock if it was not originally set to UTC.
-      - hwclock.sh init script is not called on startup, remove start
-        links on upgrade
-      - hwclockfirst.sh init script removed
+    - Since udev is required in Ubuntu, the hwclock.sh init script is
+      not called on startup and the hwclockfirst.sh init script is
+      removed.
     - Remove /etc/adjtime on upgrade if it was not used.
-    - Install udev rules into /lib/udev/rules.d not /etc/udev.rules.d
-      - Breaks to force upgrade of udev
+    - Build the blkid library and tools, and the fsck binary, from
+      util-linux replacing those from e2fsprogs
+    - Install custom blkid.conf to use /dev/.blkid.tab since we don't
+      expect device names to survive a reboot
     - Add util-linux-udeb, containing blkid.
-    - Restore correct shlibs for libblkid1-udeb.
+    - No lsb_release call in mount.preinst since we'd need Pre-Depends
+      (LP: #383697).
 
- -- LaMont Jones <lamont@ubuntu.com>  Fri, 29 May 2009 04:27:23 -0600
+ -- Scott James Remnant <scott@ubuntu.com>  Tue, 14 Jul 2009 18:24:58 +0100
 
 util-linux (2.15.1-1) unstable; urgency=low
 
@@ -88,6 +86,41 @@ util-linux (2.15.1-1) unstable; urgency=low
   * po: update vi.po (from translationproject.org) (Clytie Siddall)
 
  -- Scott James Remnant <scott@ubuntu.com>  Tue, 14 Jul 2009 18:00:01 +0100
+
+util-linux (2.15.1~rc1-1ubuntu3) karmic; urgency=low
+
+  * Remove lsb_release call from mount.preinst and just unconditionally
+    remove the guarded code from the Ubuntu package; lsb_release is not
+    guaranteed to be usable without a Pre-Depends, which is not really
+    desirable here (LP: #383697).
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Fri, 10 Jul 2009 18:06:37 +0100
+
+util-linux (2.15.1~rc1-1ubuntu2) karmic; urgency=low
+
+  * meta: fix util-linux-udeb package metadata.
+  * meta: cleanup rules targets
+
+ -- LaMont Jones <lamont@ubuntu.com>  Thu, 04 Jun 2009 04:08:48 -0600
+
+util-linux (2.15.1~rc1-1ubuntu1) karmic; urgency=low
+
+  * Merge from Debian, remaining changes:
+    - The Ubuntu kernel already sets the system clock from the hardware
+      clock at boot time, so there is no need for hwclock to do it a
+      second (or third) time.
+      - Call hwclock --systz from udev rules to set the system timezone
+        and step the system clock if it was not originally set to UTC.
+      - hwclock.sh init script is not called on startup, remove start
+        links on upgrade
+      - hwclockfirst.sh init script removed
+    - Remove /etc/adjtime on upgrade if it was not used.
+    - Install udev rules into /lib/udev/rules.d not /etc/udev.rules.d
+      - Breaks to force upgrade of udev
+    - Add util-linux-udeb, containing blkid.
+    - Restore correct shlibs for libblkid1-udeb.
+
+ -- LaMont Jones <lamont@ubuntu.com>  Fri, 29 May 2009 04:27:23 -0600
 
 util-linux (2.15.1~rc1-1) unstable; urgency=low
 

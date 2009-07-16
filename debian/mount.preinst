@@ -17,26 +17,6 @@ case "$1" in
 	;;
 
     upgrade)
-	version=$2
-	DISTRO=$(lsb_release -is 2>/dev/null || echo Debian);
-
-	if [ Debian = "$DISTRO" ]; then
-	  if [ -f /proc/mounts ] && ! chrooted; then
-	      NFS_IN_USE=$(sed -n '/^[^ ]* [^ ]* nfs /p' /proc/mounts)
-	  else
-	      NFS_IN_USE=""
-	  fi
-	  if [ -n "$NFS_IN_USE" ] && [ ! -x /sbin/mount.nfs ] ; then
-	      cat << EOF
-You have NFS mount points currently mounted, and this version of mount
-requires that nfs-common be upgraded before NFS mounts will work.
-
-Aborting install.
-EOF
-	      exit 1
-	  fi
-	fi
-
 	;;
 
     abort-upgrade)

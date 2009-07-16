@@ -1,4 +1,4 @@
-hwclock and Ubuntu:
+hwclock and Debian:
 
 When udev is running, hwclock -systz will be called when the RTC clock
 device is created.  When udev is not running, hwclock --hctosys will be

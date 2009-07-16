@@ -116,18 +116,18 @@ else
 	    install -m 755 debian/hwclock.sh debian/util-linux/etc/init.d/hwclock.sh; \
 	fi
 	# blkid.conf file and blkid.tab symlink
-	install -m 644 debian/blkid.conf debian/libblkid1/etc
+	install -m 644 debian/blkid.conf debian/libblkid1/etc/
 	ln -s /dev/.blkid.tab debian/libblkid1/etc/blkid.tab
 	# copy library and symlink into udeb
-	ln debian/libblkid1/lib/libblkid.so.1.* debian/libblkid1-udeb/lib
-	ln debian/libblkid1/lib/libblkid.so.1   debian/libblkid1-udeb/lib
+	ln debian/libblkid1/lib/libblkid.so.1.* debian/libblkid1-udeb/lib/
+	ln debian/libblkid1/lib/libblkid.so.1   debian/libblkid1-udeb/lib/
 	# move development pieces from /lib into /usr/lib
 	TARGET=$$(cd debian/libblkid1/lib; echo libblkid.so.1.*) && \
 	       ln -s /lib/$$TARGET debian/libblkid-dev/usr/lib/libblkid.so
-	mv debian/libblkid1/lib/*.a debian/libblkid-dev/usr/lib
-	mv debian/libblkid1/lib/*.la debian/libblkid-dev/usr/lib
+	mv debian/libblkid1/lib/*.a debian/libblkid-dev/usr/lib/
+	mv debian/libblkid1/lib/*.la debian/libblkid-dev/usr/lib/
 	rm debian/libblkid1/lib/*.so
-	ln debian/util-linux/sbin/blkid debian/util-linux-udeb/sbin
+	ln debian/util-linux/sbin/blkid debian/util-linux-udeb/sbin/
 	rmdir debian/util-linux/usr/lib/pkgconfig
 	rmdir debian/util-linux/usr/include/blkid
 	rmdir debian/util-linux/usr/include
