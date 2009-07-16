@@ -86,10 +86,10 @@ Priority: required
 Depends: ${shlibs:Depends}
 Architecture: any
 Description: block device id library
- The blkid library which allows system programs like fsck and 
- mount to quickly and easily find block devices by filesystem UUID and 
- LABEL.  This allows system administrators to avoid specifying 
- filesystems by hard-coded device names, but via a logical naming 
+ The blkid library which allows system programs like fsck and
+ mount to quickly and easily find block devices by filesystem UUID and
+ LABEL.  This allows system administrators to avoid specifying
+ filesystems by hard-coded device names, but via a logical naming
  system instead.
 
 Package: libblkid1-udeb
@@ -99,10 +99,10 @@ Priority: optional
 Depends: ${shlibs:Depends}
 Architecture: any
 Description: block device id library
- The blkid library which allows system programs like fsck and 
- mount to quickly and easily find block devices by filesystem UUID and 
- LABEL.  This allows system administrators to avoid specifiying 
- filesystems by hard-coded device names, but via a logical naming 
+ The blkid library which allows system programs like fsck and
+ mount to quickly and easily find block devices by filesystem UUID and
+ LABEL.  This allows system administrators to avoid specifiying
+ filesystems by hard-coded device names, but via a logical naming
  system instead.
  .
  This is a minimal package for debian-installer.
@@ -113,10 +113,10 @@ Priority: extra
 Depends: libc6-dev | libc-dev, libblkid1 (= ${binary:Version}), uuid-dev
 Architecture: any
 Description: block device id library - headers and static libraries
- The blkid library which allows system programs like fsck and 
- mount to quickly and easily find block devices by filesystem UUID and 
- LABEL.  This allows system administrators to avoid specifiying 
- filesystems by hard-coded device names, but via a logical naming 
+ The blkid library which allows system programs like fsck and
+ mount to quickly and easily find block devices by filesystem UUID and
+ LABEL.  This allows system administrators to avoid specifiying
+ filesystems by hard-coded device names, but via a logical naming
  system instead.
  .
  This package contains the development environment for the blkid library.
