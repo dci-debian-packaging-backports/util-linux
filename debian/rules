@@ -114,7 +114,6 @@ ifeq ($(DISTRO),Debian)
 else
 	if [ -f debian/util-linux/sbin/hwclock ] ; then \
 	    install -m 755 debian/hwclock.sh debian/util-linux/etc/init.d/hwclock.sh; \
-	    install -m 644 debian/hwclock.rules debian/util-linux/lib/udev/rules.d/85-hwclock.rules; \
 	fi
 	# blkid.conf file and blkid.tab symlink
 	install -m 644 debian/blkid.conf debian/libblkid1/etc
@@ -142,9 +141,12 @@ else
 	patch debian/libblkid1.symbols < debian/libblkid1.tmp-patch
 	rm debian/libblkid1.tmp-patch
 endif
+	if [ -f debian/util-linux/sbin/hwclock ] ; then \
+	    install -m 644 debian/hwclock.rules debian/util-linux/lib/udev/rules.d/85-hwclock.rules; \
+	fi
 	cd debian; if [ -f util-linux/sbin/fdisk ]; then \
-	    ln util-linux/sbin/*fdisk fdisk-udeb/usr/sbin; \
-	    S=fdisk-udeb/usr/sbin/cfdisk; if [ -f $$S ]; then mv $$S cfdisk-udeb/usr/sbin; fi; \
+	    ln util-linux/sbin/*fdisk fdisk-udeb/usr/sbin/; \
+	    S=fdisk-udeb/usr/sbin/cfdisk; if [ -f $$S ]; then mv $$S cfdisk-udeb/usr/sbin/; fi; \
 	fi
 	cd debian/util-linux-locales && find usr/share/locale -type f | while read x; do ln $$x ../cfdisk-udeb/$$x; done
 ifeq ($(DEB_HOST_ARCH_OS),linux)
