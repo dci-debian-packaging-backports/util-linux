@@ -1,3 +1,17 @@
+util-linux (2.16-1ubuntu1) karmic; urgency=low
+
+  * Merge from Debian, remaining changes:
+    - Since udev is required in Ubuntu, the hwclock.sh init script is
+      not called on startup and the hwclockfirst.sh init script is
+      removed.
+    - Remove /etc/adjtime on upgrade if it was not used.
+    - Install custom blkid.conf to use /dev/.blkid.tab since we don't
+      expect device names to survive a reboot
+    - No lsb_release call in mount.preinst since we'd need Pre-Depends
+      (LP: #383697).
+
+ -- Scott James Remnant <scott@ubuntu.com>  Thu, 16 Jul 2009 15:48:23 +0100
+
 util-linux (2.16-1) unstable; urgency=low
 
   [John Keeping]
