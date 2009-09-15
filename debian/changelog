@@ -1,3 +1,18 @@
+util-linux (2.16-1ubuntu2) karmic; urgency=low
+
+  FFE LP: #427356.
+
+  * Replace hwclock udev rule with an Upstart job.  This has never needed
+    to be a udev rule after all since it doesn't access the hardware!
+  * Replace init script with an Upstart job run on shutdown.
+  * debian/control:
+    - Bump build-dependency on debhelper for Upstart-aware dh_installinit
+    - Add missing ${misc:Depends}
+
+  * Fix build with newer glibc due to versionsort() prototype change.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Tue, 15 Sep 2009 15:14:58 +0100
+
 util-linux (2.16-1ubuntu1) karmic; urgency=low
 
   * Merge from Debian, remaining changes:
