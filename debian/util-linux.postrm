@@ -4,7 +4,6 @@ case "$1" in
 	remove)
 		;;
         purge)
-                update-rc.d hwclock.sh remove >/dev/null
 		rm -f /etc/adjtime
                 ;;
 	*)

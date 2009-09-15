@@ -109,16 +109,10 @@ ifeq ($(DISTRO),Debian)
 		debian/util-linux/etc/init.d/hwclockfirst.sh; \
 	fi
 else
-	if [ -f debian/util-linux/sbin/hwclock ] ; then \
-	    install -m 755 debian/hwclock.sh debian/util-linux/etc/init.d/hwclock.sh; \
-	fi
 	# blkid.conf file and blkid.tab symlink
 	install -m 644 debian/blkid.conf debian/libblkid1/etc/
 	ln -s /dev/.blkid.tab debian/libblkid1/etc/blkid.tab
 endif
-	if [ -f debian/util-linux/sbin/hwclock ] ; then \
-	    install -m 644 debian/hwclock.rules debian/util-linux/lib/udev/rules.d/85-hwclock.rules; \
-	fi
 	# copy blkid library and symlink into udeb
 	ln debian/libblkid1/lib/libblkid.so.1.* debian/libblkid1-udeb/lib/
 	ln debian/libblkid1/lib/libblkid.so.1   debian/libblkid1-udeb/lib/
@@ -190,7 +184,8 @@ binary-arch: build install
 ifeq ($(DISTRO),Debian)
 	dh_installinit -s -- defaults 15 85
 else
-	dh_installinit -s -- stop 25 0 6 .
+	dh_installinit
+	dh_installinit --name=hwclock-save --upstart-only
 endif
 	[ -n "$(STRIP)" ] || dh_strip -s
 	dh_makeshlibs -s
