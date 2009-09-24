@@ -1,3 +1,10 @@
+util-linux (2.16-1ubuntu3) UNRELEASED; urgency=low
+
+  * Don't step the system clock, or save the hardware clock on upgrades
+    in case the time isn't quite correct.  LP: #430878.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Thu, 24 Sep 2009 10:03:47 -0700
+
 util-linux (2.16-1ubuntu2) karmic; urgency=low
 
   FFE LP: #427356.

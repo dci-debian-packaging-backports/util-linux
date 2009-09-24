@@ -184,8 +184,8 @@ binary-arch: build install
 ifeq ($(DISTRO),Debian)
 	dh_installinit -s -- defaults 15 85
 else
-	dh_installinit
-	dh_installinit --name=hwclock-save --upstart-only
+	dh_installinit --no-start
+	dh_installinit --name=hwclock-save --upstart-only --no-start
 endif
 	[ -n "$(STRIP)" ] || dh_strip -s
 	dh_makeshlibs -s
