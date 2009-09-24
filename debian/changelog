@@ -1,5 +1,9 @@
 util-linux (2.16-1ubuntu3) UNRELEASED; urgency=low
 
+  * Removed access checks for hardware clock when called with --systz,
+    since we may not have the rtc device at the point we run hwclock.
+    I believe this is the cause of LP: #436076.
+
   * Don't step the system clock, or save the hardware clock on upgrades
     in case the time isn't quite correct.  LP: #430878.
   * Remove the hwclock.sh and hwclockfirst.sh scripts on upgrades, since
