@@ -21,17 +21,9 @@ then
 	rm -f /etc/rcS.d/???hwclock.sh
 fi
 
-# hwclock works on all Linux architectures, except s390 (and s390x, of course).
-if [ "$(uname -s)" = "Linux" ]; then
-    model=$(uname -m)
-    if [ ${model%x} != "s390" ]; then
-        update-rc.d -f hwclock.sh remove 2>/dev/null > /dev/null
-        update-rc.d hwclock.sh stop 25 0 6 . > /dev/null
-    fi
-fi
-
 if [ "$1" = "configure" ] && dpkg --compare-versions "$2" lt "2.14.2-1ubuntu4"; then
-	# Remove old init script
+	# Remove old init scripts
+	update-rc.d -f hwclock.sh remove 2>/dev/null > /dev/null
 	update-rc.d -f hwclockfirst.sh remove 2>/dev/null > /dev/null
 
 	# Remove adjtime file

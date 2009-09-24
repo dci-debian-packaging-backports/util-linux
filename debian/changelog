@@ -1,4 +1,4 @@
-util-linux (2.16-1ubuntu3) UNRELEASED; urgency=low
+util-linux (2.16-1ubuntu4) UNRELEASED; urgency=low
 
   * Removed access checks for hardware clock when called with --systz,
     since we may not have the rtc device at the point we run hwclock.
@@ -12,6 +12,15 @@ util-linux (2.16-1ubuntu3) UNRELEASED; urgency=low
     these are now Upstart jobs.  LP: #434767.
 
  -- Scott James Remnant <scott@ubuntu.com>  Thu, 24 Sep 2009 10:03:47 -0700
+
+util-linux (2.16-1ubuntu3) karmic; urgency=low
+
+  * Rename upstart jobs in source package, to fix the failure to include
+    them when building the util-linux binary.
+  * Rename calls to update-rc.d in the util-linux postinst, which are going
+    to fail on new installs because we no longer ship an init script.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Tue, 15 Sep 2009 23:33:25 -0700
 
 util-linux (2.16-1ubuntu2) karmic; urgency=low
 
