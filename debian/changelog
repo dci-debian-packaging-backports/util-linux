@@ -1,10 +1,10 @@
-util-linux (2.16-1ubuntu6) UNRELEASED; urgency=low
+util-linux (2.16-1ubuntu6) lucid; urgency=low
 
   * mount/fstab.5: document the bootwait, nobootwait, showthrough
     and optional mount options accepted by mountall.
   * mount/mount.c: don't pass the above options to mount().  LP: #479965. 
 
- -- Scott James Remnant <scott@ubuntu.com>  Wed, 23 Dec 2009 04:26:20 +0000
+ -- Scott James Remnant <scott@ubuntu.com>  Wed, 23 Dec 2009 04:29:48 +0000
 
 util-linux (2.16-1ubuntu5) karmic; urgency=low
 
