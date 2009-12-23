@@ -1,3 +1,10 @@
+util-linux (2.16-1ubuntu6) UNRELEASED; urgency=low
+
+  * mount/fstab.5: document the bootwait, nobootwait, showthrough
+    and optional mount options accepted by mountall.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Wed, 23 Dec 2009 04:26:20 +0000
+
 util-linux (2.16-1ubuntu5) karmic; urgency=low
 
   * Always return encrypted block devices as the first detected encryption
