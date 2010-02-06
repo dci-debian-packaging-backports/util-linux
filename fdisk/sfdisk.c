@@ -40,20 +40,20 @@
 #include <unistd.h>		/* read, write */
 #include <fcntl.h>		/* O_RDWR */
 #include <errno.h>		/* ERANGE */
-#include <string.h>		/* index() */
+#include <string.h>		/* strchr(), strrchr() */
 #include <ctype.h>
 #include <getopt.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/utsname.h>
+
+#include "c.h"
 #include "nls.h"
 #include "blkdev.h"
 #include "linux_version.h"
 #include "common.h"
 #include "wholedisk.h"
 #include "gpt.h"
-
-#define SIZE(a)	(sizeof(a)/sizeof(a[0]))
 
 /*
  * Table of contents:
@@ -135,20 +135,6 @@ fatal(char *s, ...) {
 }
 
 /*
- * GCC nonsense - needed for GCC 3.4.x with -O2
- *
- * Maybe just test with #if (__GNUC__ >= 3) && (__GNUC_MINOR__ >= 4) ?
- */
-#ifndef __GNUC_PREREQ
-#define __GNUC_PREREQ(x,y)	0
-#endif
-#if __GNUC_PREREQ(3,4)
-#define __attribute__used __attribute__ ((used))
-#else
-#define __attribute__used
-#endif
-
-/*
  * arm needs PACKED - use it everywhere?
  */
 #if defined(__GNUC__) && (defined(__arm__) || defined(__alpha__))
@@ -156,7 +142,6 @@ fatal(char *s, ...) {
 #else
 # define PACKED
 #endif
-
 
 /*
  *  A. About seeking
@@ -821,14 +806,13 @@ reread_disk_partition(char *dev, int fd) {
     printf(_("Re-reading the partition table ...\n"));
     fflush(stdout);
     sync();
-    sleep(3);			/* superfluous since 1.3.20 */
 
     if (reread_ioctl(fd) && is_blockdev(fd))
       do_warn(_("The command to re-read the partition table failed.\n"
 	        "Run partprobe(8), kpartx(8) or reboot your system now,\n"
 	        "before using mkfs\n"));
 
-    if (close(fd)) {
+    if (fsync(fd) || close(fd)) {
 	perror(dev);
 	do_warn(_("Error closing %s\n"), dev);
     }
@@ -921,17 +905,18 @@ unitsize(int format) {
 
 static unsigned long
 get_disksize(int format) {
-    unsigned long cs = B.cylinders;
-    if (cs && leave_last)
-      cs--;
-    return (cs * B.cylindersize) / unitsize(format);
+    if (B.total_size && leave_last)
+	    /* don't use last cylinder (--leave-last option) */
+	    return (B.total_size - B.cylindersize) / unitsize(format);
+
+    return B.total_size / unitsize(format);
 }
 
 static void
 out_partition_header(char *dev, int format, struct geometry G) {
     if (dump) {
-	printf(_("# partition table of %s\n"), dev);
-	printf(_("unit: sectors\n\n"));
+	printf("# partition table of %s\n", dev);
+	printf("unit: sectors\n\n");
 	return;
     }
 
@@ -1059,12 +1044,12 @@ out_partition(char *dev, int format, struct part_desc *p,
     size = p->size;
 
     if (dump) {
-	printf(_(" start=%9lu"), start);
-	printf(_(", size=%9lu"), size);
+	printf(" start=%9lu", start);
+	printf(", size=%9lu", size);
 	if (p->ptype == DOS_TYPE) {
 	    printf(", Id=%2x", p->p.sys_type);
 	    if (p->p.bootable == 0x80)
-		printf(_(", bootable"));
+		printf(", bootable");
 	}
 	printf("\n");
 	return;
@@ -1413,7 +1398,7 @@ extended_partition(char *dev, int fd, struct part_desc *ep, struct disk_desc *z)
 
 	cp = s->data + 0x1be;
 
-	if (pno+4 >= SIZE(z->partitions)) {
+	if (pno+4 >= ARRAY_SIZE(z->partitions)) {
 	    do_warn(_("too many partitions - ignoring those past nr (%d)\n"),
 		   pno-1);
 	    break;
@@ -1490,7 +1475,7 @@ bsd_partition(char *dev, int fd, struct part_desc *ep, struct disk_desc *z) {
 
 	bp = bp0 = &l->d_partitions[0];
 	while (bp - bp0 < BSD_MAXPARTITIONS && bp - bp0 < l->d_npartitions) {
-		if (pno+1 >= SIZE(z->partitions)) {
+		if (pno+1 >= ARRAY_SIZE(z->partitions)) {
 			do_warn(_("too many partitions - ignoring those "
 			       "past nr (%d)\n"), pno-1);
 			break;
@@ -1725,12 +1710,12 @@ read_stdin(char **fields, char *line, int fieldssize, int linesize) {
 	eof = 1;
 	return RD_EOF;
     }
-    if (!(lp = index(lp, '\n')))
+    if (!(lp = strchr(lp, '\n')))
       fatal(_("long or incomplete input line - quitting\n"));
     *lp = 0;
 
     /* remove comments, if any */
-    if ((lp = index(line+2, '#')) != 0)
+    if ((lp = strchr(line+2, '#')) != 0)
       *lp = 0;
 
     /* recognize a few commands - to be expanded */
@@ -1740,7 +1725,7 @@ read_stdin(char **fields, char *line, int fieldssize, int linesize) {
     }
 
     /* dump style? - then bad input is fatal */
-    if ((ip = index(line+2, ':')) != 0) {
+    if ((ip = strchr(line+2, ':')) != 0) {
 	struct dumpfld *d;
 
       nxtfld:
@@ -1749,7 +1734,7 @@ read_stdin(char **fields, char *line, int fieldssize, int linesize) {
 	      ip++;
 	    if (*ip == 0)
 	      return fno;
-	    for(d = dumpflds; d-dumpflds < SIZE(dumpflds); d++) {
+	    for(d = dumpflds; d-dumpflds < ARRAY_SIZE(dumpflds); d++) {
 		if (!strncmp(ip, d->fldname, strlen(d->fldname))) {
 		    ip += strlen(d->fldname);
 		    while(isspace(*ip))
@@ -2024,7 +2009,7 @@ read_line(int pno, struct part_desc *ep, char *dev, int interactive,
 
     /* read input line - skip blank lines when reading from a file */
     do {
-	fno = read_stdin(fields, line, SIZE(fields), SIZE(line));
+	fno = read_stdin(fields, line, ARRAY_SIZE(fields), ARRAY_SIZE(line));
     } while(fno == RD_CMD || (fno == 0 && !interactive));
     if (fno == RD_EOF) {
 	return -1;
@@ -2241,7 +2226,7 @@ read_partition_chain(char *dev, int interactive, struct part_desc *ep,
     eob = 0;
     while (1) {
 	base = z->partno;
-	if (base+4 > SIZE(z->partitions)) {
+	if (base+4 > ARRAY_SIZE(z->partitions)) {
 	    do_warn(_("too many partitions\n"));
 	    break;
 	}
@@ -2270,7 +2255,7 @@ read_input(char *dev, int interactive, struct disk_desc *z) {
     int i;
     struct part_desc *partitions = &(z->partitions[0]), *ep;
 
-    for (i=0; i < SIZE(z->partitions); i++)
+    for (i=0; i < ARRAY_SIZE(z->partitions); i++)
       partitions[i] = zero_part_desc;
     z->partno = 0;
 
@@ -2503,7 +2488,7 @@ main(int argc, char **argv) {
 
     if (argc < 1)
       fatal(_("no command?\n"));
-    if ((progn = rindex(argv[0], '/')) == NULL)
+    if ((progn = strrchr(argv[0], '/')) == NULL)
       progn = argv[0];
     else
       progn++;
@@ -3117,6 +3102,5 @@ do_fdisk(char *dev){
 	 "(See fdisk(8).)\n"));
 
     sync();			/* superstition */
-    sleep(3);
     exit(exit_status);
 }

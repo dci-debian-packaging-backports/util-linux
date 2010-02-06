@@ -2,6 +2,7 @@ arch
 ctrlaltdel
 cytune
 dmesg
+fallocate
 flock
 i386.8
 ia64.8
@@ -38,5 +39,6 @@ sparc64.8
 sparc.8
 switch_root
 tunelp
+unshare
 vidmode.8
 x86_64.8

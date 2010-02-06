@@ -79,6 +79,10 @@
 #include <sys/stat.h>
 #include <sys/ioctl.h>
 
+#ifdef HAVE_LIBBLKID_INTERNAL
+#include <blkid.h>
+#endif
+
 #include "nls.h"
 #include "blkdev.h"
 #include "xstrncpy.h"
@@ -137,7 +141,9 @@
 #define TAB '\011'
 #define REDRAWKEY '\014'	/* ^L */
 #define UPKEY '\020'		/* ^P */
+#define UPKEYVI '\153'		/* k */
 #define DOWNKEY '\016'		/* ^N */
+#define DOWNKEYVI '\152'	/* j */
 
 /* Display units */
 #define GIGABYTES 1
@@ -220,11 +226,6 @@ set_hsc_end(struct partition *p, long long sector) {
 #define is_extended(x)	((x) == DOS_EXTENDED || (x) == WIN98_EXTENDED || \
 			 (x) == LINUX_EXTENDED)
 
-#define is_dos_partition(x) ((x) == 1 || (x) == 4 || (x) == 6)
-#define may_have_dos_label(x) (is_dos_partition(x) \
-   || (x) == 7 || (x) == 0xb || (x) == 0xc || (x) == 0xe \
-   || (x) == 0x11 || (x) == 0x14 || (x) == 0x16 || (x) == 0x17)
-
 /* start_sect and nr_sects are stored little endian on all machines */
 /* moreover, they are not aligned correctly */
 static void
@@ -287,7 +288,7 @@ typedef struct {
     char volume_label[LABELSZ+1];
 #define OSTYPESZ 8
     char ostype[OSTYPESZ+1];
-#define FSTYPESZ 8
+#define FSTYPESZ 12
     char fstype[FSTYPESZ+1];
 } partition_info;
 
@@ -357,7 +358,7 @@ xmalloc (size_t size) {
 /* Some libc's have their own basename() */
 static char *
 my_basename(char *devname) {
-    char *s = rindex(devname, '/');
+    char *s = strrchr(devname, '/');
     return s ? s+1 : devname;
 }
 
@@ -376,37 +377,19 @@ partition_type_text(int i) {
 	 return _("Unusable");
     else if (p_info[i].id == FREE_SPACE)
 	 return _("Free Space");
-    else if (p_info[i].id == LINUX) {
-	 if (!strcmp(p_info[i].fstype, "ext2"))
-	      return _("Linux ext2");
-	 else if (!strcmp(p_info[i].fstype, "ext3"))
-	      return _("Linux ext3");
-	 else if (!strcmp(p_info[i].fstype, "xfs"))
-	      return _("Linux XFS");
-	 else if (!strcmp(p_info[i].fstype, "jfs"))
-	      return _("Linux JFS");
-	 else if (!strcmp(p_info[i].fstype, "reiserfs"))
-	      return _("Linux ReiserFS");
-	 else
-	      return _("Linux");
-    } else if (p_info[i].id == OS2_OR_NTFS) {
-	 if (!strncmp(p_info[i].fstype, "HPFS", 4))
-	      return _("OS/2 HPFS");
-	 else if (!strncmp(p_info[i].ostype, "OS2", 3))
-	      return _("OS/2 IFS");
-	 else if (!p_info[i].ostype)
-	      return p_info[i].ostype;
-	 else
-	      return _("NTFS");
-    } else
+    else if (*p_info[i].fstype)
+	 return p_info[i].fstype;
+    else
 	 return _(partition_type_name(p_info[i].id));
 }
 
 static void
 fdexit(int ret) {
-    if (opened)
+    if (opened) {
+	if (changed)
+		fsync(fd);
 	close(fd);
-
+    }
     if (changed) {
 	fprintf(stderr, _("Disk has been changed.\n"));
 #if 0
@@ -570,171 +553,36 @@ write_sector(unsigned char *buffer, long long sect_num) {
 	fatal(_("Cannot write disk drive"), 2);
 }
 
+#ifdef HAVE_LIBBLKID_INTERNAL
 static void
-dos_copy_to_info(char *to, int tosz, char *from, int fromsz) {
-     int i;
-
-     for(i=0; i<tosz && i<fromsz && isascii(from[i]); i++)
-	  to[i] = from[i];
-     to[i] = 0;
-}
-
-static void
-get_dos_label(int i) {
-	char sector[128];
-#define DOS_OSTYPE_OFFSET 3
-#define DOS_LABEL_OFFSET 43
-#define DOS_FSTYPE_OFFSET 54
-#define DOS_OSTYPE_SZ 8
-#define DOS_LABEL_SZ 11
-#define DOS_FSTYPE_SZ 8
-	long long offset;
+get_fsinfo(int i)
+{
+	blkid_probe pr;
+	blkid_loff_t offset, size;
+	const char *data;
 
 	offset = (p_info[i].first_sector + p_info[i].offset) * SECTOR_SIZE;
-	if (lseek(fd, offset, SEEK_SET) == offset
-	    && read(fd, &sector, sizeof(sector)) == sizeof(sector)) {
-		dos_copy_to_info(p_info[i].ostype, OSTYPESZ,
-				 sector+DOS_OSTYPE_OFFSET, DOS_OSTYPE_SZ);
-		dos_copy_to_info(p_info[i].volume_label, LABELSZ,
-				 sector+DOS_LABEL_OFFSET, DOS_LABEL_SZ);
-		dos_copy_to_info(p_info[i].fstype, FSTYPESZ,
-				 sector+DOS_FSTYPE_OFFSET, DOS_FSTYPE_SZ);
-	}
+	size = (p_info[i].last_sector - p_info[i].first_sector + 1) * SECTOR_SIZE;
+	pr = blkid_new_probe();
+	if (!pr)
+		return;
+	blkid_probe_enable_superblocks(pr, 1);
+	blkid_probe_set_superblocks_flags(pr, BLKID_SUBLKS_LABEL |
+					      BLKID_SUBLKS_TYPE);
+	if (blkid_probe_set_device(pr, fd, offset, size))
+		goto done;
+	if (blkid_do_safeprobe(pr))
+		goto done;
+
+	if (!blkid_probe_lookup_value(pr, "TYPE", &data, 0))
+		strncpy(p_info[i].fstype, data, FSTYPESZ);
+
+	if (!blkid_probe_lookup_value(pr, "LABEL", &data, 0))
+		strncpy(p_info[i].volume_label, data, LABELSZ);
+done:
+	blkid_free_probe(pr);
 }
-
-#define REISERFS_SUPER_MAGIC_STRING "ReIsErFs"
-#define REISER2FS_SUPER_MAGIC_STRING "ReIsEr2Fs"
-struct reiserfs_super_block {
-	char s_dummy0[52];
-	char s_magic [10];
-	char s_dummy1[38];
-	u_char s_label[16];
-};
-#define REISERFSLABELSZ sizeof(reiserfsb.s_label)
-
-static int
-has_reiserfs_magic_string(const struct reiserfs_super_block *rs, int *is_3_6) {
-	if (!strncmp(rs->s_magic, REISERFS_SUPER_MAGIC_STRING,
-		     strlen(REISERFS_SUPER_MAGIC_STRING))) {
-		*is_3_6 = 0;
-		return 1;
-	}
-	if (!strncmp(rs->s_magic, REISER2FS_SUPER_MAGIC_STRING,
-		     strlen(REISER2FS_SUPER_MAGIC_STRING))) {
-		*is_3_6 = 1;
-		return 1;
-	}
-	return 0;
-}
-
-static void
-get_linux_label(int i) {
-
-#define EXT2LABELSZ 16
-#define EXT2_SUPER_MAGIC 0xEF53
-#define EXT3_FEATURE_COMPAT_HAS_JOURNAL 0x0004
-	struct ext2_super_block {
-		char  s_dummy0[56];
-		unsigned char  s_magic[2];
-		char  s_dummy1[34];
-		unsigned char  s_feature_compat[4];
-		char  s_dummy2[24];
-		char  s_volume_name[EXT2LABELSZ];
-		char  s_last_mounted[64];
-		char  s_dummy3[824];
-	} e2fsb;
-
-#define REISERFS_DISK_OFFSET_IN_BYTES (64 * 1024)
-	struct reiserfs_super_block reiserfsb;
-	int reiserfs_is_3_6;
-
-#define JFS_SUPER1_OFF	0x8000
-#define JFS_MAGIC	"JFS1"
-#define JFSLABELSZ	16
-	struct jfs_super_block {
-		char    s_magic[4];
-		u_char  s_version[4];
-		u_char  s_dummy1[93];
-		char    s_fpack[11];
-		u_char  s_dummy2[24];
-		u_char  s_uuid[16];
-		char    s_label[JFSLABELSZ];
-	} jfsb;
-
-#define XFS_SUPER_MAGIC "XFSB"
-#define XFSLABELSZ 12
-	struct xfs_super_block {
-		unsigned char   s_magic[4];
-		unsigned char   s_dummy0[104];
-		unsigned char   s_fname[XFSLABELSZ];
-		unsigned char   s_dummy1[904];
-	} xfsb;
-
-	char *label;
-	long long offset;
-	int j;
-
-	offset = (p_info[i].first_sector + p_info[i].offset) * SECTOR_SIZE
-		+ 1024;
-	if (lseek(fd, offset, SEEK_SET) == offset
-	    && read(fd, &e2fsb, sizeof(e2fsb)) == sizeof(e2fsb)
-	    && e2fsb.s_magic[0] + (e2fsb.s_magic[1]<<8) == EXT2_SUPER_MAGIC) {
-		label = e2fsb.s_volume_name;
-		for(j=0; j<EXT2LABELSZ && j<LABELSZ && isprint(label[j]); j++)
-			p_info[i].volume_label[j] = label[j];
-		p_info[i].volume_label[j] = 0;
-		/* ext2 or ext3? */
-		if (e2fsb.s_feature_compat[0]&EXT3_FEATURE_COMPAT_HAS_JOURNAL)
-			strncpy(p_info[i].fstype, "ext3", FSTYPESZ);
-		else
-			strncpy(p_info[i].fstype, "ext2", FSTYPESZ);
-		return;
-	}
-
-	offset = (p_info[i].first_sector + p_info[i].offset) * SECTOR_SIZE + 0;
-	if (lseek(fd, offset, SEEK_SET) == offset
-	    && read(fd, &xfsb, sizeof(xfsb)) == sizeof(xfsb)
-	    && !strncmp((char *) xfsb.s_magic, XFS_SUPER_MAGIC, 4)) {
-		label = (char *) xfsb.s_fname;
-		for(j=0; j<XFSLABELSZ && j<LABELSZ && isprint(label[j]); j++)
-			p_info[i].volume_label[j] = label[j];
-		p_info[i].volume_label[j] = 0;
-		strncpy(p_info[i].fstype, "xfs", FSTYPESZ);
-		return;
-	}
-
-	/* jfs? */
-	offset = (p_info[i].first_sector + p_info[i].offset) * SECTOR_SIZE
-		+ JFS_SUPER1_OFF;
-	if (lseek(fd, offset, SEEK_SET) == offset
-	    && read(fd, &jfsb, sizeof(jfsb)) == sizeof(jfsb)
-	    && !strncmp(jfsb.s_magic, JFS_MAGIC, strlen(JFS_MAGIC))) {
-		label = jfsb.s_label;
-		for(j=0; j<JFSLABELSZ && j<LABELSZ && isprint(label[j]); j++)
-			p_info[i].volume_label[j] = label[j];
-		p_info[i].volume_label[j] = 0;
-		strncpy(p_info[i].fstype, "jfs", FSTYPESZ);
-		return;
-	}
-
-	/* reiserfs? */
-	offset = (p_info[i].first_sector + p_info[i].offset) * SECTOR_SIZE
-		+ REISERFS_DISK_OFFSET_IN_BYTES;
-	if (lseek(fd, offset, SEEK_SET) == offset
-	    && read(fd, &reiserfsb, sizeof(reiserfsb)) == sizeof(reiserfsb)
-	    && has_reiserfs_magic_string(&reiserfsb, &reiserfs_is_3_6)) {
-		if (reiserfs_is_3_6) {
-			/* label only on version 3.6 onward */
-			label = (char *) reiserfsb.s_label;
-			for(j=0; j<REISERFSLABELSZ && j<LABELSZ &&
-				    isprint(label[j]); j++)
-				p_info[i].volume_label[j] = label[j];
-			p_info[i].volume_label[j] = 0;
-		}
-		strncpy(p_info[i].fstype, "reiserfs", FSTYPESZ);
-		return;
-	}
-}
+#endif
 
 static void
 check_part_info(void) {
@@ -1046,13 +894,11 @@ add_part(int num, int id, int flags, long long first, long long last,
     p_info[i].volume_label[0] = 0;
     p_info[i].fstype[0] = 0;
     p_info[i].ostype[0] = 0;
-    if (want_label) {
-	 if (may_have_dos_label(id))
-	      get_dos_label(i);
-	 else if (id == LINUX)
-	      get_linux_label(i);
-    }
 
+#ifdef HAVE_LIBBLKID_INTERNAL
+    if (want_label)
+	 get_fsinfo(i);
+#endif
     check_part_info();
 
     return 0;
@@ -1270,6 +1116,7 @@ menuSelect( int y, int x, struct MenuItem *menuItems, int itemLength,
                         key = MENU_RIGHT;
                         break;
                     case 'D': /* Left arrow */
+                    case 'Z': /* Shift Tab */
                         key = MENU_LEFT;
                         break;
 		    default:
@@ -1286,9 +1133,9 @@ menuSelect( int y, int x, struct MenuItem *menuItems, int itemLength,
 	   swallows these */
 	if (key == TAB)
 	    key = MENU_RIGHT;
-        if (key == UPKEY)	/* ^P */
+        if (key == UPKEY || key == UPKEYVI)	/* ^P or k */
 	    key = MENU_UP;
-	if (key == DOWNKEY)	/* ^N */
+	if (key == DOWNKEY || key == DOWNKEYVI)	/* ^N or j */
 	    key = MENU_DOWN;
 
 	if (key == MENU_UP) {
@@ -1909,12 +1756,10 @@ write_part_table(void) {
     if (is_bdev) {
 #ifdef BLKRRPART
 	 sync();
-	 sleep(2);
 	 if (!ioctl(fd,BLKRRPART))
 	      changed = TRUE;
 #endif
 	 sync();
-	 sleep(4);
 
 	 clear_warning();
 	 if (changed)

@@ -13,9 +13,9 @@ fsck_minix_SOURCES = fsck.minix.c minix.h
 mkfs_minix_SOURCES = mkfs.minix.c minix.h $(utils_common)
 mkfs_bfs_SOURCES = mkfs.bfs.c $(utils_common)
 
-mkswap_SOURCES = mkswap.c $(utils_common) ../lib/wholedisk.c ../lib/pttype.c
+mkswap_SOURCES = mkswap.c $(utils_common) ../lib/wholedisk.c
 mkswap_LDADD =
-mkswap_CFLAGS =
+mkswap_CFLAGS = $(AM_CFLAGS)
 
 usrbin_exec_PROGRAMS = isosize
 usrsbin_exec_PROGRAMS =
@@ -57,6 +57,12 @@ else
 mkswap_LDADD += $(UUID_LIBS)
 mkswap_CFLAGS += $(UUID_CFLAGS)
 endif
+endif
+
+if BUILD_LIBBLKID
+# only in-tree libblkid has partitions parsing support
+mkswap_LDADD += $(ul_libblkid_la)
+mkswap_CFLAGS += -I$(ul_libblkid_incdir)
 endif
 
 if HAVE_SELINUX

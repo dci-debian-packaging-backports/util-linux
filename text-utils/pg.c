@@ -220,7 +220,7 @@ smalloc(size_t s)
 {
         char *m = (char *)malloc(s);
         if (m == NULL) {
-		char *p = _("Out of memory\n");
+		const char *p = _("Out of memory\n");
                 write(2, p, strlen(p));
                 quit(++exitstatus);
         }
@@ -448,7 +448,10 @@ endline_for_mb(unsigned col, char *s)
 			pos += TABSIZE - (pos % TABSIZE);
 			break;
 		default:
-			pos += wcwidth(*p);
+			if (iswprint(*p))
+				pos += wcwidth(*p);
+			else
+				pos += wcwidth(L'?');
 		}
 		if (pos > col) {
 			if (*p == L'\t')
@@ -1507,7 +1510,7 @@ found_bw:
 				/*
 				 * Help!
 				 */
-				char *help = _(helpscreen);
+				const char *help = _(helpscreen);
 				write(1, copyright + 4, strlen(copyright + 4));
 				write(1, help, strlen(help));
 				goto newcmd;

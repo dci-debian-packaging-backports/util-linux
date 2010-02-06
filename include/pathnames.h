@@ -34,6 +34,7 @@
 #define _PATH_INITTAB		"/etc/inittab"
 #define _PATH_RC		"/etc/rc"
 #define _PATH_REBOOT		"/sbin/reboot"
+#define _PATH_SHUTDOWN		"/sbin/shutdown"
 #define _PATH_SINGLE		"/etc/singleboot"
 #define _PATH_SHUTDOWN_CONF	"/etc/shutdown.conf"
 
@@ -73,6 +74,9 @@
 #define _PATH_PROC_FILESYSTEMS	"/proc/filesystems"
 #define _PATH_PROC_MOUNTS	"/proc/mounts"
 #define _PATH_PROC_PARTITIONS	"/proc/partitions"
+#define _PATH_PROC_DEVICES	"/proc/devices"
+
+#define _PATH_SYS_BLOCK		"/sys/block"
 
 #ifndef _PATH_MOUNTED
 # ifdef MOUNTED					/* deprecated */

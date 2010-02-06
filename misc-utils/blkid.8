@@ -40,6 +40,9 @@ blkid \- command\-line utility to locate/print block device attributes
 .IR size ]
 .RB [ \-o
 .IR format ]
+.RB [ \-s
+.IR tag ]
+.in +9
 .RB [ \-u
 .IR list ]
 .I device
@@ -93,7 +96,13 @@ Look up one device that uses the label (same as: -l -o device -t
 LABEL=<label>).  This look up method is able to reliable use /dev/disk/by-label
 udev symlinks (depends on setting in /etc/blkid.conf). Avoid to use the
 symlinks directly. It is not reliable to use the symlinks without verification.
-The \fB-L\fR option is portable and works on systems with and without udev.
+The \fB-L\fR option works on systems with and without udev.
+
+Unfortunately, the original
+.B blkid(8)
+from e2fsprogs use the \fB-L\fR option as a
+synonym to the \fB-o list\fR option. For better portability use "-l -o device
+-t LABEL=<label>" and "-o list" in your scripts rather than -L option.
 .TP
 .B \-u " list "
 Restrict probing functions to defined (comma separated) list of "usage" types.
@@ -127,10 +136,12 @@ print all tags (the default)
 print the value of the tags
 .TP
 .B list
-print the devices in a user-friendly format
+print the devices in a user-friendly format, this output format is unsupported
+for low-level probing (\fB-p\fR)
 .TP
 .B device
-print the device name only
+print the device name only, this output format is always enabled for \fB-L\fR
+and \fB-U\fR options
 .TP
 .B udev
 vol_id compatible mode; usable in udev rules
@@ -140,7 +151,7 @@ vol_id compatible mode; usable in udev rules
 Probe at the given offset (only useful with \fB-p\fR).
 .TP
 .BI \-p
-Switch to low-level probing mode (bypass cache)"
+Switch to low-level probing mode (bypass cache)
 .TP
 .BI \-s " tag"
 For each (specified) device, show only the tags that match
@@ -209,3 +220,4 @@ ftp://ftp.kernel.org/pub/linux/utils/util-linux-ng/.
 .SH "SEE ALSO"
 .BR libblkid (3)
 .BR findfs (8)
+.BR wipefs (8)

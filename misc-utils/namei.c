@@ -32,15 +32,13 @@
 #include <err.h>
 #include <pwd.h>
 #include <grp.h>
+
+#include "c.h"
 #include "nls.h"
 #include "widechar.h"
 
 #ifndef MAXSYMLINKS
 #define MAXSYMLINKS 256
-#endif
-
-#ifndef PATH_MAX
-#define PATH_MAX 4096
 #endif
 
 #ifndef LOGIN_NAME_MAX
@@ -61,6 +59,7 @@ struct namei {
 	int		relstart;	/* offset of relative path in 'abslink' */
 	struct namei	*next;		/* next item */
 	int		level;
+	int		mountpoint;	/* is mount point */
 };
 
 struct idcache {
@@ -190,14 +189,15 @@ readlink_to_namei(struct namei *nm, const char *path)
 	if (*sym != '/') {
 		char *p = strrchr(path, '/');
 
-		nm->relstart = p ? p - path : strlen(path);
-		sz += nm->relstart + 1;
+		nm->relstart = p ? p - path : 0;
+		if (nm->relstart)
+			sz += nm->relstart + 1;
 	}
 	nm->abslink = malloc(sz + 1);
 	if (!nm->abslink)
 		err(EXIT_FAILURE, _("out of memory?"));
 
-	if (*sym != '/') {
+	if (*sym != '/' && nm->relstart) {
 		/* create the absolute path from the relative symlink */
 		memcpy(nm->abslink, path, nm->relstart);
 		*(nm->abslink + nm->relstart) = '/';
@@ -206,6 +206,31 @@ readlink_to_namei(struct namei *nm, const char *path)
 	} else
 		memcpy(nm->abslink, sym, sz);
 	nm->abslink[sz] = '\0';
+}
+
+static struct stat *
+dotdot_stat(const char *dirname, struct stat *st)
+{
+	char *path;
+	size_t len;
+
+#define DOTDOTDIR	"/.."
+
+	if (!dirname)
+		return NULL;
+
+	len = strlen(dirname);
+	path = malloc(len + sizeof(DOTDOTDIR));
+	if (!path)
+		err(EXIT_FAILURE, _("out of memory?"));
+
+	memcpy(path, dirname, len);
+	memcpy(path + len, DOTDOTDIR, sizeof(DOTDOTDIR));
+
+	if (stat(path, st))
+		err(EXIT_FAILURE, _("could not stat '%s'"), path);
+	free(path);
+	return st;
 }
 
 static struct namei *
@@ -227,6 +252,27 @@ new_namei(struct namei *parent, const char *path, const char *fname, int lev)
 		err(EXIT_FAILURE, _("out of memory?"));
 	if (lstat(path, &nm->st) == -1)
 		err(EXIT_FAILURE, _("could not stat '%s'"), path);
+
+	if (S_ISLNK(nm->st.st_mode))
+		readlink_to_namei(nm, path);
+	if (flags & NAMEI_OWNERS) {
+		add_uid(nm->st.st_uid);
+		add_gid(nm->st.st_gid);
+	}
+
+	if ((flags & NAMEI_MNTS) && S_ISDIR(nm->st.st_mode)) {
+		struct stat stbuf, *sb = NULL;
+
+		if (parent && S_ISDIR(parent->st.st_mode))
+			sb = &parent->st;
+		else if (!parent || S_ISLNK(parent->st.st_mode))
+			sb = dotdot_stat(path, &stbuf);
+
+		if (sb && (sb->st_dev != nm->st.st_dev ||   /* different device */
+		           sb->st_ino == nm->st.st_ino))    /* root directory */
+			nm->mountpoint = 1;
+	}
+
 	return nm;
 }
 
@@ -268,12 +314,6 @@ add_namei(struct namei *parent, const char *orgpath, int start, struct namei **l
 			end = NULL;
 		if (!first)
 			first = nm;
-		if (S_ISLNK(nm->st.st_mode))
-			readlink_to_namei(nm, path);
-		if (flags & NAMEI_OWNERS) {
-			add_uid(nm->st.st_uid);
-			add_gid(nm->st.st_gid);
-		}
 		/* set begin of the next filename */
 		if (end) {
 			*end++ = '/';
@@ -365,9 +405,7 @@ print_namei(struct namei *nm, char *path)
 
 		strmode(nm->st.st_mode, md);
 
-		if ((flags & NAMEI_MNTS) && prev &&
-		    S_ISDIR(nm->st.st_mode) && S_ISDIR(prev->st.st_mode) &&
-		    prev->st.st_dev != nm->st.st_dev)
+		if (nm->mountpoint)
 			md[0] = 'D';
 
 		if (!(flags & NAMEI_VERTICAL)) {

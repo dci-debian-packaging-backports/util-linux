@@ -63,8 +63,9 @@ checkconfig:
 		| xargs $(top_srcdir)/tools/checkconfig.sh $(top_srcdir)
 
 
-ENABLE_ALL = --enable-static-programs --with-fsprobe=builtin \
+ENABLE_ALL = --enable-static-programs \
  --enable-elvtune --enable-init --enable-kill --enable-last \
  --enable-mesg --enable-partx --enable-raw --enable-rdev --enable-reset \
  --enable-login-utils --enable-write --enable-arch --enable-mount
-DISTCHECK_CONFIGURE_FLAGS = --disable-use-tty-group $(ENABLE_ALL)
+
+DISTCHECK_CONFIGURE_FLAGS = --enable-gtk-doc --disable-use-tty-group $(ENABLE_ALL)

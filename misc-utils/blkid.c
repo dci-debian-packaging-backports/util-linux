@@ -40,6 +40,8 @@ extern int optind;
 
 #include <blkid.h>
 
+#include "ismounted.h"
+
 const char *progname = "blkid";
 
 static void print_version(FILE *out)
@@ -186,16 +188,12 @@ static void pretty_print_line(const char *device, const char *fs_type,
 
 static void pretty_print_dev(blkid_dev dev)
 {
-	fprintf(stderr, "pretty print not implemented yet\n");
-
-#ifdef NOT_IMPLEMENTED
 	blkid_tag_iterate	iter;
 	const char		*type, *value, *devname;
 	const char		*uuid = "", *fs_type = "", *label = "";
-	char			*cp;
 	int			len, mount_flags;
 	char			mtpt[80];
-	errcode_t		retval;
+	int			retval;
 
 	if (dev == NULL) {
 		pretty_print_line("device", "fs_type", "label",
@@ -224,20 +222,18 @@ static void pretty_print_dev(blkid_dev dev)
 
 	/* Get the mount point */
 	mtpt[0] = 0;
-	retval = ext2fs_check_mount_point(devname, &mount_flags,
-					  mtpt, sizeof(mtpt));
+	retval = check_mount_point(devname, &mount_flags, mtpt, sizeof(mtpt));
 	if (retval == 0) {
-		if (mount_flags & EXT2_MF_MOUNTED) {
+		if (mount_flags & MF_MOUNTED) {
 			if (!mtpt[0])
 				strcpy(mtpt, "(mounted, mtpt unknown)");
-		} else if (mount_flags & EXT2_MF_BUSY)
+		} else if (mount_flags & MF_BUSY)
 			strcpy(mtpt, "(in use)");
 		else
 			strcpy(mtpt, "(not mounted)");
 	}
 
 	pretty_print_line(devname, fs_type, label, mtpt, uuid);
-#endif
 }
 
 static void print_udev_format(const char *name, const char *value, size_t sz)
@@ -259,9 +255,24 @@ static void print_udev_format(const char *name, const char *value, size_t sz)
 
 		blkid_encode_string(value, enc, sizeof(enc));
 		printf("ID_FS_%s_ENC=%s\n", name, enc);
-	}
+
+	} else if (!strcmp(name, "PTTYPE"))
+		printf("ID_PART_TABLE_TYPE=%s\n", value);
+
+	/* TODO:  ID_PART_ENTRY_{UUID,NAME,FLAG} */
+
 	else
 		printf("ID_FS_%s=%s\n", name, value);
+}
+
+static int has_item(char *ary[], const char *item)
+{
+	char **p;
+
+	for (p = ary; *p != NULL; p++)
+		if (!strcmp(item, *p))
+			return 1;
+	return 0;
 }
 
 static void print_value(int output, int num, const char *devname,
@@ -284,11 +295,11 @@ static void print_value(int output, int num, const char *devname,
 	}
 }
 
-static void print_tags(blkid_dev dev, char *show[], int numtag, int output)
+static void print_tags(blkid_dev dev, char *show[], int output)
 {
 	blkid_tag_iterate	iter;
 	const char		*type, *value, *devname;
-	int			i, num = 1;
+	int			num = 1;
 
 	if (!dev)
 		return;
@@ -307,13 +318,8 @@ static void print_tags(blkid_dev dev, char *show[], int numtag, int output)
 
 	iter = blkid_tag_iterate_begin(dev);
 	while (blkid_tag_next(iter, &type, &value) == 0) {
-		if (numtag && show) {
-			for (i=0; i < numtag; i++)
-				if (!strcmp(type, show[i]))
-					break;
-			if (i >= numtag)
-				continue;
-		}
+		if (show[0] && !has_item(show, type))
+			continue;
 		print_value(output, num++, devname, value, type, strlen(value));
 	}
 	blkid_tag_iterate_end(iter);
@@ -322,15 +328,94 @@ static void print_tags(blkid_dev dev, char *show[], int numtag, int output)
 		printf("\n");
 }
 
-static int lowprobe_device(blkid_probe pr, const char *devname, int output,
-		blkid_loff_t offset, blkid_loff_t size)
+
+static int append_str(char **res, size_t *sz, const char *a, const char *b)
+{
+	char *str = *res;
+	size_t asz = a ? strlen(a) : 0;
+	size_t bsz = b ? strlen(b) : 0;
+	size_t len = *sz + asz + bsz;
+
+	if (!len)
+		return -1;
+
+	str = realloc(str, len + 1);
+	if (!str) {
+		free(*res);
+		return -1;
+	}
+	*res = str;
+	str += *sz;
+
+	if (a) {
+		memcpy(str, a, asz);
+		str += asz;
+	}
+	if (b) {
+		memcpy(str, b, bsz);
+		str += bsz;
+	}
+	*str = '\0';
+	*sz = len;
+	return 0;
+}
+
+/*
+ * Compose and print ID_FS_AMBIVALENT for udev
+ */
+static int print_udev_ambivalent(blkid_probe pr)
+{
+	char *val = NULL;
+	size_t valsz = 0;
+	int count = 0, rc = -1;
+
+	while (!blkid_do_probe(pr)) {
+		const char *usage = NULL, *type = NULL, *version = NULL;
+		char enc[256];
+
+		blkid_probe_lookup_value(pr, "USAGE", &usage, NULL);
+		blkid_probe_lookup_value(pr, "TYPE", &type, NULL);
+		blkid_probe_lookup_value(pr, "VERSION", &version, NULL);
+
+		if (!usage || !type)
+			continue;
+
+		blkid_encode_string(usage, enc, sizeof(enc));
+		if (append_str(&val, &valsz, enc, ":"))
+			goto done;
+
+		blkid_encode_string(type, enc, sizeof(enc));
+		if (append_str(&val, &valsz, enc, version ? ":" : " "))
+			goto done;
+
+		if (version) {
+			blkid_encode_string(version, enc, sizeof(enc));
+			if (append_str(&val, &valsz, enc, " "))
+				goto done;
+		}
+		count++;
+	}
+
+	if (count > 1) {
+		*(val + valsz - 1) = '\0';		/* rem tailing whitespace */
+		printf("ID_FS_AMBIVALEN=%s\n", val);
+		rc = 0;
+	}
+done:
+	free(val);
+	return rc;
+}
+
+static int lowprobe_device(blkid_probe pr, const char *devname,	char *show[],
+			int output, blkid_loff_t offset, blkid_loff_t size)
 {
 	const char *data;
 	const char *name;
-	int nvals = 0, n;
+	int nvals = 0, n, num = 1;
 	size_t len;
 	int fd;
 	int rc = 0;
+	struct stat st;
 
 	fd = open(devname, O_RDONLY);
 	if (fd < 0)
@@ -338,9 +423,35 @@ static int lowprobe_device(blkid_probe pr, const char *devname, int output,
 
 	if (blkid_probe_set_device(pr, fd, offset, size))
 		goto done;
-	rc = blkid_do_safeprobe(pr);
-	if (rc)
+
+	if (fstat(fd, &st))
 		goto done;
+	/*
+	 * partitions probing
+	 */
+	blkid_probe_enable_superblocks(pr, 0);	/* enabled by default ;-( */
+
+	blkid_probe_enable_partitions(pr, 1);
+	rc = blkid_do_fullprobe(pr);
+	blkid_probe_enable_partitions(pr, 0);
+
+	if (rc < 0)
+		goto done;	/* -1 = error, 1 = nothing, 0 = succes */
+
+	/*
+	 * Don't probe for FS/RAIDs on small devices
+	 */
+	if (rc || S_ISCHR(st.st_mode) ||
+	    blkid_probe_get_size(pr) > 1024 * 1440) {
+		/*
+		 * filesystems/RAIDs probing
+		 */
+		blkid_probe_enable_superblocks(pr, 1);
+
+		rc = blkid_do_safeprobe(pr);
+		if (rc < 0)
+			goto done;
+	}
 
 	nvals = blkid_probe_numof_values(pr);
 
@@ -352,18 +463,25 @@ static int lowprobe_device(blkid_probe pr, const char *devname, int output,
 	for (n = 0; n < nvals; n++) {
 		if (blkid_probe_get_value(pr, n, &name, &data, &len))
 			continue;
-
+		if (show[0] && !has_item(show, name))
+			continue;
 		len = strnlen((char *) data, len);
-		print_value(output, n + 1, devname, (char *) data, name, len);
+		print_value(output, num++, devname, (char *) data, name, len);
 	}
 
-	if (nvals > 1 && !(output & (OUTPUT_VALUE_ONLY | OUTPUT_UDEV_LIST)))
+	if (nvals >= 1 && !(output & (OUTPUT_VALUE_ONLY | OUTPUT_UDEV_LIST)))
 		printf("\n");
 done:
-	if (rc == -2)
-		fprintf(stderr, "%s: ambivalent result "
-				"(probably more filesystems on the device)\n",
+	if (rc == -2) {
+		if (output & OUTPUT_UDEV_LIST)
+			print_udev_ambivalent(pr);
+		else
+			fprintf(stderr,
+				"%s: ambivalent result (probably more "
+				"filesystems on the device, use wipefs(8) "
+				"to see more details)\n",
 				devname);
+	}
 	close(fd);
 	return !nvals ? 2 : 0;
 }
@@ -419,6 +537,8 @@ int main(int argc, char **argv)
 	int c;
 	blkid_loff_t offset = 0, size = 0;
 
+	show[0] = NULL;
+
 	while ((c = getopt (argc, argv, "c:f:ghlL:o:O:ps:S:t:u:U:w:v")) != EOF)
 		switch (c) {
 		case 'c':
@@ -473,11 +593,12 @@ int main(int argc, char **argv)
 			lowprobe++;
 			break;
 		case 's':
-			if (numtag >= sizeof(show) / sizeof(*show)) {
+			if (numtag + 1 >= sizeof(show) / sizeof(*show)) {
 				fprintf(stderr, "Too many tags specified\n");
 				usage(err);
 			}
 			show[numtag++] = optarg;
+			show[numtag] = NULL;
 			break;
 		case 'S':
 			size = strtoll(optarg, NULL, 10);
@@ -535,8 +656,14 @@ int main(int argc, char **argv)
 	}
 	err = 2;
 
-	if (output_format & OUTPUT_PRETTY_LIST)
+	if (eval == 0 && output_format & OUTPUT_PRETTY_LIST) {
+		if (lowprobe) {
+			fprintf(stderr, "The low-level probing mode does not "
+					"support 'list' output format\n");
+			exit(4);
+		}
 		pretty_print_dev(NULL);
+	}
 
 	if (lowprobe) {
 		/*
@@ -545,22 +672,25 @@ int main(int argc, char **argv)
 		blkid_probe pr;
 
 		if (!numdev) {
-			fprintf(stderr, "The low-probe option requires a device\n");
+			fprintf(stderr, "The low-level probing mode "
+					"requires a device\n");
 			exit(4);
 		}
 		pr = blkid_new_probe();
 		if (!pr)
 			goto exit;
-		blkid_probe_set_request(pr,
-				BLKID_PROBREQ_LABEL | BLKID_PROBREQ_UUID |
-				BLKID_PROBREQ_TYPE | BLKID_PROBREQ_SECTYPE |
-				BLKID_PROBREQ_USAGE | BLKID_PROBREQ_VERSION);
+
+		blkid_probe_set_superblocks_flags(pr,
+				BLKID_SUBLKS_LABEL | BLKID_SUBLKS_UUID |
+				BLKID_SUBLKS_TYPE | BLKID_SUBLKS_SECTYPE |
+				BLKID_SUBLKS_USAGE | BLKID_SUBLKS_VERSION);
+
 		if (fltr_usage &&
-		    blkid_probe_filter_usage(pr, fltr_flag, fltr_usage))
+		    blkid_probe_filter_superblocks_usage(pr, fltr_flag, fltr_usage))
 			goto exit;
 
 		for (i = 0; i < numdev; i++)
-			err = lowprobe_device(pr, devices[i],
+			err = lowprobe_device(pr, devices[i], show,
 					output_format, offset, size);
 		blkid_free_probe(pr);
 	} else if (eval) {
@@ -589,7 +719,7 @@ int main(int argc, char **argv)
 
 		if ((dev = blkid_find_dev_with_tag(cache, search_type,
 						   search_value))) {
-			print_tags(dev, show, numtag, output_format);
+			print_tags(dev, show, output_format);
 			err = 0;
 		}
 	/* If we didn't specify a single device, show all available devices */
@@ -605,7 +735,7 @@ int main(int argc, char **argv)
 			dev = blkid_verify(cache, dev);
 			if (!dev)
 				continue;
-			print_tags(dev, show, numtag, output_format);
+			print_tags(dev, show, output_format);
 			err = 0;
 		}
 		blkid_dev_iterate_end(iter);
@@ -619,7 +749,7 @@ int main(int argc, char **argv)
 			    !blkid_dev_has_tag(dev, search_type,
 					       search_value))
 				continue;
-			print_tags(dev, show, numtag, output_format);
+			print_tags(dev, show, output_format);
 			err = 0;
 		}
 	}

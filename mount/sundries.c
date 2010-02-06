@@ -21,6 +21,7 @@
 
 int mount_quiet;
 int verbose;
+int nocanonicalize;
 char *progname;
 
 char *
@@ -157,7 +158,7 @@ matching_type (const char *type, const char *types) {
 	     if (strncmp(p, type, len) == 0 &&
 		 (p[len] == 0 || p[len] == ','))
 		     return !no;
-	     p = index(p,',');
+	     p = strchr(p,',');
 	     if (!p)
 		     break;
 	     p++;
@@ -251,6 +252,10 @@ is_pseudo_fs(const char *type)
 	    streq(type, "proc") ||
 	    streq(type, "tmpfs") ||
 	    streq(type, "sysfs") ||
+	    streq(type, "usbfs") ||
+	    streq(type, "cgroup") ||
+	    streq(type, "cpuset") ||
+	    streq(type, "rpc_pipefs") ||
 	    streq(type, "devpts"))
 		return 1;
 	return 0;
@@ -266,9 +271,9 @@ canonicalize_spec (const char *path)
 {
 	char *res;
 
-	if (path == NULL)
+	if (!path)
 		return NULL;
-	if (is_pseudo_fs(path))
+	if (nocanonicalize || is_pseudo_fs(path))
 		return xstrdup(path);
 
 	res = canonicalize_path(path);
@@ -279,8 +284,14 @@ canonicalize_spec (const char *path)
 
 char *canonicalize (const char *path)
 {
-	char *res = canonicalize_path(path);
+	char *res;
 
+	if (!path)
+		return NULL;
+	else if (nocanonicalize)
+		return xstrdup(path);
+
+	res = canonicalize_path(path);
 	if (!res)
 		die(EX_SYSERR, _("not enough memory"));
 	return res;

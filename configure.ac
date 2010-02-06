@@ -1,4 +1,4 @@
-AC_INIT(util-linux-ng, 2.16, kzak@redhat.com)
+AC_INIT(util-linux-ng, 2.17, kzak@redhat.com)
 
 AC_PREREQ(2.60)
 
@@ -6,6 +6,9 @@ AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_MACRO_DIR([m4])
 
 AM_INIT_AUTOMAKE([check-news -Wall foreign 1.9 dist-bzip2])
+
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])],
+                            [AC_SUBST([AM_DEFAULT_VERBOSITY], [1])])
 
 AC_CONFIG_SRCDIR(mount/mount.c)
 
@@ -19,7 +22,7 @@ PACKAGE_VERSION_RELEASE=0
 
 dnl libblkid version
 LIBBLKID_VERSION="$PACKAGE_VERSION_MAJOR.$PACKAGE_VERSION_MINOR.$PACKAGE_VERSION_RELEASE"
-LIBBLKID_DATE="10-Feb-2009"
+LIBBLKID_DATE="08-Jan-2010"
 LIBBLKID_LT_MAJOR=1
 LIBBLKID_LT_MINOR=1
 LIBBLKID_LT_MICRO=0
@@ -67,12 +70,17 @@ AC_SUBST([usrlib_execdir])
 AC_PROG_CC_STDC
 AC_GNU_SOURCE
 AC_CANONICAL_HOST
+AC_C_CONST
+AC_C_VOLATILE
 AC_C_BIGENDIAN
 
 dnl libtool-2
 LT_INIT
 
 PKG_PROG_PKG_CONFIG
+
+GTK_DOC_CHECK([1.10])
+AC_PATH_PROG([XSLTPROC], [xsltproc])
 
 linux_os=no
 case ${host_os} in
@@ -83,8 +91,6 @@ esac
 AM_CONDITIONAL([LINUX], test "x$linux_os" = xyes)
 
 AC_PATH_PROG(PERL, perl)
-AC_PATH_PROG(BLKID, blkid, [], [$PATH:/sbin])
-AC_PATH_PROG(VOLID, vol_id, [], [$PATH:/lib/udev])
 
 AC_SYS_LARGEFILE
 
@@ -110,7 +116,6 @@ AC_CHECK_HEADERS(
 	net/if_dl.h \
         netinet/in.h \
 	rpcsvc/nfs_prot.h \
-	scsi/scsi.h \
 	stdlib.h \
 	sys/disk.h \
 	sys/disklabel.h \
@@ -137,9 +142,11 @@ AC_CHECK_DECLS([_NL_TIME_WEEK_1STDAY],[],[],[[#include <langinfo.h>]])
 
 AC_CHECK_FUNCS(
 	[inet_aton \
+	futimens \
 	fsync \
 	getdomainname \
 	get_current_dir_name \
+	usleep \
 	nanosleep \
 	personality \
 	updwtmp \
@@ -156,6 +163,8 @@ AC_CHECK_FUNCS(
 	setresuid \
 	inotify_init \
 	prctl \
+	posix_fadvise \
+	getmntinfo \
 	__secure_getenv \
 	rpmatch])
 AC_FUNC_FSEEKO
@@ -231,14 +240,7 @@ AC_DEFUN([UTIL_RESTORE_FLAGS], [
 ])
 
 
-AC_ARG_ENABLE([tls],
-  AS_HELP_STRING([--disable-tls], [disable use of thread local support]),
-  [], enable_tls=yes
-)
-if test "x$enable_tls" = xyes; then
-  AX_TLS
-fi
-
+AX_CHECK_TLS
 
 AC_ARG_ENABLE([mount],
   AS_HELP_STRING([--disable-mount], [do not build mount utilities]),
@@ -320,6 +322,7 @@ AC_ARG_ENABLE([libblkid],
   AS_HELP_STRING([--disable-libblkid], [do not build libblkid and blkid utilities]),
   [], enable_libblkid=yes
 )
+AC_SUBST([LIBBLKID_DATE])
 AC_SUBST([LIBBLKID_VERSION])
 AC_SUBST([LIBBLKID_VERSION_INFO])
 AM_CONDITIONAL(BUILD_LIBBLKID, test "x$enable_libblkid" = xyes)
@@ -348,7 +351,7 @@ if test "x$enable_libblkid" = xno; then
 else
   # internal library
   AC_DEFINE(HAVE_BLKID_H, 1, [Define to 1 if you have the <blkid.h> header file.])
-  AC_DEFINE(HAVE_BLKID_EVALUATE_TAG, 1, [Define to 1 if you have the blkid_evaluate_tag().])
+  AC_DEFINE(HAVE_LIBBLKID_INTERNAL, 1, [Define to 1 if you have the in-tree libblkid.])
 fi
 
 if test "x$have_blkid" = xyes; then
@@ -366,7 +369,6 @@ AM_CONDITIONAL(HAVE_BLKID, test "x$have_blkid" = xyes)
 : ${BLKID_LIBS='-lblkid -luuid'}
 
 AC_ARG_VAR([BLKID_LIBS_STATIC], [-l options for linking statically with blkid])
-
 
 UTIL_CHECK_LIB(util, openpty)
 UTIL_CHECK_LIB(termcap, tgetnum)
@@ -458,6 +460,11 @@ printf(__progname);
 ]])],
 [AC_DEFINE(HAVE___PROGNAME, 1, Do we have __progname?)
 ])
+
+
+AC_CHECK_TYPES([union semun], [], [], [[
+#include <sys/sem.h>
+]])
 
 
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
@@ -554,6 +561,13 @@ UTIL_CHECK_SYSCALL([ioprio_get],
   [sh*],      [289],
   [x86_64*],  [252])
 
+dnl fallocate could be available as libc function or as syscall only
+UTIL_CHECK_SYSCALL([fallocate])
+AC_CHECK_FUNCS([fallocate])
+
+dnl unshare could be available as libc function or as syscall only
+UTIL_CHECK_SYSCALL([unshare])
+AC_CHECK_FUNCS([unshare])
 
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #include <time.h>
@@ -651,7 +665,6 @@ AC_ARG_ENABLE([switch_root],
   AS_HELP_STRING([--disable-switch_root], [do not build switch_root]),
   [], enable_switch_root=check
 )
-
 if test "x$enable_switch_root" = xno; then
   build_switch_root=no
 else
@@ -670,6 +683,79 @@ else
   fi
 fi
 AM_CONDITIONAL(BUILD_SWITCH_ROOT, test "x$build_switch_root" = xyes)
+
+
+AC_ARG_ENABLE([pivot_root],
+  AS_HELP_STRING([--disable-pivot_root], [do not build pivot_root]),
+  [], enable_pivot_root=check
+)
+if test "x$enable_pivot_root" = xno; then
+  build_pivot_root=no
+else
+  build_pivot_root=yes
+  case $enable_pivot_root:$linux_os in
+  yes:no) AC_MSG_ERROR([pivot_root selected for non-linux system]);;
+  check:no) AC_MSG_WARN([non-linux system; do not build pivot_root])
+            build_pivot_root=no;;
+  esac
+  if test "x$build_pivot_root" = xyes; then
+    case $enable_pivot_root:$util_cv_syscall_pivot_root in
+    yes:no) AC_MSG_ERROR([pivot_root selected but pivot_root syscall not found]);;
+    check:no) AC_MSG_WARN([pivot_root syscall not found; do not build pivot_root])
+              build_pivot_root=no;;
+    esac
+  fi
+fi
+AM_CONDITIONAL(BUILD_PIVOT_ROOT, test "x$build_pivot_root" = xyes)
+
+
+AC_ARG_ENABLE([fallocate],
+  AS_HELP_STRING([--disable-fallocate], [do not build fallocate]),
+  [], enable_fallocate=check
+)
+if test "x$enable_fallocate" = xno; then
+  build_fallocate=no
+else
+  build_fallocate=yes
+  case $enable_fallocate:$linux_os in
+  yes:no) AC_MSG_ERROR([fallocate selected for non-linux system]);;
+  check:no) AC_MSG_WARN([non-linux system; do not build fallocate])
+            build_fallocate=no;;
+  esac
+  if test "x$build_fallocate" = xyes; then
+    case $enable_fallocate:$util_cv_syscall_fallocate in
+    yes:no) AC_MSG_ERROR([fallocate selected but fallocate syscall not found]);;
+    check:no) AC_MSG_WARN([fallocate syscall not found; do not build fallocate])
+              build_fallocate=no;;
+    esac
+  fi
+fi
+AM_CONDITIONAL(BUILD_FALLOCATE, test "x$build_fallocate" = xyes)
+
+
+AC_ARG_ENABLE([unshare],
+  AS_HELP_STRING([--disable-unshare], [do not build unshare]),
+  [], enable_unshare=check
+)
+if test "x$enable_unshare" = xno; then
+  build_unshare=no
+else
+  build_unshare=yes
+  case $enable_unshare:$linux_os in
+  yes:no) AC_MSG_ERROR([unshare selected for non-linux system]);;
+  check:no) AC_MSG_WARN([non-linux system; do not build unshare])
+            build_unshare=no;;
+  esac
+  if test "x$build_unshare" = xyes; then
+    case $enable_unshare:$util_cv_syscall_unshare in
+    yes:no) AC_MSG_ERROR([unshare selected but unshare syscall not found]);;
+    check:no) AC_MSG_WARN([unshare syscall not found; do not build unshare])
+              build_unshare=no;;
+    esac
+  fi
+fi
+AM_CONDITIONAL(BUILD_UNSHARE, test "x$build_unshare" = xyes)
+
 
 
 AC_ARG_ENABLE([elvtune],
@@ -874,6 +960,34 @@ if test "x$enable_require_password" = xyes; then
 fi
 
 
+AC_DEFUN([FS_PATHS_DEFAULT], [/sbin:/sbin/fs.d:/sbin/fs])
+AC_ARG_ENABLE([fs-paths-default],
+  AS_HELP_STRING([--enable-fs-paths-default=paths], [default search path for fs helpers @<:@FS_PATHS_DEFAULT@:>@]),
+  [case "$enableval" in
+     yes) fs_paths_defaults="FS_PATHS_DEFAULT" ;;
+      no) fs_paths_defaults="" ;;
+       *) fs_paths_defaults="$enableval" ;;
+   esac],
+  [fs_paths_defaults="FS_PATHS_DEFAULT"]
+)
+AC_ARG_ENABLE([fs-paths-extra],
+  AS_HELP_STRING([--enable-fs-paths-extra=paths], [additional search paths for fs helpers]),
+  [case "$enableval" in
+     yes|no) fs_paths_extra="" ;;
+          *) fs_paths_extra="$enableval" ;;
+    esac],
+  [fs_paths_extra=""]
+)
+fs_paths="$fs_paths_defaults"
+if test "x$fs_paths_extra" != "x"; then
+  if test "x$fs_paths" != "x"; then
+    fs_paths="${fs_paths}:"
+  fi
+  fs_paths="${fs_paths}${fs_paths_extra}"
+fi
+AC_DEFINE_UNQUOTED([FS_SEARCH_PATH], "$fs_paths", [search path for fs helpers])
+
+
 AC_ARG_ENABLE([use-tty-group],
   AS_HELP_STRING([--disable-use-tty-group], [do not install wall and write setgid tty]),
   [], enable_use_tty_group=yes
@@ -889,6 +1003,12 @@ AC_ARG_ENABLE([makeinstall-chown],
   [], enable_makeinstall_chown=yes
 )
 AM_CONDITIONAL(MAKEINSTALL_DO_CHOWN, test "x$enable_makeinstall_chown" = xyes)
+
+AC_ARG_ENABLE([makeinstall-setuid],
+  AS_HELP_STRING([--disable-makeinstall-setuid], [do not do setuid chmod operations during "make install"]),
+  [], enable_makeinstall_setuid=yes
+)
+AM_CONDITIONAL(MAKEINSTALL_DO_SETUID, test "x$enable_makeinstall_setuid" = xyes)
 
 
 AC_ARG_VAR([SUID_CFLAGS],
@@ -919,8 +1039,14 @@ po/Makefile.in
 schedutils/Makefile
 shlibs/blkid/blkid.pc
 shlibs/blkid/Makefile
+shlibs/blkid/docs/Makefile
+shlibs/blkid/docs/version.xml
 shlibs/blkid/src/Makefile
-shlibs/blkid/src/probers/Makefile
+shlibs/blkid/src/blkid.h
+shlibs/blkid/src/superblocks/Makefile
+shlibs/blkid/src/topology/Makefile
+shlibs/blkid/src/partitions/Makefile
+shlibs/blkid/samples/Makefile
 shlibs/uuid/uuid.pc
 shlibs/uuid/Makefile
 shlibs/uuid/man/Makefile

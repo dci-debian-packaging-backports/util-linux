@@ -12,6 +12,7 @@ test -z "$srcdir" && srcdir=.
 THEDIR=`pwd`
 cd $srcdir
 DIE=0
+HAS_GTKDOC=1
 
 (autopoint --version) < /dev/null > /dev/null 2>&1 || {
         echo
@@ -53,6 +54,7 @@ DIE=0
 	echo "or see http://www.gnu.org/software/autoheader"
 	DIE=1
 }
+
 if test "$DIE" -eq 1; then
 	exit 1
 fi
@@ -76,7 +78,6 @@ echo "   autoconf:   $(autoconf --version | head -1)"
 echo "   autoheader: $(autoheader --version | head -1)"
 echo "   automake:   $(automake --version | head -1)"
 #echo "   libtoolize: $(libtoolize --version | head -1)"
-echo
 
 set -e
 autopoint --force $AP_OPTS
@@ -84,6 +85,7 @@ autopoint --force $AP_OPTS
 aclocal -I m4 $AL_OPTS
 autoconf $AC_OPTS
 autoheader $AH_OPTS
+
 automake --add-missing $AM_OPTS
 
 cd $THEDIR

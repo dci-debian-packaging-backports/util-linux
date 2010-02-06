@@ -20,7 +20,7 @@
 
 static blkid_cache blcache;
 
-#ifdef HAVE_BLKID_EVALUATE_TAG
+#ifdef HAVE_LIBBLKID_INTERNAL
 /* ask kernel developers why we need such ugly open() method... */
 static int
 open_device(const char *devname)
@@ -31,8 +31,13 @@ open_device(const char *devname)
 		int fd = open(devname, O_RDONLY);
 		if (fd >= 0)
 			return fd;
+#ifdef ENOMEDIUM
+		/* ENOMEDIUM is Linux-only */
 		if (errno != ENOMEDIUM)
 			break;
+#else
+		break;
+#endif
 		if (retries >= CRDOM_NOMEDIUM_RETRIES)
 			break;
 		++retries;
@@ -97,7 +102,7 @@ fsprobe_known_fstype(const char *fstype)
 	return blkid_known_fstype(fstype);
 }
 
-#ifdef HAVE_BLKID_EVALUATE_TAG
+#ifdef HAVE_LIBBLKID_INTERNAL
 /*
  * libblkid from util-linux-ng
  * -- recommended
@@ -133,9 +138,12 @@ fsprobe_get_value(const char *name, const char *devname)
 		goto done;
 	if (blkid_probe_set_device(blprobe, fd, 0, 0))
 		goto done;
-	if (blkid_probe_set_request(blprobe, BLKID_PROBREQ_LABEL |
-			 BLKID_PROBREQ_UUID | BLKID_PROBREQ_TYPE ))
-		goto done;
+
+	blkid_probe_enable_superblocks(blprobe, 1);
+
+	blkid_probe_set_superblocks_flags(blprobe,
+		BLKID_SUBLKS_LABEL | BLKID_SUBLKS_UUID | BLKID_SUBLKS_TYPE);
+
 	if (blkid_do_safeprobe(blprobe))
 		goto done;
 	if (blkid_probe_lookup_value(blprobe, name, &data, NULL))
@@ -175,7 +183,7 @@ fsprobe_get_devname_by_label(const char *label)
 	return blkid_evaluate_tag("LABEL", label, &blcache);
 }
 
-#else /* !HAVE_BLKID_EVALUATE_TAG */
+#else /* !HAVE_LIBBLKID_INTERNAL */
 
 /*
  * Classic libblkid (from e2fsprogs) without blkid_evaluate_tag()
@@ -246,4 +254,4 @@ fsprobe_get_uuid_by_devname(const char *devname)
 	return blkid_get_tag_value(blcache, "UUID", devname);
 }
 
-#endif /* !HAVE_BLKID_EVALUATE_TAG */
+#endif /* !HAVE_LIBBLKID_INTERNAL */

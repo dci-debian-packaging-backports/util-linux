@@ -58,15 +58,11 @@ Enable/disable:
 .RB [ \-p
 .IR priority ]
 .RB [ \-v ]
-. I specialfile
-.RB [ \fIspecialfile\fP
-.RB ...]
+.IR specialfile ...
 .br
 .B swapoff
 .RB [ \-v ]
-. I specialfile
-.RB [ \fIspecialfile\fP
-.RB ...]
+.IR specialfile ...
 .sp
 .in -5
 Enable/disable all:
@@ -114,7 +110,7 @@ All devices marked as ``swap'' in
 .I /etc/fstab
 are made available, except for those with the ``noauto'' option.
 Devices that are already being used as swap are silently skipped.
-.TP 
+.TP
 .B "\-e, \-\-ifexists"
 Silently skip devices that do not exist.
 .TP
@@ -134,7 +130,7 @@ Use the partition that has the specified
 .I /proc/partitions
 is needed.)
 .TP
-.B "\-p, \-\-priority \fIpriprity\fP"
+.B "\-p, \-\-priority \fIpriority\fP"
 Specify the priority of the swap device.
 .I priority
 is a value between 0 and 32767. Higher numbers indicate higher

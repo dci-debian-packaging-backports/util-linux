@@ -27,11 +27,19 @@
 .SH NAME
 umount \- unmount file systems
 .SH SYNOPSIS
-.BI "umount [\-hV]"
+.B umount
+.RB [ \-hV ]
 .LP
-.BI "umount -a [\-dflnrv] [\-t " vfstype "] [\-O " options ]
+.B umount \-a
+.RB [ \-dflnrv ]
+.RB [ \-t
+.IR vfstype ]
+.RB [ \-O
+.IR options ]
 .br
-.BI "umount [\-dflnrv] " "dir " | " device " [...]
+.B umount
+.RB [ \-dflnrv ]
+.RI { dir | device }...
 .SH DESCRIPTION
 The
 .B umount
@@ -111,6 +119,10 @@ Lazy unmount. Detach the filesystem from the filesystem hierarchy now,
 and cleanup all references to the filesystem as soon as it is not busy
 anymore.
 (Requires kernel 2.4.11 or later.)
+.IP "\fB\-\-no\-canonicalize\fP"
+Don't canonicalize paths. For more details about this option see the
+.B mount(8)
+man page.
 
 .SH "THE LOOP DEVICE"
 The
@@ -126,7 +138,9 @@ Any pending loop devices can be freed using `losetup -d', see
 The syntax of external umount helpers is:
 
 .br
-.BI "/sbin/umount.<suffix> [\-nlfvr] " "dir " | " device "
+.BI /sbin/umount. <suffix>
+.RI { dir | device }
+.RB [ \-nlfvr ]
 .br
 
 where the <suffix> is filesystem type or a value from "uhelper=" mtab option.

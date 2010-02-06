@@ -1,6 +1,6 @@
 include $(top_srcdir)/config/include-Makefile.am
 
-SUBDIRS = probers .
+SUBDIRS = superblocks topology partitions .
 
 common_ldadd =
 common_cflags =
@@ -15,25 +15,32 @@ common_cflags += $(UUID_CFLAGS)
 endif
 endif
 
-AM_CPPFLAGS += -I$(ul_libblkid_srcdir) $(common_cflags)
+AM_CPPFLAGS += -I$(ul_libblkid_incdir) -I$(ul_libblkid_srcdir) $(common_cflags)
 
 # includes
 blkidincdir = $(includedir)/blkid
-blkidinc_HEADERS = blkid.h
+nodist_blkidinc_HEADERS = blkid.h
 
 usrlib_exec_LTLIBRARIES = libblkid.la
 libblkid_la_SOURCES = cache.c dev.c devname.c devno.c getsize.c llseek.c  \
 		     probe.c read.c resolve.c save.c tag.c version.c verify.c \
-		     encode.c blkid.h list.h blkidP.h probers/probers.h \
-		     config.c evaluate.c \
+		     encode.c list.h blkidP.h superblocks/superblocks.h \
+		     config.c evaluate.c fat.h \
 		     $(blkidinc_HEADERS) \
 		     $(top_srcdir)/lib/blkdev.c \
 		     $(top_srcdir)/lib/linux_version.c \
 		     $(top_srcdir)/lib/canonicalize.c \
-		     $(top_srcdir)/lib/md5.c
+		     $(top_srcdir)/lib/md5.c \
+		     $(top_srcdir)/lib/crc32.c
 
-libblkid_la_LIBADD = probers/libblkid_probers.la $(common_ldadd)
-libblkid_la_DEPENDENCIES = $(libblkid_la_LIBADD) blkid.sym
+nodist_libblkid_la_SOURCES = blkid.h
+
+libblkid_la_LIBADD = superblocks/libblkid_superblocks.la \
+		     topology/libblkid_topology.la \
+		     partitions/libblkid_partitions.la \
+		     $(common_ldadd)
+
+libblkid_la_DEPENDENCIES = $(libblkid_la_LIBADD) blkid.sym blkid.h.in
 
 libblkid_la_LDFLAGS = -Wl,--version-script=$(ul_libblkid_srcdir)/blkid.sym \
                       -version-info $(LIBBLKID_VERSION_INFO)
@@ -41,7 +48,7 @@ libblkid_la_LDFLAGS = -Wl,--version-script=$(ul_libblkid_srcdir)/blkid.sym \
 tests = test_cache test_config test_dev test_devname test_devno test_getsize \
 	test_read test_resolve test_save test_tag test_verify test_evaluate
 
-EXTRA_DIST = blkid.sym tst_types.c
+EXTRA_DIST = blkid.sym tst_types.c blkid.h.in
 CLEANFILES = $(tests)
 
 tests: all $(tests)

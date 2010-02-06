@@ -655,74 +655,89 @@ do_mount (struct mountargs *args, int *special, int *status) {
 static int
 check_special_mountprog(const char *spec, const char *node, const char *type, int flags,
 			char *extra_opts, int *status) {
-  char mountprog[120];
-  struct stat statbuf;
-  int res;
+	char search_path[] = FS_SEARCH_PATH;
+	char *path, mountprog[150];
+	struct stat statbuf;
+	int res;
 
-  if (!external_allowed)
-      return 0;
+	if (!external_allowed)
+		return 0;
 
-  if (type == NULL || strcmp(type, "none") == 0)
-	  return 0;
+	if (type == NULL || strcmp(type, "none") == 0)
+		return 0;
 
-  if (strlen(type) < 100) {
-       sprintf(mountprog, "/sbin/mount.%s", type);
-       if (stat(mountprog, &statbuf) == 0) {
-	    if (verbose)
-		 fflush(stdout);
-	    res = fork();
-	    if (res == 0) {
-		 char *oo, *mountargs[10];
-		 int i = 0;
+	path = strtok(search_path, ":");
+	while (path) {
+		res = snprintf(mountprog, sizeof(mountprog), "%s/mount.%s",
+			       path, type);
+		path = strtok(NULL, ":");
+		if (res >= sizeof(mountprog) || res < 0)
+			continue;
 
-		 if(setgid(getgid()) < 0)
-			 die(EX_FAIL, _("mount: cannot set group id: %s"), strerror(errno));
+		if (stat(mountprog, &statbuf))
+			continue;
 
-		 if(setuid(getuid()) < 0)
-			 die(EX_FAIL, _("mount: cannot set user id: %s"), strerror(errno));
-
-		 oo = fix_opts_string (flags, extra_opts, NULL);
-		 mountargs[i++] = mountprog;				/* 1 */
-		 mountargs[i++] = (char *) spec;			/* 2 */
-		 mountargs[i++] = (char *) node;			/* 3 */
-		 if (sloppy && strncmp(type, "nfs", 3) == 0)
-		      mountargs[i++] = "-s";				/* 4 */
-		 if (fake)
-		      mountargs[i++] = "-f";				/* 5 */
-		 if (nomtab)
-		      mountargs[i++] = "-n";				/* 6 */
-		 if (verbose)
-		      mountargs[i++] = "-v";				/* 7 */
-		 if (oo && *oo) {
-		      mountargs[i++] = "-o";				/* 8 */
-		      mountargs[i++] = oo;				/* 9 */
-		 }
-		 mountargs[i] = NULL;					/* 10 */
-
-		 if (verbose > 2) {
-			i = 0;
-			while(mountargs[i]) {
-				printf("mount: external mount: argv[%d] = \"%s\"\n",
-					i, mountargs[i]);
-				i++;
-			}
+		if (verbose)
 			fflush(stdout);
-		 }
 
-		 execv(mountprog, mountargs);
-		 exit(1);	/* exec failed */
-	    } else if (res != -1) {
-		 int st;
-		 wait(&st);
-		 *status = (WIFEXITED(st) ? WEXITSTATUS(st) : EX_SYSERR);
-		 return 1;
-	    } else {
-		 int errsv = errno;
-		 error(_("mount: cannot fork: %s"), strerror(errsv));
-	    }
-       }
-  }
-  return 0;
+		switch (fork()) {
+		case 0: { /* child */
+			char *oo, *mountargs[10];
+			int i = 0;
+
+			if (setgid(getgid()) < 0)
+				die(EX_FAIL, _("mount: cannot set group id: %s"), strerror(errno));
+
+			if (setuid(getuid()) < 0)
+				die(EX_FAIL, _("mount: cannot set user id: %s"), strerror(errno));
+
+			oo = fix_opts_string (flags, extra_opts, NULL);
+			mountargs[i++] = mountprog;			/* 1 */
+			mountargs[i++] = (char *) spec;			/* 2 */
+			mountargs[i++] = (char *) node;			/* 3 */
+			if (sloppy && strncmp(type, "nfs", 3) == 0)
+				mountargs[i++] = "-s";			/* 4 */
+			if (fake)
+				mountargs[i++] = "-f";			/* 5 */
+			if (nomtab)
+				mountargs[i++] = "-n";			/* 6 */
+			if (verbose)
+				mountargs[i++] = "-v";			/* 7 */
+			if (oo && *oo) {
+				mountargs[i++] = "-o";			/* 8 */
+				mountargs[i++] = oo;			/* 9 */
+			}
+			mountargs[i] = NULL;				/* 10 */
+
+			if (verbose > 2) {
+				i = 0;
+				while (mountargs[i]) {
+					printf("mount: external mount: argv[%d] = \"%s\"\n",
+						i, mountargs[i]);
+					i++;
+				}
+				fflush(stdout);
+			}
+
+			execv(mountprog, mountargs);
+			exit(1);	/* exec failed */
+		}
+
+		default: { /* parent */
+			int st;
+			wait(&st);
+			*status = (WIFEXITED(st) ? WEXITSTATUS(st) : EX_SYSERR);
+			return 1;
+		}
+
+		case -1: { /* error */
+			int errsv = errno;
+			error(_("mount: cannot fork: %s"), strerror(errsv));
+		}
+		}
+	}
+
+	return 0;
 }
 
 
@@ -927,11 +942,11 @@ guess_fstype_and_mount(const char *spec, const char *node, const char **types,
 
    /* Accept a comma-separated list of types, and try them one by one */
    /* A list like "nonfs,.." indicates types not to use */
-   if (*types && strncmp(*types, "no", 2) && index(*types,',')) {
+   if (*types && strncmp(*types, "no", 2) && strchr(*types,',')) {
       char *t = strdup(*types);
       char *p;
 
-      while((p = index(t,',')) != NULL) {
+      while((p = strchr(t,',')) != NULL) {
 	 *p = 0;
 	 args.type = *types = t;
 	 if (do_mount (&args, special, status) == 0)
@@ -1245,6 +1260,41 @@ cdrom_setspeed(const char *spec) {
 }
 
 /*
+ * Check if @node is read-only filesystem by access() or futimens().
+ *
+ * Note that access(2) uses real-UID (= useless for suid programs)
+ * and euidaccess(2) does not check for read-only FS.
+ */
+static int
+is_readonly(const char *node)
+{
+	int res = 0;
+
+	if (getuid() == geteuid()) {
+		if (access(node, W_OK) == -1 && errno == EROFS)
+			res = 1;
+	}
+#ifdef HAVE_FUTIMENS
+	else {
+		struct timespec times[2];
+		int fd = open(node, O_RDONLY);
+
+		if (fd < 0)
+			goto done;
+
+		times[0].tv_nsec = UTIME_NOW;	/* atime */
+		times[1].tv_nsec = UTIME_OMIT;	/* mtime */
+
+		if (futimens(fd, times) == -1 && errno == EROFS)
+			res = 1;
+		close(fd);
+	}
+done:
+#endif
+	return res;
+}
+
+/*
  * try_mount_one()
  *	Try to mount one file system.
  *
@@ -1343,6 +1393,17 @@ mount_retry:
       res = status;
       goto out;
     }
+  }
+
+  /* Kernel allows to use MS_RDONLY for bind mounts, but the read-only request
+   * could be silently ignored. Check it to avoid 'ro' in ntab and 'rw' in
+   * /proc/mounts.
+   */
+  if (!fake && mnt5_res == 0 &&
+      (flags & MS_BIND) && (flags & MS_RDONLY) && !is_readonly(node)) {
+
+      printf(_("mount: warning: %s seems to be mounted read-write.\n"), node);
+      flags &= ~MS_RDONLY;
   }
 
   if (fake || mnt5_res == 0) {
@@ -1898,6 +1959,7 @@ static struct option longopts[] = {
 	{ "make-rslave", 0, 0, 141 },
 	{ "make-rprivate", 0, 0, 142 },
 	{ "make-runbindable", 0, 0, 143 },
+	{ "no-canonicalize", 0, 0, 144 },
 	{ "internal-only", 0, 0, 'i' },
 	{ NULL, 0, 0, 0 }
 };
@@ -2194,7 +2256,9 @@ main(int argc, char *argv[]) {
 		case 143:
 			mounttype = (MS_UNBINDABLE | MS_REC);
 			break;
-
+		case 144:
+			nocanonicalize = 1;
+			break;
 		case '?':
 		default:
 			usage (stderr, EX_USAGE);
@@ -2229,12 +2293,19 @@ main(int argc, char *argv[]) {
 		if (((uid_t)0 == ruid) && (ruid == euid)) {
 			restricted = 0;
 		}
-	}
 
-	if (restricted &&
-	    (types || options || readwrite || nomtab || mount_all ||
-	     fake || mounttype || (argc + specseen) != 1)) {
-		die (EX_USAGE, _("mount: only root can do that"));
+		if (restricted &&
+		    (types || options || readwrite || nomtab || mount_all ||
+		     nocanonicalize || fake || mounttype ||
+		     (argc + specseen) != 1)) {
+
+			if (ruid == 0 && euid != 0)
+				/* user is root, but setuid to non-root */
+				die (EX_USAGE, _("mount: only root can do that "
+					"(effective UID is %d)"), euid);
+
+			die (EX_USAGE, _("mount: only root can do that"));
+		}
 	}
 
 	if (keysize && sscanf(keysize,"%d",&keysz) != 1)

@@ -64,6 +64,8 @@
 #include <time.h>
 #include <unistd.h>
 #include <err.h>
+
+#include "c.h"
 #include "nls.h"
 
 #if defined(HAVE_LIBNCURSES) || defined(HAVE_LIBNCURSESW)
@@ -139,13 +141,9 @@ char		*Hrow;		/* pointer to highlighted row in month */
 
 #ifdef HAVE_LANGINFO_H
 # include <langinfo.h>
-#else
-# include <localeinfo.h>	/* libc4 only */
 #endif
 
 #include "widechar.h"
-
-#define SIZE(a)	(sizeof(a)/sizeof((a)[0]))
 
 /* allow compile-time define to over-ride default */
 #ifndef NUM_MONTHS
@@ -162,7 +160,7 @@ char		*Hrow;		/* pointer to highlighted row in month */
 #define	FIRST_MISSING_DAY	639799		/* 3 Sep 1752 */
 #define	NUMBER_MISSING_DAYS	11		/* 11 day correction */
 
-#define	MAXDAYS			43		/* max slots in a month array */
+#define	MAXDAYS			42		/* slots in a month array */
 #define	SPACE			-1		/* used in day array */
 
 static int days_in_month[2][13] = {
@@ -170,30 +168,34 @@ static int days_in_month[2][13] = {
 	{0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31},
 };
 
-int sep1752[MAXDAYS] = {
+#define SEP1752_OFS		4		/* sep1752[4] is a Sunday */
+
+/* 1 Sep 1752 is represented by sep1752[6] and j_sep1752[6] */
+int sep1752[MAXDAYS+6] = {
+				SPACE,	SPACE,	SPACE,	SPACE,
 	SPACE,	SPACE,	1,	2,	14,	15,	16,
 	17,	18,	19,	20,	21,	22,	23,
 	24,	25,	26,	27,	28,	29,	30,
 	SPACE,	SPACE,	SPACE,	SPACE,	SPACE,	SPACE,	SPACE,
 	SPACE,	SPACE,	SPACE,	SPACE,	SPACE,	SPACE,	SPACE,
 	SPACE,	SPACE,	SPACE,	SPACE,	SPACE,	SPACE,	SPACE,
-	SPACE
-}, j_sep1752[MAXDAYS] = {
+	SPACE,	SPACE
+}, j_sep1752[MAXDAYS+6] = {
+				SPACE,	SPACE,	SPACE,	SPACE,
 	SPACE,	SPACE,	245,	246,	258,	259,	260,
 	261,	262,	263,	264,	265,	266,	267,
 	268,	269,	270,	271,	272,	273,	274,
 	SPACE,	SPACE,	SPACE,	SPACE,	SPACE,	SPACE,	SPACE,
 	SPACE,	SPACE,	SPACE,	SPACE,	SPACE,	SPACE,	SPACE,
 	SPACE,	SPACE,	SPACE,	SPACE,	SPACE,	SPACE,	SPACE,
-	SPACE
+	SPACE,	SPACE
 }, empty[MAXDAYS] = {
 	SPACE,	SPACE,	SPACE,	SPACE,	SPACE,	SPACE,	SPACE,
 	SPACE,	SPACE,	SPACE,	SPACE,	SPACE,	SPACE,	SPACE,
 	SPACE,	SPACE,	SPACE,	SPACE,	SPACE,	SPACE,	SPACE,
 	SPACE,	SPACE,	SPACE,	SPACE,	SPACE,	SPACE,	SPACE,
 	SPACE,	SPACE,	SPACE,	SPACE,	SPACE,	SPACE,	SPACE,
-	SPACE,	SPACE,	SPACE,	SPACE,	SPACE,	SPACE,	SPACE,
-	SPACE
+	SPACE,	SPACE,	SPACE,	SPACE,	SPACE,	SPACE,	SPACE
 };
 
 #define	DAY_LEN		3		/* 3 spaces per day */
@@ -354,7 +356,7 @@ main(int argc, char **argv) {
 	day = month = year = 0;
 	switch(argc) {
 	case 3:
-		if ((day = atoi(*argv++)) < 1 || month > 31)
+		if ((day = atoi(*argv++)) < 1 || day > 31)
 			errx(1, _("illegal day value: use 1-%d"), 31);
 		/* FALLTHROUGH */
 	case 2:
@@ -459,7 +461,7 @@ do_monthly(int day, int month, int year, struct fmt_st *out) {
 	 */
 	snprintf(lineout, sizeof(lineout), _("%s %d"),
 			full_month[month - 1], year);
-	center_str(lineout, out->s[0], SIZE(out->s[0]), width);
+	center_str(lineout, out->s[0], ARRAY_SIZE(out->s[0]), width);
 
 	snprintf(out->s[1], FMT_ST_CHARS, "%s",
 		julian ? j_day_headings : day_headings);
@@ -534,7 +536,7 @@ monthly3(int day, int month, int year) {
                 w2 += (out_curm.s[i] == Hrow ? Slen : 0);
                 w3 += (out_next.s[i] == Hrow ? Slen : 0);
 #endif
-		snprintf(lineout, SIZE(lineout), "%-*s  %-*s  %-*s\n",
+		snprintf(lineout, sizeof(lineout), "%-*s  %-*s  %-*s\n",
 		       w1, out_prev.s[i],
 		       w2, out_curm.s[i],
 		       w3, out_next.s[i]);
@@ -629,10 +631,11 @@ day_array(int day, int month, int year, int *days) {
 	int *d_sep1752;
 
 	if (month == 9 && year == 1752) {
+		int sep1752_ofs = (weekstart + SEP1752_OFS) % 7;
 		d_sep1752 = julian ? j_sep1752 : sep1752;
-		memcpy(days, d_sep1752 + weekstart, MAXDAYS * sizeof(int));
+		memcpy(days, d_sep1752 + sep1752_ofs, MAXDAYS * sizeof(int));
 		for (dm=0; dm<MAXDAYS; dm++)
-			if (j_sep1752[dm] == day)
+			if (j_sep1752[dm + sep1752_ofs] == day)
 				days[dm] |= TODAY_FLAG;
 		return;
 	}
@@ -799,11 +802,11 @@ center_str(const char* src, char* dest, size_t dest_size, int width)
 	int used, spaces, wc_conversion=0, wc_enabled=0;
 
 #ifdef HAVE_WIDECHAR
-	if (mbstowcs(str_wc, src, SIZE(str_wc)) > 0) {
-		str_wc[SIZE(str_wc)-1]=L'\0';
+	if (mbstowcs(str_wc, src, ARRAY_SIZE(str_wc)) > 0) {
+		str_wc[ARRAY_SIZE(str_wc)-1]=L'\0';
 		wc_enabled=1;
 		wc_conversion = wc_ensure_printable(str_wc);
-		used = wcswidth(str_wc, SIZE(str_wc));
+		used = wcswidth(str_wc, ARRAY_SIZE(str_wc));
 	}
 	else
 #endif
@@ -814,7 +817,7 @@ center_str(const char* src, char* dest, size_t dest_size, int width)
 		if (wc_enabled) {
 #ifdef HAVE_WIDECHAR
 			used = wc_truncate(str_wc, width, 1);
-			wcstombs(str, str_wc, SIZE(str));
+			wcstombs(str, str_wc, ARRAY_SIZE(str));
 #endif
 		} else {
 			memcpy(str, src, width);
@@ -838,7 +841,7 @@ center(str, len, separate)
 	int separate;
 {
 	char lineout[FMT_ST_CHARS];
-	center_str(str, lineout, SIZE(lineout), len);
+	center_str(str, lineout, ARRAY_SIZE(lineout), len);
 	fputs(lineout, stdout);
 	if (separate)
 		printf("%*s", separate, "");

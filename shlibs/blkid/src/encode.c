@@ -22,6 +22,13 @@
 
 #define UDEV_ALLOWED_CHARS_INPUT               "/ $%?,"
 
+/**
+ * SECTION: encode
+ * @title: Encoding utils
+ * @short_description: encode strings to safe udev-compatible formats
+ *
+ */
+
 /* count of characters used to encode one unicode char */
 static int utf8_encoded_expected_len(const char *str)
 {
@@ -227,6 +234,41 @@ static int replace_chars(char *str, const char *white)
 	return replaced;
 }
 
+size_t blkid_encode_to_utf8(int enc, unsigned char *dest, size_t len,
+			const unsigned char *src, size_t count)
+{
+	size_t i, j;
+	uint16_t c;
+
+	for (j = i = 0; i + 2 <= count; i += 2) {
+		if (enc == BLKID_ENC_UTF16LE)
+			c = (src[i+1] << 8) | src[i];
+		else /* BLKID_ENC_UTF16BE */
+			c = (src[i] << 8) | src[i+1];
+		if (c == 0) {
+			dest[j] = '\0';
+			break;
+		} else if (c < 0x80) {
+			if (j+1 >= len)
+				break;
+			dest[j++] = (uint8_t) c;
+		} else if (c < 0x800) {
+			if (j+2 >= len)
+				break;
+			dest[j++] = (uint8_t) (0xc0 | (c >> 6));
+			dest[j++] = (uint8_t) (0x80 | (c & 0x3f));
+		} else {
+			if (j+3 >= len)
+				break;
+			dest[j++] = (uint8_t) (0xe0 | (c >> 12));
+			dest[j++] = (uint8_t) (0x80 | ((c >> 6) & 0x3f));
+			dest[j++] = (uint8_t) (0x80 | (c & 0x3f));
+		}
+	}
+	dest[j] = '\0';
+	return j;
+}
+
 /**
  * blkid_encode_string:
  * @str: input string to be encoded
@@ -243,28 +285,35 @@ int blkid_encode_string(const char *str, char *str_enc, size_t len)
 {
 	size_t i, j;
 
-	if (str == NULL || str_enc == NULL || len == 0)
+	if (str == NULL || str_enc == NULL)
 		return -1;
 
-	str_enc[0] = '\0';
 	for (i = 0, j = 0; str[i] != '\0'; i++) {
 		int seqlen;
 
 		seqlen = utf8_encoded_valid_unichar(&str[i]);
 		if (seqlen > 1) {
+			if (len-j < (size_t)seqlen)
+				goto err;
 			memcpy(&str_enc[j], &str[i], seqlen);
 			j += seqlen;
 			i += (seqlen-1);
 		} else if (str[i] == '\\' || !is_whitelisted(str[i], NULL)) {
+			if (len-j < 4)
+				goto err;
 			sprintf(&str_enc[j], "\\x%02x", (unsigned char) str[i]);
 			j += 4;
 		} else {
+			if (len-j < 1)
+				goto err;
 			str_enc[j] = str[i];
 			j++;
 		}
 		if (j+3 >= len)
 			goto err;
 	}
+	if (len-j < 1)
+		goto err;
 	str_enc[j] = '\0';
 	return 0;
 err:
@@ -279,6 +328,8 @@ err:
  *
  * Allows plain ascii, hex-escaping and valid utf8. Replaces all whitespaces
  * with '_'.
+ *
+ * Returns: 0 on success or -1 in case of error.
  */
 int blkid_safe_string(const char *str, char *str_safe, size_t len)
 {

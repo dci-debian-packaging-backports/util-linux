@@ -200,6 +200,13 @@ opentty(const char * tty) {
 		exit(1);
 	}
 
+	if (!isatty(fd)) {
+		close(fd);
+		syslog(LOG_ERR, _("FATAL: %s is not a terminal"), tty);
+		sleep(1);
+		exit(1);
+	}
+
 	flags = fcntl(fd, F_GETFL);
 	flags &= ~O_NONBLOCK;
 	fcntl(fd, F_SETFL, flags);
@@ -222,7 +229,9 @@ static void
 check_ttyname(char *ttyn) {
 	struct stat statbuf;
 
-	if (lstat(ttyn, &statbuf)
+	if (ttyn == NULL
+	    || *ttyn == '\0'
+	    || lstat(ttyn, &statbuf)
 	    || !S_ISCHR(statbuf.st_mode)
 	    || (statbuf.st_nlink > 1 && strncmp(ttyn, "/dev/", 5))
 	    || (access(ttyn, R_OK | W_OK) != 0)) {
@@ -378,7 +387,7 @@ main(int argc, char **argv)
     int ask, fflag, hflag, pflag, cnt, errsv;
     int quietlog, passwd_req;
     char *domain, *ttyn;
-    char tbuf[MAXPATHLEN + 2], tname[sizeof(_PATH_DEV_TTY) + 10];
+    char tbuf[MAXPATHLEN + 2];
     char *termenv;
     char *childArgv[10];
     char *buff;
@@ -418,7 +427,7 @@ main(int argc, char **argv)
      */
     gethostname(tbuf, sizeof(tbuf));
     xstrncpy(thishost, tbuf, sizeof(thishost));
-    domain = index(tbuf, '.');
+    domain = strchr(tbuf, '.');
 
     username = tty_name = hostname = NULL;
     fflag = hflag = pflag = 0;
@@ -437,7 +446,7 @@ main(int argc, char **argv)
 	      exit(1);
 	  }
 	  hflag = 1;
-	  if (domain && (p = index(optarg, '.')) &&
+	  if (domain && (p = strchr(optarg, '.')) &&
 	      strcasecmp(p, domain) == 0)
 	    *p = 0;
 
@@ -495,14 +504,9 @@ main(int argc, char **argv)
     for (cnt = getdtablesize(); cnt > 2; cnt--)
       close(cnt);
 
+    /* note that libc checks that the file descriptor is a terminal, so we don't
+     * have to call isatty() here */
     ttyn = ttyname(0);
-
-    if (ttyn == NULL || *ttyn == '\0') {
-	/* no snprintf required - see definition of tname */
-	snprintf(tname, sizeof(tname), "%s??", _PATH_DEV_TTY);
-	ttyn = tname;
-    }
-
     check_ttyname(ttyn);
 
     if (strncmp(ttyn, "/dev/", 5) == 0)
@@ -536,8 +540,8 @@ main(int argc, char **argv)
 	ttt.c_cflag &= ~HUPCL;
 
 	/* These can fail, e.g. with ttyn on a read-only filesystem */
-	chown(ttyn, 0, 0);
-	chmod(ttyn, TTY_MODE);
+	fchown(0, 0, 0);
+	fchmod(0, TTY_MODE);
 
 	/* Kill processes left on this tty */
 	tcsetattr(0,TCSAFLUSH,&ttt);
@@ -1009,9 +1013,9 @@ Michael Riepe <michael@stud.uni-hannover.de>
     logaudit(tty_name, username, hostname, pwd, 1);
     dolastlog(quietlog);
 
-    chown(ttyn, pwd->pw_uid,
+    fchown(0, pwd->pw_uid,
 	  (gr = getgrnam(TTYGRPNAME)) ? gr->gr_gid : pwd->pw_gid);
-    chmod(ttyn, TTY_MODE);
+    fchmod(0, TTY_MODE);
 
 #ifdef LOGIN_CHOWN_VCS
     /* if tty is one of the VC's then change owner and mode of the
@@ -1251,7 +1255,7 @@ Michael Riepe <michael@stud.uni-hannover.de>
 	childArgv[childArgc++] = buff;
     } else {
 	tbuf[0] = '-';
-	xstrncpy(tbuf + 1, ((p = rindex(pwd->pw_shell, '/')) ?
+	xstrncpy(tbuf + 1, ((p = strrchr(pwd->pw_shell, '/')) ?
 			   p + 1 : pwd->pw_shell),
 		sizeof(tbuf)-1);
 

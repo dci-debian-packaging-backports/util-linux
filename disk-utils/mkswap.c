@@ -38,7 +38,6 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <mntent.h>
-#include <sys/ioctl.h>		/* for _IO */
 #include <sys/utsname.h>
 #include <sys/stat.h>
 #include <errno.h>
@@ -53,15 +52,18 @@
 #include "nls.h"
 #include "blkdev.h"
 #include "pathnames.h"
-#include "pttype.h"
 #include "wholedisk.h"
 
 #ifdef HAVE_LIBUUID
 # ifdef HAVE_UUID_UUID_H
 #  include <uuid/uuid.h>
-#else
-# include <uuid.h>
+# else
+#  include <uuid.h>
 # endif
+#endif
+
+#ifdef HAVE_LIBBLKID_INTERNAL
+# include <blkid.h>
 #endif
 
 static char * program_name = "mkswap";
@@ -141,7 +143,7 @@ is_sparc64(void) {
  */
 static int user_pagesize;
 static int pagesize;
-static unsigned long *signature_page;
+static unsigned long *signature_page = NULL;
 struct swap_header_v1 *p;
 
 static void
@@ -167,6 +169,11 @@ init_signature_page(void) {
 	signature_page = (unsigned long *) malloc(pagesize);
 	memset(signature_page, 0, pagesize);
 	p = (struct swap_header_v1 *) signature_page;
+}
+
+static void
+deinit_signature_page(void) {
+	free(signature_page);
 }
 
 static void
@@ -303,20 +310,18 @@ check_blocks(void) {
 		die(_("Out of memory"));
 	current_page = 0;
 	while (current_page < PAGES) {
-		if (!check)
-			continue;
 		if (do_seek && lseek(DEV,current_page*pagesize,SEEK_SET) !=
 		    current_page*pagesize)
 			die(_("seek failed in check_blocks"));
-		if ((do_seek = (pagesize != read(DEV, buffer, pagesize)))) {
-			page_bad(current_page++);
-			continue;
-		}
+		if ((do_seek = (pagesize != read(DEV, buffer, pagesize))))
+			page_bad(current_page);
+		current_page++;
 	}
 	if (badpages == 1)
 		printf(_("one bad page\n"));
 	else if (badpages > 1)
 		printf(_("%lu bad pages\n"), badpages);
+	free(buffer);
 }
 
 /* return size in pages */
@@ -388,21 +393,43 @@ write_all(int fd, const void *buf, size_t count) {
 static void
 zap_bootbits(int fd, const char *devname, int force)
 {
-	const char *type = NULL;
+	char *type = NULL;
+	int whole = 0;
 	int zap = 1;
 
 	if (!force) {
 		if (lseek(fd, 0, SEEK_SET) != 0)
 	                die(_("unable to rewind swap-device"));
 
-		if (is_whole_disk_fd(fd, devname))
+		if (is_whole_disk_fd(fd, devname)) {
 			/* don't zap bootbits on whole disk -- we know nothing
 			 * about bootloaders on the device */
+			whole = 1;
 			zap = 0;
+		} else {
+#ifdef HAVE_LIBBLKID_INTERNAL
+			blkid_probe pr = blkid_new_probe();
+			if (!pr)
+				die(_("unable to alloc new libblkid probe"));
+			if (blkid_probe_set_device(pr, fd, 0, 0))
+				die(_("unable to assign device to liblkid probe"));
 
-		else if ((type = get_pt_type_fd(fd)))
-			/* don't zap partition table */
+			blkid_probe_enable_partitions(pr, 1);
+			blkid_probe_enable_superblocks(pr, 0);
+
+			if (blkid_do_fullprobe(pr) == 0)
+				blkid_probe_lookup_value(pr, "PTTYPE",
+						(const char **) &type, NULL);
+			if (type) {
+				type = strdup(type);
+				zap = 0;
+			}
+			blkid_free_probe(pr);
+#else
+			/* don't zap if compiled without libblkid */
 			zap = 0;
+#endif
+		}
 	}
 
 	if (zap) {
@@ -421,8 +448,10 @@ zap_bootbits(int fd, const char *devname, int force)
 		program_name, devname);
 	if (type)
 		fprintf(stderr, _("        (%s partition table detected). "), type);
-	else
+	else if (whole)
 		fprintf(stderr, _("        on whole disk. "));
+	else
+		fprintf(stderr, _("        (compiled without libblkid). "));
 	fprintf(stderr, "Use -f to force.\n");
 }
 
@@ -523,6 +552,7 @@ main(int argc, char ** argv) {
 #endif
 
 	init_signature_page();	/* get pagesize */
+	atexit(deinit_signature_page);
 
 	if (!device_name) {
 		fprintf(stderr,
