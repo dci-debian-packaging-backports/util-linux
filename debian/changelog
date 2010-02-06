@@ -1,4 +1,4 @@
-util-linux (2.17-0ubuntu1) UNRELEASED; urgency=low
+util-linux (2.17-0ubuntu1) lucid; urgency=low
 
   * Merge from Debian experimental, remaining changes:
     - Since udev is required in Ubuntu, the hwclock.sh init script is
@@ -14,7 +14,7 @@ util-linux (2.17-0ubuntu1) UNRELEASED; urgency=low
     - Mention mountall(8) in fstab(5) manpages, along with its special
       options.
 
- -- Scott James Remnant <scott@ubuntu.com>  Fri, 05 Feb 2010 16:07:46 -0800
+ -- Scott James Remnant <scott@ubuntu.com>  Fri, 05 Feb 2010 17:25:53 -0800
 
 util-linux (2.17-0) experimental; urgency=low
 
