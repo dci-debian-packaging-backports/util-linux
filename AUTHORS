@@ -54,9 +54,11 @@ CONTRIBUTORS:
       Attila Áfra <attila.afra@gmail.com>
       Aurelien Jarno <aurelien@aurel32.net>
       Balint Cristian <cbalint@redhat.com>
+      Bastian Friedrich <bastian.friedrich@collax.com>
       Benno Schulenberg <bensberg@justemail.net>
       Bernardo Innocenti <bernie@codewiz.org>
       Bernhard Walle <bwalle@suse.de>
+      Bryn M. Reeves <bmr@errorists.org>
       Cai Qian <qcai@redhat.com>
       Christophe Blaess <Christophe@Blaess.fr>
       Christoph Hellwig <hch@infradead.org>
@@ -80,6 +82,7 @@ CONTRIBUTORS:
       Flávio Leitner <fleitner@redhat.com>
       Florentin Duneau <fduneau@gmail.com>
       Florian Zumbiehl <florz@florz.de>
+      Francesco Cosoleto <cosoleto@gmail.com>
       Frédéric Bothamy <frederic.bothamy@free.fr>
       Gabor Kelemen <kelemeng@gnome.hu>
       Gabriel Barazer <gabriel@oxeva.fr>
@@ -95,6 +98,7 @@ CONTRIBUTORS:
       Jakob Unterwurzacher <jakobunt@gmail.com>
       Jakub Bogusz <qboosh@pld-linux.org>
       James Youngman <jay@gnu.org>
+      Jan Kara <jack@suse.cz>
       Jan Sarenik <jsarenik@redhat.com>
       Jason Vas Dias <jvdias@redhat.com>
       Jeff Mahoney <jeffm@suse.com>
@@ -113,6 +117,7 @@ CONTRIBUTORS:
       LaMont Jones <lamont@mmjgroup.com>
       Lauri Nurmi <lanurmi@iki.fi>
       Lawrence Rust <lawrence@softsystem.co.uk>
+      Linus Torvalds <torvalds@linux-foundation.org>
       Li Zefan <lizf@cn.fujitsu.com>
       Lubomir Kundrak <lkundrak@redhat.com>
       Luciano Chavez <lnx1138@us.ibm.com>
@@ -127,6 +132,7 @@ CONTRIBUTORS:
       Masatake YAMATO <jet@gyve.org>
       Matthew Garrett <mjg59@srcf.ucam.org>
       Matthias Koenig <mkoenig@suse.de>
+      Matthias König <mk@phasorlab.de>
       maximilian attems <max@stro.at>
       Maxim Levitsky <maximlevitsky@gmail.com>
       Maxim V. Dziumanenko <mvd@mylinux.com.ua>
@@ -135,7 +141,7 @@ CONTRIBUTORS:
       Michel Robitaille <robitail@IRO.UMontreal.CA>
       Mike Frysinger <vapier@gentoo.org>
       Mike Hommey <mh@glandium.org>
-      Mikel Olasagasti <hey_neken@mundurat.net>
+      Mikel Olasagasti Uranga <hey_neken@mundurat.net>
       Mikhail Gusarov <dottedmag@dottedmag.net>
       Miklos Szeredi <mszeredi@suse.cz>
       Milan Broz <mbroz@redhat.com>
@@ -184,6 +190,8 @@ CONTRIBUTORS:
       Tom Prince <tom.prince@ualberta.net>
       Valerie Aurora <vaurora@redhat.com>
       Vincent Deffontaines <vincent@gryzor.com>
+      Vladimir Brednikov <vbrednikov@gmail.com>
       Volker Schatz <oss@volkerschatz.com>
+      Yann Droneaud <yann@droneaud.fr>
       Yu Zhiguo <yuzg@cn.fujitsu.com>
       Zdenek Behan <rain@matfyz.cz>

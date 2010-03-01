@@ -1,4 +1,4 @@
-AC_INIT(util-linux-ng, 2.17-rc3, kzak@redhat.com)
+AC_INIT(util-linux-ng, 2.17.1, kzak@redhat.com)
 
 AC_PREREQ(2.60)
 
@@ -22,7 +22,7 @@ PACKAGE_VERSION_RELEASE=0
 
 dnl libblkid version
 LIBBLKID_VERSION="$PACKAGE_VERSION_MAJOR.$PACKAGE_VERSION_MINOR.$PACKAGE_VERSION_RELEASE"
-LIBBLKID_DATE="10-Dec-2009"
+LIBBLKID_DATE="22-Feb-2010"
 LIBBLKID_LT_MAJOR=1
 LIBBLKID_LT_MINOR=1
 LIBBLKID_LT_MICRO=0
@@ -116,7 +116,6 @@ AC_CHECK_HEADERS(
 	net/if_dl.h \
         netinet/in.h \
 	rpcsvc/nfs_prot.h \
-	scsi/scsi.h \
 	stdlib.h \
 	sys/disk.h \
 	sys/disklabel.h \
@@ -127,6 +126,8 @@ AC_CHECK_HEADERS(
 	sys/prctl.h \
 	sys/queue.h \
 	sys/sockio.h \
+	sys/socket.h \
+	sys/syscall.h \
 	sys/file.h \
 	sys/ioctl.h \
 	sys/stat.h \
@@ -141,9 +142,24 @@ AC_CHECK_HEADERS([linux/raw.h],
 
 AC_CHECK_DECLS([_NL_TIME_WEEK_1STDAY],[],[],[[#include <langinfo.h>]])
 
+AC_CHECK_DECL([llseek],
+	[AC_DEFINE(HAVE_LLSEEK_PROTOTYPE, 1,
+			[Define to 1 if have llseek prototype])],
+	[],
+	[#include <unistd.h>])
+
+AC_CHECK_DECL([lseek64],
+	[AC_DEFINE(HAVE_LSEEK64_PROTOTYPE, 1,
+			[Define to 1 if have lseek64 prototype])],
+	[],
+	[#define _LARGEFILE_SOURCE
+	 #define _LARGEFILE64_SOURCE
+	 #include <unistd.h>])
+
 AC_CHECK_FUNCS(
 	[inet_aton \
 	futimens \
+	fstat64 \
 	fsync \
 	getdomainname \
 	get_current_dir_name \
@@ -164,6 +180,7 @@ AC_CHECK_FUNCS(
 	setresuid \
 	inotify_init \
 	prctl \
+	posix_fadvise \
 	getmntinfo \
 	__secure_getenv \
 	rpmatch])

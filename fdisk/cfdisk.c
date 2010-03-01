@@ -406,9 +406,11 @@ partition_type_text(int i) {
 
 static void
 fdexit(int ret) {
-    if (opened)
+    if (opened) {
+	if (changed)
+		fsync(fd);
 	close(fd);
-
+    }
     if (changed) {
 	fprintf(stderr, _("Disk has been changed.\n"));
 #if 0
@@ -1912,12 +1914,10 @@ write_part_table(void) {
     if (is_bdev) {
 #ifdef BLKRRPART
 	 sync();
-	 sleep(2);
 	 if (!ioctl(fd,BLKRRPART))
 	      changed = TRUE;
 #endif
 	 sync();
-	 sleep(4);
 
 	 clear_warning();
 	 if (changed)
@@ -2742,6 +2742,7 @@ static void
 do_curses_fdisk(void) {
     int done = FALSE;
     char command;
+    int is_first_run = TRUE;
 
     static struct MenuItem menuMain[] = {
         { 'b', N_("Bootable"), N_("Toggle bootable flag of the current partition") },
@@ -2784,16 +2785,17 @@ do_curses_fdisk(void) {
 	if (p_info[cur_part].id == FREE_SPACE) {
 	    s = ((opentype == O_RDWR) ? "hnpquW" : "hnpqu");
 	    command = menuSelect(COMMAND_LINE_Y, COMMAND_LINE_X, menuMain, 10,
-	        s, MENU_HORIZ | MENU_BUTTON | MENU_ACCEPT_OTHERS, 0);
+	        s, MENU_HORIZ | MENU_BUTTON | MENU_ACCEPT_OTHERS, 5);
 	} else if (p_info[cur_part].id > 0) {
 	    s = ((opentype == O_RDWR) ? "bdhmpqtuW" : "bdhmpqtu");
 	    command = menuSelect(COMMAND_LINE_Y, COMMAND_LINE_X, menuMain, 10,
-	        s, MENU_HORIZ | MENU_BUTTON | MENU_ACCEPT_OTHERS, 0);
+	        s, MENU_HORIZ | MENU_BUTTON | MENU_ACCEPT_OTHERS, is_first_run ? 7 : 0);
 	} else {
 	    s = ((opentype == O_RDWR) ? "hpquW" : "hpqu");
 	    command = menuSelect(COMMAND_LINE_Y, COMMAND_LINE_X, menuMain, 10,
 	        s, MENU_HORIZ | MENU_BUTTON | MENU_ACCEPT_OTHERS, 0);
 	}
+	is_first_run = FALSE;
 	switch ( command ) {
 	case 'B':
 	case 'b':

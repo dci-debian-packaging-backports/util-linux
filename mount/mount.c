@@ -211,6 +211,7 @@ static const char *opt_loopdev, *opt_vfstype, *opt_offset, *opt_sizelimit,
         *opt_encryption, *opt_speed, *opt_comment, *opt_uhelper;
 static const char *opt_keybits, *opt_nohashpass;
 
+static int is_readonly(const char *node);
 static int mounted (const char *spec0, const char *node0);
 static int check_special_mountprog(const char *spec, const char *node,
 		const char *type, int flags, char *extra_opts, int *status);
@@ -294,6 +295,14 @@ print_all (char *types) {
 	  if (matching_type (mc->m.mnt_type, types))
 	       print_one (&(mc->m));
      }
+
+     if (!mtab_does_not_exist() && !mtab_is_a_symlink() && is_readonly(_PATH_MOUNTED))
+          printf(_("\n"
+	"mount: warning: /etc/mtab is not writable (e.g. read-only filesystem).\n"
+	"       It's possible that information reported by mount(8) is not\n"
+	"       up to date. For actual information about system mount points\n"
+	"       check the /proc/mounts file.\n\n"));
+
      exit (0);
 }
 
@@ -1562,7 +1571,7 @@ mount_retry:
 	error (_("mount: %s is not a block device, and stat fails?"), spec);
       else if (S_ISBLK(statbuf.st_mode))
         error (_("mount: the kernel does not recognize %s as a block device\n"
-	       "       (maybe `insmod driver'?)"), spec);
+	       "       (maybe `modprobe driver'?)"), spec);
       else if (S_ISREG(statbuf.st_mode))
 	error (_("mount: %s is not a block device (maybe try `-o loop'?)"),
 		 spec);
