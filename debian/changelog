@@ -52,6 +52,41 @@ util-linux (2.17.2-1) UNRELEASED; urgency=low
 
  -- Scott James Remnant <scott@ubuntu.com>  Mon, 22 Mar 2010 14:54:31 +0000
 
+util-linux (2.17-0ubuntu3) lucid; urgency=low
+
+  * Fix infinite loop in blkid when superblocks_probe bails out right at the
+    start, as it may do on extended partitions (LP: #528073).
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Sat, 13 Mar 2010 00:21:08 +0000
+
+util-linux (2.17-0ubuntu2) lucid; urgency=low
+
+  * debian/control:
+    - remove dependency on initscripts, we get them via the upstart-jobs
+      dependency (that is generated via misc:Depends) and removing the
+      direct dependency here fixes a configure problem with apt because
+      apt wants to immediate-configure direct dependencies
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 17 Feb 2010 20:00:29 +0100
+
+util-linux (2.17-0ubuntu1) lucid; urgency=low
+
+  * Merge from Debian experimental, remaining changes:
+    - Since udev is required in Ubuntu, the hwclock.sh init script is
+      not called on startup and the hwclockfirst.sh init script is
+      removed.
+    - Remove /etc/adjtime on upgrade if it was not used.
+    - Install custom blkid.conf to use /dev/.blkid.tab since we don't
+      expect device names to survive a reboot
+    - No lsb_release call in mount.preinst since we'd need Pre-Depends
+      (LP: #383697).
+    - Do not install initramfs hook, since our initramfs already handles
+      including blkid.
+    - Mention mountall(8) in fstab(5) manpages, along with its special
+      options.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Fri, 05 Feb 2010 17:25:53 -0800
+
 util-linux (2.17~rc3-1) experimental; urgency=low
 
   [Mike Frysinger]
@@ -101,6 +136,190 @@ util-linux (2.17~rc1-1) experimental; urgency=low
 
  -- LaMont Jones <lamont@debian.org>  Sun, 06 Dec 2009 18:56:21 -0700
 
+util-linux (2.16.2-0) unstable; urgency=low
+
+  [Milan Broz]
+
+  * libuuid: remove .UE macro from libuuid man pages.
+
+  [Ken Kopin]
+
+  * Fix typo in dmesg manpage.
+
+  [Mike Frysinger]
+
+  * tailf: fix printf format
+  * swapon: handle <=linux-2.6.19 bug in /proc/swaps
+
+  [Cristian Rodríguez]
+
+  * fdformat: fix memory leak in verify_disk()
+
+  [Lawrence Rust]
+
+  * libblkid: fix FAT super block definition
+
+  [Scott James Remnant]
+
+  * hwclock: do not access hardware clock when using --systz
+  * hwclock: set kernel timezone with --systz --utc
+
+  [Peter Breitenlohner]
+
+  * mkswap: restore device argument in mkswap.8 synopsis
+
+  [kevin.granade@gmail.com]
+
+  * mount: document changed semantics of tmpfs size option in mount.8
+
+  [Theodore Ts'o]
+
+  * lib: fix file descriptor leak in is_mounted()
+
+  [Karel Zak]
+
+  * libblkid: fix typo (swsupend -> swsuspend)
+  * switch_root: remove TIOCSCTTY and setsid().  red: #519237
+  * libblkid: add missing packed attributes, add new UFS magic strings
+  * mount: update list of pseudo filesystems
+  * sfdisk: dump has to be $LANG insensitive
+  * mount: more explicitly explain 'strictatime' in mount.8
+  * libblkid: fix the default cache file path
+  * fsck.minix: fix broken zone checking
+  * docs: update AUTHORS file
+  * docs: add v2.16.2 ReleaseNotes
+  * build-sys: release++ (v2.16.2)
+  * po: merge changes
+
+  [localization folks]
+
+  * po: update vi.po (from translationproject.org) (Clytie Siddall)
+  * po: update pl.po (from translationproject.org) (Jakub Bogusz)
+  * po: update id.po (from translationproject.org) (Arif E. Nugroho)
+
+ -- LaMont Jones <lamont@debian.org>  Sun, 06 Dec 2009 17:38:15 -0700
+
+util-linux (2.16.1-4) unstable; urgency=low
+
+  [Petter Reinholdtsen]
+
+  * 85-hwclock.rules only ran hwclock if BADYEAR defined.  Closes: #543375
+
+  [Hiroyuki Yamamoto]
+
+  * drop rdev on hurd.  Closes: #547808
+
+  [Karel Zak]
+
+  * libblkid: fix blkid_probe_set_utf8label() call for Joliet
+  * libblkid: trim tailing whitespace from unicode LABELs.  LP: #432215
+  * libblkid: prefer ISO9660 PVD Label to Joliet Label
+
+  [LaMont Jones]
+
+  * initramfs doesn't like hyphens in hook names.  Closes: #544669
+  * Merge remote branch 'origin/stable/v2.16' into stable/v2.16
+
+  [Florentin Duneau]
+
+  * Fix typo on swapon.8 manpage.  Closes: #487497
+
+ -- LaMont Jones <lamont@debian.org>  Sat, 10 Oct 2009 19:29:39 -0600
+
+util-linux (2.16.1-3) unstable; urgency=low
+
+  [Jonas Meurer]
+
+  * provide initramfs-tools hook to copy /sbin/blkid into initramfs. 
+    Closes: #544669
+
+  [LaMont Jones]
+
+  * meta: drop Depends: install-info, install-info calls in preinst/postrm. 
+    Based on the patch in the bug.  Closes: #547430, #547320
+  * rules: remove usr/share/info/dir.gz.  Closes: #547488
+
+ -- LaMont Jones <lamont@debian.org>  Sun, 20 Sep 2009 15:58:15 -0600
+
+util-linux (2.16.1-2) unstable; urgency=low
+
+  [Zdenek Behan]
+
+  * tests: fdisk doslabel test also checks changing partition type
+  * tests: fdisk doslabel test also checks setting partition active
+  * tests: test for basic functionality of sun labels
+
+  [Peter De Wachter]
+
+  * mkswap: unbreak -c ("check") option.
+
+  [Florian Zumbiehl]
+
+  * libblkid: fix buffer overflow in blkid_encode_string()
+
+  [Peter Volkov]
+
+  * mount: mention mtab for single mount point mount in mount.8
+
+  [Petter Reinholdtsen]
+
+  * meta: util-linux Depends: initscripts.  Closes: #546834
+
+  [Scott James Remnant]
+
+  * versionsort() prototype changed
+
+  [Peter Breitenlohner]
+
+  * mkfs.8: incomplete sentence and formatting
+  * vipw.8: remove erroneous empty line, formatting
+  * umount.8: command line for umount helpers, formatting
+  * cytune.8: missing description of `-S', formatting
+  * hexdump.1: erroneous .Nm ""
+  * ul.1: erroneous .SH instead of .Sh
+  * ctrlaltdel.8: formatting
+  * various other manpage formatting
+
+  [Daniel Mierswa]
+
+  * replace bcopy,bzero,index and rindex
+  * libblkid: allow linking with uClibc
+  * replace usleep() for systems that don't have them
+
+  [Karel Zak]
+
+  * libblkid: fix FALSE definition
+  * tailf: report inotify_add_watch() problems
+  * libblkid: fix ext2 detection on systems with ext4 only
+  * libblkid: fix cache->probe memory leak
+  * dmesg: add -r to help output
+  * mount: add info about ext{3,4} barriers to mount.8
+  * mount: clean up mount.8
+  * Revert "mount: clean up mount.8"
+  * mount: clean up mount.8
+  * hwclocks: use time limit for KDGHWCLK busy wait
+  * mount: add info about ext{3,4} barriers to mount.8
+  * mount: clean up mount.8
+  * Revert "mount: clean up mount.8"
+  * mount: clean up mount.8
+  * libblkid: add *.ko.gz support to modules.dep parser
+  * mkswap: fix memory leaks, cleanup check_blocks()
+  * docs: update AUTHORS file
+  * docs: add v2.16.1 ReleaseNotes
+  * build-sys: release++ (v2.16.1)
+  * po: merge changes
+
+  [LaMont Jones]
+  * meta: fix misc:Depends
+  * Depends: install-info, set -e in postrm
+
+  [localization folks]
+
+  * po: fix grammar glitch in german translation (Hendrik Lönngren)
+  * po: update ja.po (from translationproject.org) (Makoto Kato)
+
+ -- LaMont Jones <lamont@debian.org>  Thu, 17 Sep 2009 05:16:55 -0600
+
 util-linux (2.16-3) unstable; urgency=low
 
   [Kel Modderman]
@@ -143,6 +362,81 @@ util-linux (2.16-2.1) unstable; urgency=low
  -- Aurelien Jarno <aurel32@debian.org>  Wed, 05 Aug 2009 21:20:07 +0000
 
 util-linux (2.16-2) experimental; urgency=low
+
+  (identical to Ubuntu 2.16-1)
+
+ -- LaMont Jones <lamont@debian.org>  Tue, 21 Jul 2009 15:58:40 -0600
+
+util-linux (2.16-1ubuntu6) lucid; urgency=low
+
+  * mount/fstab.5: document the bootwait, nobootwait, showthrough
+    and optional mount options accepted by mountall.
+  * mount/mount.c: don't pass the above options to mount().  LP: #479965. 
+
+ -- Scott James Remnant <scott@ubuntu.com>  Wed, 23 Dec 2009 04:29:48 +0000
+
+util-linux (2.16-1ubuntu5) karmic; urgency=low
+
+  * Always return encrypted block devices as the first detected encryption
+    system (ie. LUKS, since that's the only one) rather than probing for
+    additional metadata and returning an ambivalent result.  LP: #428435.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Wed, 21 Oct 2009 14:22:31 +0100
+
+util-linux (2.16-1ubuntu4) karmic; urgency=low
+
+  * Removed access checks for hardware clock when called with --systz,
+    since we may not have the rtc device at the point we run hwclock.
+    I believe this is the cause of LP: #436076.
+  * Set kernel timezone even when the hardware clock is in UTC.
+    LP: #426886.
+
+  * Don't step the system clock, or save the hardware clock on upgrades
+    in case the time isn't quite correct.  LP: #430878.
+  * Remove the hwclock.sh and hwclockfirst.sh scripts on upgrades, since
+    these are now Upstart jobs.  LP: #434767.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Thu, 24 Sep 2009 12:31:29 -0700
+
+util-linux (2.16-1ubuntu3) karmic; urgency=low
+
+  * Rename upstart jobs in source package, to fix the failure to include
+    them when building the util-linux binary.
+  * Rename calls to update-rc.d in the util-linux postinst, which are going
+    to fail on new installs because we no longer ship an init script.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Tue, 15 Sep 2009 23:33:25 -0700
+
+util-linux (2.16-1ubuntu2) karmic; urgency=low
+
+  FFE LP: #427356.
+
+  * Replace hwclock udev rule with an Upstart job.  This has never needed
+    to be a udev rule after all since it doesn't access the hardware!
+  * Replace init script with an Upstart job run on shutdown.
+  * debian/control:
+    - Bump build-dependency on debhelper for Upstart-aware dh_installinit
+    - Add missing ${misc:Depends}
+
+  * Fix build with newer glibc due to versionsort() prototype change.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Tue, 15 Sep 2009 15:14:58 +0100
+
+util-linux (2.16-1ubuntu1) karmic; urgency=low
+
+  * Merge from Debian, remaining changes:
+    - Since udev is required in Ubuntu, the hwclock.sh init script is
+      not called on startup and the hwclockfirst.sh init script is
+      removed.
+    - Remove /etc/adjtime on upgrade if it was not used.
+    - Install custom blkid.conf to use /dev/.blkid.tab since we don't
+      expect device names to survive a reboot
+    - No lsb_release call in mount.preinst since we'd need Pre-Depends
+      (LP: #383697).
+
+ -- Scott James Remnant <scott@ubuntu.com>  Thu, 16 Jul 2009 15:48:23 +0100
+
+util-linux (2.16-1) unstable; urgency=low
 
   [John Keeping]
 
@@ -327,7 +621,24 @@ util-linux (2.16-2) experimental; urgency=low
   * po: update vi.po (from translationproject.org) (Clytie Siddall)
   * po: update cs.po (from translationproject.org) (Petr Pisar)
 
- -- LaMont Jones <lamont@debian.org>  Tue, 21 Jul 2009 15:58:40 -0600
+ -- Scott James Remnant <scott@ubuntu.com>  Thu, 16 Jul 2009 14:41:50 +0100
+
+util-linux (2.15.1-1ubuntu1) karmic; urgency=low
+
+  * Merge from Debian, remaining changes:
+    - Since udev is required in Ubuntu, the hwclock.sh init script is
+      not called on startup and the hwclockfirst.sh init script is
+      removed.
+    - Remove /etc/adjtime on upgrade if it was not used.
+    - Build the blkid library and tools, and the fsck binary, from
+      util-linux replacing those from e2fsprogs
+    - Install custom blkid.conf to use /dev/.blkid.tab since we don't
+      expect device names to survive a reboot
+    - Add util-linux-udeb, containing blkid.
+    - No lsb_release call in mount.preinst since we'd need Pre-Depends
+      (LP: #383697).
+
+ -- Scott James Remnant <scott@ubuntu.com>  Tue, 14 Jul 2009 18:24:58 +0100
 
 util-linux (2.15.1-1) unstable; urgency=low
 
@@ -401,6 +712,41 @@ util-linux (2.15.1-1) unstable; urgency=low
 
  -- Scott James Remnant <scott@ubuntu.com>  Tue, 14 Jul 2009 18:00:01 +0100
 
+util-linux (2.15.1~rc1-1ubuntu3) karmic; urgency=low
+
+  * Remove lsb_release call from mount.preinst and just unconditionally
+    remove the guarded code from the Ubuntu package; lsb_release is not
+    guaranteed to be usable without a Pre-Depends, which is not really
+    desirable here (LP: #383697).
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Fri, 10 Jul 2009 18:06:37 +0100
+
+util-linux (2.15.1~rc1-1ubuntu2) karmic; urgency=low
+
+  * meta: fix util-linux-udeb package metadata.
+  * meta: cleanup rules targets
+
+ -- LaMont Jones <lamont@ubuntu.com>  Thu, 04 Jun 2009 04:08:48 -0600
+
+util-linux (2.15.1~rc1-1ubuntu1) karmic; urgency=low
+
+  * Merge from Debian, remaining changes:
+    - The Ubuntu kernel already sets the system clock from the hardware
+      clock at boot time, so there is no need for hwclock to do it a
+      second (or third) time.
+      - Call hwclock --systz from udev rules to set the system timezone
+        and step the system clock if it was not originally set to UTC.
+      - hwclock.sh init script is not called on startup, remove start
+        links on upgrade
+      - hwclockfirst.sh init script removed
+    - Remove /etc/adjtime on upgrade if it was not used.
+    - Install udev rules into /lib/udev/rules.d not /etc/udev.rules.d
+      - Breaks to force upgrade of udev
+    - Add util-linux-udeb, containing blkid.
+    - Restore correct shlibs for libblkid1-udeb.
+
+ -- LaMont Jones <lamont@ubuntu.com>  Fri, 29 May 2009 04:27:23 -0600
+
 util-linux (2.15.1~rc1-1) unstable; urgency=low
 
   [Aurelien Jarno]
@@ -461,6 +807,30 @@ util-linux (2.15.1~rc1-1) unstable; urgency=low
 
  -- LaMont Jones <lamont@debian.org>  Fri, 29 May 2009 04:19:25 -0600
 
+util-linux (2.15-1ubuntu2) karmic; urgency=low
+
+  * Add util-linux-udeb, containing blkid.
+  * Restore correct shlibs for libblkid1-udeb.
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Tue, 12 May 2009 10:48:35 +0100
+
+util-linux (2.15-1ubuntu1) karmic; urgency=low
+
+  * Merge from Debian, remaining changes:
+    - The Ubuntu kernel already sets the system clock from the hardware
+      clock at boot time, so there is no need for hwclock to do it a
+      second (or third) time.
+      - Call hwclock --systz from udev rules to set the system timezone
+        and step the system clock if it was not originally set to UTC.
+      - hwclock.sh init script is not called on startup, remove start
+        links on upgrade
+      - hwclockfirst.sh init script removed
+    - Remove /etc/adjtime on upgrade if it was not used.
+    - Install udev rules into /lib/udev/rules.d not /etc/udev.rules.d
+      - Breaks to force upgrade of udev
+
+ -- Scott James Remnant <scott@ubuntu.com>  Thu, 07 May 2009 12:42:36 +0100
+
 util-linux (2.15-1) unstable; urgency=low
 
   [Aurelien Jarno]
@@ -501,15 +871,75 @@ util-linux (2.15-1) unstable; urgency=low
 
  -- Scott James Remnant <scott@ubuntu.com>  Thu, 07 May 2009 12:36:41 +0100
 
+util-linux (2.15~rc2-1ubuntu1) karmic; urgency=low
+
+  * Merge from Debian, remaining changes:
+    - The Ubuntu kernel already sets the system clock from the hardware
+      clock at boot time, so there is no need for hwclock to do it a
+      second (or third) time.
+      - Call hwclock --systz from udev rules to set the system timezone
+        and step the system clock if it was not originally set to UTC.
+      - hwclock.sh init script is not called on startup, remove start
+        links on upgrade
+      - hwclockfirst.sh init script removed
+    - Always pass --rtc=/dev/$HCTOSYS_DEVICE for hwclock invocations, as
+      systems may have multiple hardware clocks.
+    - Always pass --noadjfile if /etc/adjtime is not writable, including
+      on "stop" and "show" (this was only done on "start" before).
+      - Remove /etc/adjtime on upgrade if it was not used.
+    - Install udev rules into /lib/udev/rules.d not /etc/udev.rules.d
+      - Breaks to force upgrade of udev
+
+  * mount breaks nfs-common to force an upgrade
+  * Build the fsck binary
+    - Replaces e2fsprogs
+  * Build the blkid library and tools
+    - Install custom blkid.conf to use /dev/.blkid.tab since we don't
+      expect device names to survive a reboot
+    - Drop build-dep on libblkid-dev and use --with-fsprobe=builtin
+
+  Also include the following updates from GIT:
+
+  [Aurelien Jarno]
+
+  * lib: do not include <linux/fd.h> in ismounted.c
+  * chrt: add a comment about non POSIX 1003.1b attributes in chrt.1
+  * agetty: IUCLC and OLCUC are Linux extensions
+
+  [Eric Sandeen]
+
+  * blkid: remove whole-disk entries from cache when partitions are found
+
+  [Karel Zak]
+
+  * blkid: rename blkid_debug_init to blkid_init_debug
+  * docs: add a note about /proc/sys/kernel/random/uuid
+  * ionice: change Jens Axboe's email
+  * losetup: mount endless loop hang.  novell: #449646
+  * cfdisk: fix "cannot seek on disk drive" bug.  Closes: #511161
+  * blkid: split SONAME and LIBBLKID_VERSION
+  * blockdev: fix possible buffer overflow
+  * fdisk: fix max. ptname
+  * sfdisk: fix possible buffer overflow
+  * docs: add entry about /proc/partitions parsing
+  * blkid: rename blkid_evaluate_spec to blkid_evaluate_tag
+  * tests: fix -regex in run.sh
+  * blkid: linux_raid - fix logic for volumes with size == 0
+  * po: merge changes
+
+  [localization folks]
+
+  * po: update fr.po (from translationproject.org) (Nicolas Provost)
+  * po: update cs.po (from translationproject.org) (Petr Pisar)
+  * po: update id.po (from translationproject.org) (Arif E. Nugroho)
+
+ -- Scott James Remnant <scott@ubuntu.com>  Tue, 24 Mar 2009 12:06:54 +0000
+
 util-linux (2.15~rc2-1) experimental; urgency=low
 
   [Aurelien Jarno]
 
   * lib: do not include <linux/fd.h> in ismounted.c
-
-  [LaMont Jones]
-  
-  * Package
 
   [Matthew Garrett]
 
@@ -522,8 +952,6 @@ util-linux (2.15~rc2-1) experimental; urgency=low
   [Scott James Remnant]
 
   * blkid: fix exit codes in blkid(8)
-  * hwclock: pass --noadjfile if /etc/adjtime not writable
-  * hwclock: always pass --rtc to hwclock calls
 
   [Karel Zak]
 
@@ -540,7 +968,7 @@ util-linux (2.15~rc2-1) experimental; urgency=low
   * blkid: rename blkid_debug_init to blkid_init_debug
   * po: merge changes
 
- -- LaMont Jones <lamont@debian.org>  Mon, 04 May 2009 18:20:35 -0600
+ -- Scott James Remnant <scott@ubuntu.com>  Wed, 29 Apr 2009 12:36:23 +0100
 
 util-linux (2.15~rc1-1) experimental; urgency=low
 
@@ -1152,6 +1580,56 @@ util-linux (2.15~rc1-1) experimental; urgency=low
 
  -- Scott James Remnant <scott@ubuntu.com>  Mon, 23 Mar 2009 18:07:01 +0000
 
+util-linux (2.14.2-1ubuntu4) jaunty; urgency=low
+
+  * Apply my patch to step the system clock on startup without reference
+    to the hardware clock, used when the hardware clock is not in UTC.
+
+  * debian/hwclock.rules: Replace with a rule that reads /etc/default/rcS
+    and calls hwclock --systz
+  * debian/hwclock.udev: Drop since the udev rule invokes hwclock directly.
+  * debian/rules:
+    - Don't install hwclock.udev since it's dropped
+    - Don't generate hwclockfirst.sh
+    - Don't add startup symlinks for hwclock.sh
+  * debian/hwclock.sh:
+    - Always pass --rtc to hwclock calls.
+    - Call hwclock --systohc with --noadjfile unless the file is writable.
+    - Change LSB header, this is no longer installed on startup.
+  * debian/util-linux.postinst:
+    - Drop code for hwclockfirst.sh, remove on upgrade
+    - Don't put start links in for hwclock.sh
+    - Remove /etc/adjtime if the appropriate init script line has never been
+      uncommented, combined with the init script patch, this file should now
+      never be created
+  * debian/util-linux.postrm: No hwclockfirst.sh to remove on purge.
+  * debian/README.Debian.hwclock: Update documentation.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Mon, 16 Feb 2009 14:46:06 +0000
+
+util-linux (2.14.2-1ubuntu3) jaunty; urgency=low
+
+  * Run autoreconf again.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Tue, 17 Feb 2009 13:01:31 +0000
+
+util-linux (2.14.2-1ubuntu2) jaunty; urgency=low
+
+  * Re-apply changes from 2.14-1ubuntu3 and 2.14-1ubuntu4
+
+ -- Scott James Remnant <scott@ubuntu.com>  Mon, 16 Feb 2009 23:05:33 +0000
+
+util-linux (2.14.2-1ubuntu1) jaunty; urgency=low
+
+  * New Debian version: remaining ubuntu changes:
+    - use libvolume-id instead of libblkid
+    - udev hooks
+    - Disable the fallback clause when /dev/rtc cannot be opened. hwclock
+      should not access the x86 RTC using I/O instructions unless explicitly
+      requested from the command line (--directisa).
+
+ -- LaMont Jones <lamont@ubuntu.com>  Fri, 30 Jan 2009 08:14:49 -0700
+
 util-linux (2.14.2-1) unstable; urgency=low
 
   [LaMont Jones]
@@ -1180,6 +1658,17 @@ util-linux (2.14.2-1) unstable; urgency=low
   * po: update nl.po (from translationproject.org) (Benno Schulenberg)
 
  -- LaMont Jones <lamont@debian.org>  Fri, 13 Feb 2009 12:25:27 -0700
+
+util-linux (2.14.2~rc2-1ubuntu1) jaunty; urgency=low
+
+  * New Debian version: remaining ubuntu changes:
+    - use libvolume-id instead of libblkid
+    - udev hooks
+    - Disable the fallback clause when /dev/rtc cannot be opened. hwclock
+      should not access the x86 RTC using I/O instructions unless explicitly
+      requested from the command line (--directisa).
+
+ -- LaMont Jones <lamont@ubuntu.com>  Fri, 30 Jan 2009 08:14:49 -0700
 
 util-linux (2.14.2~rc2-1) unstable; urgency=low
 
@@ -1340,6 +1829,36 @@ util-linux (2.14.2~rc2-1) unstable; urgency=low
 
  -- LaMont Jones <lamont@debian.org>  Fri, 30 Jan 2009 08:14:49 -0700
 
+util-linux (2.14-1ubuntu4) jaunty; urgency=low
+
+  * Add Breaks so the right version of udev gets used.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Fri, 09 Jan 2009 11:58:58 +0000
+
+util-linux (2.14-1ubuntu3) jaunty; urgency=low
+
+  * debian/rules: Install rules into /lib/udev/rules.d instead
+  * debian/util-linux.dirs: Create new location, don't create old.
+  * debian/util-linux.preinst: Remove the old rules if unmodified.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Wed, 07 Jan 2009 10:47:13 +0000
+
+util-linux (2.14-1ubuntu2) intrepid; urgency=low
+
+  * Disable the fallback clause when /dev/rtc cannot be opened. hwclock
+    should not access the x86 RTC using I/O instructions unless explicitly
+    requested from the command line (--directisa).
+
+ -- Tim Gardner <tim.gardner@canonical.com>  Wed, 24 Sep 2008 13:35:15 -0600
+
+util-linux (2.14-1ubuntu1) intrepid; urgency=low
+
+  * New Debian version: remaining ubuntu changes:
+    - use libvolume-id instead of libblkid
+    - udev hooks
+
+ -- LaMont Jones <lamont@ubuntu.com>  Sun, 22 Jun 2008 08:20:03 -0600
+
 util-linux (2.14-1) unstable; urgency=low
 
   [LaMont Jones]
@@ -1375,6 +1894,14 @@ util-linux (2.14-1) unstable; urgency=low
 
  -- LaMont Jones <lamont@debian.org>  Sun, 22 Jun 2008 08:17:41 -0600
 
+util-linux (2.14~rc3-1ubuntu1) intrepid; urgency=low
+
+  * New Debian version: remaining ubuntu changes:
+    - use libvolume-id instead of libblkid
+    - udev hooks
+
+ -- LaMont Jones <lamont@ubuntu.com>  Thu, 22 May 2008 10:20:03 -0600
+
 util-linux (2.14~rc3-1) experimental; urgency=low
 
   [LaMont Jones]
@@ -1387,6 +1914,14 @@ util-linux (2.14~rc3-1) experimental; urgency=low
   * control: add support for sh4.  Closes: #479509
 
  -- LaMont Jones <lamont@debian.org>  Tue, 27 May 2008 22:45:49 -0600
+
+util-linux (2.14~rc3-0ubuntu1) intrepid; urgency=low
+
+  * New Debian version: remaining ubuntu changes:
+    - use libvolume-id instead of libblkid
+    - udev hooks
+
+ -- LaMont Jones <lamont@ubuntu.com>  Thu, 22 May 2008 10:20:03 -0600
 
 util-linux (2.14~rc3-0) experimental; urgency=low
 
@@ -1409,6 +1944,14 @@ util-linux (2.14~rc3-0) experimental; urgency=low
   * build-sys: release++
 
  -- LaMont Jones <lamont@debian.org>  Mon, 19 May 2008 06:31:20 -0600
+
+util-linux (2.14~rc2-0ubuntu1) intrepid; urgency=low
+
+  * New Debian version: remaining ubuntu changes:
+    - use libvolume-id instead of libblkid
+    - udev hooks
+
+ -- LaMont Jones <lamont@ubuntu.com>  Thu, 17 Apr 2008 22:41:15 -0600
 
 util-linux (2.14~rc2-0) experimental; urgency=low
 
@@ -1457,6 +2000,14 @@ util-linux (2.13.1.1-1) unstable; urgency=low
 
  -- LaMont Jones <lamont@debian.org>  Mon, 28 Apr 2008 19:47:33 -0600
 
+util-linux (2.13.1-5ubuntu1) hardy; urgency=low
+
+  * New Debian version: remaining ubuntu changes:
+    - use libvolume-id instead of libblkid
+    - udev hooks
+
+ -- LaMont Jones <lamont@ubuntu.com>  Fri, 11 Apr 2008 21:03:50 -0600
+
 util-linux (2.13.1-5) unstable; urgency=low
 
   * Switch to upstream's more-correct fix for LP#206113
@@ -1464,12 +2015,28 @@ util-linux (2.13.1-5) unstable; urgency=low
 
  -- LaMont Jones <lamont@debian.org>  Mon, 14 Apr 2008 18:18:30 -0600
 
+util-linux (2.13.1-4ubuntu1) hardy; urgency=low
+
+  * New Debian version: remaining ubuntu changes:
+    - use libvolume-id instead of libblkid
+    - udev hooks
+
+ -- LaMont Jones <lamont@ubuntu.com>  Fri, 11 Apr 2008 21:03:50 -0600
+
 util-linux (2.13.1-4) unstable; urgency=low
 
   * meta: Drop bashism in preinst.  Closes: #472248
   * mkswap: when writing the signature page, handle EINTR returns.  LP: #206113
 
  -- LaMont Jones <lamont@debian.org>  Fri, 11 Apr 2008 21:01:29 -0600
+
+util-linux (2.13.1-3ubuntu1) hardy; urgency=low
+
+  * New Debian version: remaining ubuntu changes:
+    - use libvolume-id instead of libblkid
+    - udev hooks
+
+ -- LaMont Jones <lamont@ubuntu.com>  Fri, 21 Mar 2008 10:20:36 -0600
 
 util-linux (2.13.1-3) unstable; urgency=low
 
@@ -1479,6 +2046,14 @@ util-linux (2.13.1-3) unstable; urgency=low
     LP: #66637
 
  -- LaMont Jones <lamont@debian.org>  Fri, 21 Mar 2008 10:11:57 -0600
+
+util-linux (2.13.1-2ubuntu1) hardy; urgency=low
+
+  * New Debian version: remaining ubuntu changes:
+    - use libvolume-id instead of libblkid
+    - udev hooks
+
+ -- LaMont Jones <lamont@ubuntu.com>  Thu, 06 Mar 2008 20:36:42 -0700
 
 util-linux (2.13.1-2) unstable; urgency=low
 
@@ -1504,6 +2079,14 @@ util-linux (2.13.1-2) unstable; urgency=low
   * mkswap: -U UUID cleanup
 
  -- LaMont Jones <lamont@debian.org>  Thu, 06 Mar 2008 20:33:38 -0700
+
+util-linux (2.13.1-1ubuntu1) hardy; urgency=low
+
+  * New Debian version: remaining ubuntu changes:
+    - use libvolume-id instead of libblkid
+    - udev hooks
+
+ -- LaMont Jones <lamont@ubuntu.com>  Sat, 19 Jan 2008 09:39:15 -0700
 
 util-linux (2.13.1-1) unstable; urgency=low
 
@@ -1537,11 +2120,27 @@ util-linux (2.13.1-1) unstable; urgency=low
 
  -- LaMont Jones <lamont@debian.org>  Sat, 19 Jan 2008 08:48:31 -0700
 
+util-linux (2.13.1~rc2-2ubuntu1) hardy; urgency=low
+
+  * New Debian version: remaining ubuntu changes:
+    - use libvolume-id instead of libblkid
+    - udev hooks
+
+ -- LaMont Jones <lamont@ubuntu.com>  Fri, 11 Jan 2008 22:34:38 -0700
+
 util-linux (2.13.1~rc2-2) unstable; urgency=low
 
   * hwclockfirst.sh: yet more tweaks for LSB init.  Closes: #459760
 
  -- LaMont Jones <lamont@debian.org>  Fri, 11 Jan 2008 22:32:15 -0700
+
+util-linux (2.13.1~rc2-1ubuntu1) hardy; urgency=low
+
+  * New Debian version: remaining ubuntu changes:
+    - use libvolume-id instead of libblkid
+    - udev hooks
+
+ -- LaMont Jones <lamont@debian.org>  Sat, 20 Oct 2007 22:22:13 -0600
 
 util-linux (2.13.1~rc2-1) unstable; urgency=low
 
@@ -1582,6 +2181,14 @@ util-linux (2.13.1~rc2-1) unstable; urgency=low
 
  -- LaMont Jones <lamont@debian.org>  Sun, 06 Jan 2008 20:20:48 -0700
 
+util-linux (2.13-14ubuntu1) hardy; urgency=low
+
+  * New Debian version: remaining ubuntu changes:
+    - use libvolume-id instead of libblkid
+    - udev hooks
+
+ -- LaMont Jones <lamont@ubuntu.com>  Sun, 06 Jan 2008 12:58:31 -0700
+
 util-linux (2.13-14) unstable; urgency=low
 
   [Karel Zak]
@@ -1593,6 +2200,14 @@ util-linux (2.13-14) unstable; urgency=low
   * rules: correct LSB init data for hwclockfirst.sh.  Closes: #458346
 
  -- LaMont Jones <lamont@debian.org>  Sun, 06 Jan 2008 12:50:08 -0700
+
+util-linux (2.13-13ubuntu1) hardy; urgency=low
+
+  * New Debian version: remaining ubuntu changes:
+    - use libvolume-id instead of libblkid
+    - udev hooks
+
+ -- LaMont Jones <lamont@ubuntu.com>  Wed, 05 Dec 2007 22:37:11 -0700
 
 util-linux (2.13-13) unstable; urgency=low
 
@@ -1622,6 +2237,14 @@ util-linux (2.13-13) unstable; urgency=low
   * blockdev: add --getsz to blockdev.8
 
  -- LaMont Jones <lamont@debian.org>  Wed, 05 Dec 2007 21:34:36 -0700
+
+util-linux (2.13-12ubuntu1) hardy; urgency=low
+
+  * New Debian version: remaining ubuntu changes:
+    - use libvolume-id instead of libblkid
+    - udev hooks
+
+ -- LaMont Jones <lamont@ubuntu.com>  Mon, 19 Nov 2007 19:33:50 -0700
 
 util-linux (2.13-12) unstable; urgency=low
 
@@ -1654,6 +2277,15 @@ util-linux (2.13-11) unstable; urgency=low
 
  -- LaMont Jones <lamont@debian.org>  Wed, 14 Nov 2007 22:24:36 -0700
 
+util-linux (2.13-10ubuntu1) hardy; urgency=low
+
+  * New Debian version: remaining ubuntu changes:
+    - use libvolume-id instead of libblkid
+    - udev hooks
+    - deliver hwclockfirst.sh on ubuntu as well.  LP: #63175
+
+ -- LaMont Jones <lamont@ubuntu.com>  Mon, 29 Oct 2007 15:13:58 -0600
+
 util-linux (2.13-10) unstable; urgency=low
 
   [KaiGai Kohei]
@@ -1669,6 +2301,14 @@ util-linux (2.13-10) unstable; urgency=low
   * build: don't deliver col* and ul as part of bsdutils for now.  Closes: #446939
 
  -- LaMont Jones <lamont@debian.org>  Mon, 29 Oct 2007 14:29:49 -0600
+
+util-linux (2.13-9ubuntu1) hardy; urgency=low
+
+  * New Debian version: remaining ubuntu changes:
+    - use libvolume-id instead of libblkid
+    - udev hooks
+
+ -- LaMont Jones <lamont@ubuntu.com>  Fri, 19 Oct 2007 10:42:14 -0600
 
 util-linux (2.13-9) unstable; urgency=low
 
@@ -1709,6 +2349,15 @@ util-linux (2.13-9) unstable; urgency=low
 
  -- LaMont Jones <lamont@debian.org>  Sat, 20 Oct 2007 20:59:12 -0600
 
+util-linux (2.13-8ubuntu1) gutsy; urgency=low
+
+  * New Debian version: remaining ubuntu changes:
+    - use libvolume-id instead of libblkid
+    - udev hooks
+    - deliver hwclockfirst.sh on ubuntu as well.  LP: #63175
+
+ -- LaMont Jones <lamont@ubuntu.com>  Fri, 21 Sep 2007 10:39:12 -0600
+
 util-linux (2.13-8) unstable; urgency=low
 
   * Upstream git:
@@ -1734,11 +2383,27 @@ util-linux (2.13-7) unstable; urgency=low
 
  -- LaMont Jones <lamont@debian.org>  Fri, 21 Sep 2007 22:10:20 -0600
 
+util-linux (2.13-6ubuntu1) gutsy; urgency=low
+
+  * New Debian version: remaining ubuntu changes:
+    - use libvolume-id instead of libblkid
+    - udev hooks
+
+ -- LaMont Jones <lamont@ubuntu.com>  Fri, 21 Sep 2007 10:39:12 -0600
+
 util-linux (2.13-6) unstable; urgency=low
 
   * sparc-utils 'sparc64' binary sets ADDR_LIMIT_32BIT.  Closes: LP#141524
 
  -- LaMont Jones <lamont@debian.org>  Fri, 21 Sep 2007 10:36:39 -0600
+
+util-linux (2.13-5ubuntu1) gutsy; urgency=low
+
+  * New Debian version: remaining ubuntu changes:
+    - use libvolume-id instead of libblkid
+    - udev hooks
+
+ -- LaMont Jones <lamont@debian.org>  Wed, 12 Sep 2007 10:36:46 -0600
 
 util-linux (2.13-5) unstable; urgency=low
 
@@ -1746,11 +2411,27 @@ util-linux (2.13-5) unstable; urgency=low
 
  -- LaMont Jones <lamont@debian.org>  Wed, 12 Sep 2007 10:33:06 -0600
 
+util-linux (2.13-4ubuntu1) gutsy; urgency=low
+
+  * New Debian version: remaining ubuntu changes:
+    - use libvolume-id instead of libblkid
+    - udev hooks
+
+ -- LaMont Jones <lamont@ubuntu.com>  Wed, 12 Sep 2007 06:46:59 -0600
+
 util-linux (2.13-4) unstable; urgency=low
 
   * build: look for fdisk in the right place.  Closes: LP#138040
 
  -- LaMont Jones <lamont@debian.org>  Wed, 12 Sep 2007 06:30:18 -0600
+
+util-linux (2.13-3ubuntu1) gutsy; urgency=low
+
+  * New Debian version: remaining ubuntu changes:
+    - use libvolume-id instead of libblkid
+    - udev hooks
+
+ -- LaMont Jones <lamont@ubuntu.com>  Thu, 06 Sep 2007 14:38:14 -0600
 
 util-linux (2.13-3) unstable; urgency=low
 
@@ -1802,6 +2483,12 @@ util-linux (2.13~rc3-9) unstable; urgency=low
     Closes: #439647, #439712
 
  -- LaMont Jones <lamont@debian.org>  Mon, 27 Aug 2007 02:36:50 -0600
+
+util-linux (2.13~rc3-8ubuntu1) gutsy; urgency=low
+
+  * Ubuntu uses udev, not libblkid.
+
+ -- LaMont Jones <lamont@ubuntu.com>  Sat, 25 Aug 2007 21:44:40 -0600
 
 util-linux (2.13~rc3-8) unstable; urgency=low
 

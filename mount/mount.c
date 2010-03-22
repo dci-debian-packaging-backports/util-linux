@@ -202,6 +202,10 @@ static const struct opt_map opt_map[] = {
   { "nostrictatime", 0, 1, MS_STRICTATIME }, /* kernel default atime */
 #endif
   { "nofail",	0, 0, MS_COMMENT},	/* Do not fail if ENOENT on dev */
+  { "bootwait",	0, 0, MS_COMMENT },
+  { "nobootwait", 0, 0, MS_COMMENT },
+  { "optional",	0, 0, MS_COMMENT },
+  { "showthrough", 0, 0, MS_COMMENT },
   { NULL,	0, 0, 0		}
 };
 

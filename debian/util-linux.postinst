@@ -3,9 +3,6 @@
 umask 022
 set -e
 
-install-info --quiet --section "Development" "Development" \
-  --description="System V interprocess communication facilities" \
-  /usr/share/info/ipc.info.gz
 update-alternatives --install /usr/bin/pager pager /bin/more 50 \
   --slave /usr/share/man/man1/pager.1.gz pager.1.gz /usr/share/man/man1/more.1.gz
 update-alternatives --install /usr/bin/pager pager /usr/bin/pg 10 \
@@ -21,17 +18,13 @@ then
 	rm -f /etc/rcS.d/???hwclock.sh
 fi
 
-# hwclock works on all Linux architectures, except s390 (and s390x, of course).
-if [ "$(uname -s)" = "Linux" ]; then
-    model=$(uname -m)
-    if [ ${model%x} != "s390" ]; then
-        update-rc.d -f hwclock.sh remove 2>/dev/null > /dev/null
-        update-rc.d hwclock.sh start 11 S . stop 25 0 6 . > /dev/null
-        update-rc.d -f hwclockfirst.sh remove 2>/dev/null > /dev/null
-	if [ -f /etc/init.d/hwclockfirst.sh ]; then
-	  update-rc.d hwclockfirst.sh start 8 S . > /dev/null
-	fi
-    fi
+if [ "$1" = "configure" ] && dpkg --compare-versions "$2" lt "2.14.2-1ubuntu4"; then
+	# Remove old init scripts
+	update-rc.d -f hwclock.sh remove 2>/dev/null > /dev/null
+	update-rc.d -f hwclockfirst.sh remove 2>/dev/null > /dev/null
+
+	# Remove adjtime file
+	rm -f /etc/adjtime
 fi
 
 if [ -x /usr/sbin/update-mime ]; then
