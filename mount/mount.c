@@ -2076,6 +2076,16 @@ getfs(const char *spec, const char *uuid, const char *label)
 	if (!mc && (devname || spec))
 		mc = getmntfile (devname ? devname : spec);
 
+	/*
+	 * E) try /lib/init/fstab
+	 *    These are things mounted by mountall, unless overridden by
+	 *    just about everything else -- it makes sense to use it here
+	 *    too so "mount /sys" just works.
+	 */
+	if (!mc && spec)
+		mc = getmountalldir (spec);
+
+
 	my_free(devname);
 	return mc;
 }

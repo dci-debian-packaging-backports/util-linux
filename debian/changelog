@@ -16,6 +16,11 @@ util-linux (2.17.2-0ubuntu1) UNRELEASED; urgency=low
     - Mention mountall(8) in fstab(5) manpages, along with its special
       options.
 
+  * For the case where mount is called with a directory to mount, look
+    that directory up in mountall's /lib/init/fstab if we couldn't find
+    it mentioned anywhere else.  This means "mount /proc", "mount /sys",
+    etc. work.
+
  -- Scott James Remnant <scott@ubuntu.com>  Mon, 22 Mar 2010 16:39:21 +0000
 
 util-linux (2.17.2-1) UNRELEASED; urgency=low
