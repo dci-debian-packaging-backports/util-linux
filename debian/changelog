@@ -1,3 +1,13 @@
+util-linux (2.17-0ubuntu2) lucid; urgency=low
+
+  * debian/control:
+    - remove dependency on initscripts, we get them via the upstart-jobs
+      dependency (that is generated via misc:Depends) and removing the
+      direct dependency here fixes a configure problem with apt because
+      apt wants to immediate-configure direct dependencies
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 17 Feb 2010 20:00:29 +0100
+
 util-linux (2.17-0ubuntu1) lucid; urgency=low
 
   * Merge from Debian experimental, remaining changes:
