@@ -1,3 +1,23 @@
+util-linux (2.17.2-0ubuntu1) UNRELEASED; urgency=low
+
+  * Merge from Debian experimental, remaining changes:
+    - Since udev is required in Ubuntu, the hwclock.sh init script is
+      not called on startup and the hwclockfirst.sh init script is
+      removed.
+    - Use wildcards for symbols file, since they use versioned symbols
+      properly.
+    - Remove /etc/adjtime on upgrade if it was not used.
+    - Install custom blkid.conf to use /dev/.blkid.tab since we don't
+      expect device names to survive a reboot
+    - No lsb_release call in mount.preinst since we'd need Pre-Depends
+      (LP: #383697).
+    - Do not install initramfs hook, since our initramfs already handles
+      including blkid.
+    - Mention mountall(8) in fstab(5) manpages, along with its special
+      options.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Mon, 22 Mar 2010 16:39:21 +0000
+
 util-linux (2.17.2-1) UNRELEASED; urgency=low
 
   [Pascal Terjan]
