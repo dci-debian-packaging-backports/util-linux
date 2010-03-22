@@ -569,6 +569,7 @@ int blkid_probe_set_device(blkid_probe pr, int fd,
 		close(pr->fd);
 
 	pr->flags &= ~BLKID_PRIVATE_FD;
+	pr->flags &= ~BLKID_TINY_DEV;
 	pr->fd = fd;
 	pr->off = off;
 	pr->size = 0;
@@ -608,7 +609,7 @@ int blkid_probe_set_device(blkid_probe pr, int fd,
 		pr->size -= pr->off;
 	}
 
-	DBG(DEBUG_LOWPROBE, printf("ready for low-probing, offset=%zd, size=%zd\n",
+	DBG(DEBUG_LOWPROBE, printf("ready for low-probing, offset=%jd, size=%jd\n",
 				pr->off, pr->size));
 
 	if (pr->size <= 1440 * 1024 && !S_ISCHR(pr->mode))
@@ -716,10 +717,12 @@ int blkid_do_probe(blkid_probe pr)
 		/* we go to the next chain only when the previous probing
 		 * result was nothing (rc == 1) and when the current chain is
 		 * disabled or we are at end of the current chain (chain->idx +
-		 * 1 == sizeof chain)
+		 * 1 == sizeof chain) or the current chain bailed out right at
+		 * the start (chain->idx == -1)
 		 */
 		else if (rc == 1 && (chn->enabled == FALSE ||
-				     chn->idx + 1 == chn->driver->nidinfos)) {
+				     chn->idx + 1 == chn->driver->nidinfos ||
+				     chn->idx == -1)) {
 
 			int idx = chn->driver->id + 1;
 
