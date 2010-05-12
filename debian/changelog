@@ -1,6 +1,168 @@
-util-linux (2.17.2-1~0) UNRELEASED; urgency=low
+util-linux (2.17.2-1) unstable; urgency=low
 
-  *
+  [Pascal Terjan]
+
+  * libblkid: reset BLKID_TINY_DEV flag in blkid_probe_set_device
+
+  [Yoshihiro Takahashi]
+
+  * mount: posix option of vfat is obsolete
+
+  [Jan Kara]
+
+  * mount: update documentation about barrier mount options
+
+  [Karel Zak]
+
+  * sfdisk: confused about disk size
+  * mount: fix typo in mount.8
+  * fdisk: sleep-after-sync and fsync usage
+  * lscpu: add {32,64}-bit CPU modes detection
+  * tests: refresh lscpu tests
+  * docs: update AUTHORS file
+  * docs: update v2.17 ReleaseNotes
+  * build-sys: release++ (v2.17)
+  * fdisk: don't include scsi.h
+  * libblkid: restrict RAID/FS proving for small devices (1.4MiB)
+  * libblkid: read() optimization for small devices
+  * tests: fix RAIDs tests
+  * libblkid: call read() per FAT root dir entry
+  * libblkid: set minimal size for jfs, reiser, swap and zfs
+  * libblkid: read whole SB buffer (69kB) on large disks
+  * libblkid: don't call read() per FAT dir-entry on large disks
+  * libblkid: add minimal sizes for OCFS and GFS
+  * tests: update FS test images
+  * libblkid: rewrite blkid_probe_get_buffer()
+  * blkid: probe for PT, don't probe for FS on small whole-disks
+  * libblkid: add sanity checks for FAT to DOS PT parser
+  * libblkid: don't probe for GPT and Unixware PT on floppies
+  * login: don't link PAMed version with libcrypt
+  * libblkid: more robust minix probing
+  * blkid: add newline when only one value is printed
+  * login: check that after tty reopen we still work with a terminal
+  * fdisk: use optimal_io_size
+  * fdisk: use "optimal I/O size" in warnings
+  * wipefs: ignore devices with partition table
+  * libblkid: don't return error on empty files
+  * fdisk: don't check alignment_offset against geometry
+  * fdisk: fix check_alignment()
+  * fdisk: cleanup alignment, default to 1MiB offset
+  * fdisk: fix default first sector
+  * fdisk: cleanup warnings
+  * tests: add fdisk alignment tests
+  * tests: fix and update old fdisk tests
+  * mount: warn users that mtab is read-only
+  * cal: fix first day of the week calculation on BE systems
+  * build-sys: remove duplicate #includes
+  * blkid: fix #ifdef HAVE_TERMIO[S]_H
+  * build-sys: add missing tests for libuuid and libblkid
+  * mount: advise users to use "modprobe", not "insmod"
+  * include: add min/max macros
+  * fdisk: use more elegant way to count and check alignment
+  * tests: update fdisk tests
+  * fdisk: cleanup help, add -h option
+  * fdisk: fallback for topology values
+  * fdisk: fix ALIGN_UP
+  * fdisk: add -c option (switch off DOS mode)
+  * fdisk: use 1MiB offset and grain always when possible
+  * tests: update fdisk tests
+  * fdisk: don't use 1MiB grain on small devices
+  * blkid: report open() errors in low-level probing
+  * tests: update fdisk tests (add whitespaces)
+  * docs: update AUTHORS file
+  * docs: add v2.17.1 ReleaseNotes
+  * build-sys: release++ (v2.17.1-rc1)
+  * swapon: fix swapsize calculation
+  * fdisk: swap VTOC values for warning messages
+  * docs: update AUTHORS file
+  * docs: update v2.17.1 ReleaseNotes
+  * build-sys: release++ (v2.17.1)
+  * docs: fix small typo in v2.17.1-ReleaseNotes
+  * libblkid: support alignment_offset=-1
+  * libblkid: more robust minix probing
+  * libblkid: fix display of device size
+  * swapon: remove " (deleted)" from filenames from /proc/swaps
+  * libblkid: remove "0x" prefix from DRBD UUID
+  * wipefs: cleanup usage() and man page
+  * mount: more explicitly explain fstab usage in mount.8
+  * lib: add #ifndef around min() max() macros
+  * fdisk: fix -b <sectorsize>
+  * docs: update AUTHORS file
+  * docs: add v2.17.2 ReleaseNotes
+  * build-sys: release++ (v2.17.2)
+  * po: merge changes
+
+  [Vladimir Brednikov]
+
+  * namei: fix man page formatting
+
+  [Francesco Cosoleto]
+
+  * cfdisk: set '[Quit]' as default menu item on first run instead of
+    '[Bootable]'.
+  * cfdisk: set '[New]' as default item on menu for non allocated space
+    instead of '[Help]'.
+
+  [Andreas Dilger]
+
+  * libblkid: fix ZSF detection
+
+  [Bastian Friedrich]
+
+  * libblkid: DRBD support for blkid
+
+  [Matthias König]
+
+  * libblkid: fix segfault in drdb
+
+  [Bryn M. Reeves]
+
+  * sfdisk: make sure writes make it to disk in write_partitions()
+
+  [Linus Torvalds]
+
+  * libblkid: disable read-ahead when probing device files
+
+  [Pierre Hauweele]
+
+  * ionice: fix typo
+
+  [Mike Frysinger]
+
+  * pg: command enters infinite loop
+  * mount: properly ignore comments in /etc/filesystems
+
+  [LaMont Jones]
+
+  * new upstream
+  * lintian cleanup
+  * updated symbols file for libblkid1
+  * drop use of install-info in postinst, uses triggers now
+  * adjust mount.8 manpage to avoid man error
+
+  [Henne Vogelsang]
+
+  * lscpu: fix cpuid opcode detection
+
+  [Yann Droneaud]
+
+  * login: use fd instead of pathname for update tty's owner and permissions
+
+  [Colin Watson]
+
+  * libblkid: fix infinite loop when probe chain bails out early
+
+  [localization folks]
+
+  * po: update id.po (from translationproject.org) (Arif E. Nugroho)
+  * po: update ja.po (from translationproject.org) (Makoto Kato)
+  * po: update cs.po (from translationproject.org) (Petr Pisar)
+  * po: update eu.po (from translationproject.org) (Mikel Olasagasti Uranga)
+  * po: update eu.po (from translationproject.org) (Mikel Olasagasti)
+  * po: update zh_CN.po (from translationproject.org) (Ray Wang)
+  * po: update pl.po (from translationproject.org) (Jakub Bogusz)
+  * po: update vi.po (from translationproject.org) (Clytie Siddall)
+  * po: update fi.po (from translationproject.org) (Lauri Nurmi)
 
  -- LaMont Jones <lamont@debian.org>  Sat, 08 May 2010 13:34:05 +0200
 
