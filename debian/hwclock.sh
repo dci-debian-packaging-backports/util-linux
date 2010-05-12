@@ -37,7 +37,7 @@ HCTOSYS_DEVICE=rtc0
 hwclocksh()
 {
     [ ! -x /sbin/hwclock ] && return 0
-    . /etc/default/rcS
+    [ ! -r /etc/default/rcS ] || . /etc/default/rcS
 
     . /lib/lsb/init-functions
     verbose_log_action_msg() { [ "$VERBOSE" = no ] || log_action_msg "$@"; }
