@@ -71,6 +71,7 @@ install: build
 	dh_installmenu -i -s
 	dh_installcron -i -s
 	dh_installinfo -i -s
+	rm -f debian/util-linux/usr/share/info/dir debian/util-linux/usr/share/info/dir.gz
 	dh_installchangelogs docs/v*-ReleaseNotes -i -s
 	dh_movefiles --sourcedir=debian/util-linux -i -s
 	#
@@ -101,7 +102,7 @@ endif
 	#
 	mv debian/util-linux/usr/share/getopt/* debian/util-linux/usr/share/doc/util-linux/examples
 	rmdir  debian/util-linux/usr/share/getopt
-	install -m 644 debian/lintian-override debian/util-linux/usr/share/lintian/overrides/util-linux
+	for pkg in bsdutils mount uuid-runtime; do install -m 644 debian/$${pkg}.lintian-overrides debian/$${pkg}/usr/share/lintian/overrides/$${pkg}; done
 	install -m 644 debian/mime.util-linux debian/util-linux/usr/lib/mime/packages/util-linux
 	if [ -f debian/util-linux/sbin/hwclock ] ; then \
 	    install -m 755 debian/hwclock.sh debian/util-linux/etc/init.d/hwclock.sh; \
