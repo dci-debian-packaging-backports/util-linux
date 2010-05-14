@@ -32,7 +32,7 @@ export arch = $(DEB_HOST_ARCH)
 version := $(shell sed -e '1{;s|^util-linux (\(.*\))\ .*|\1|;q;}' debian/changelog)
 Upstream := $(shell sed 's/^.*(\(.*\)-.*).*/\1/; q' debian/changelog)
 
-CONFOPTS= --enable-raw --enable-rdev --enable-partx --with-slang
+CONFOPTS= --enable-raw --enable-rdev --enable-partx
 ifeq ($(DEB_HOST_ARCH_OS),linux)
 CONFOPTS += --with-selinux
 endif
