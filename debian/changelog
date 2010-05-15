@@ -1,3 +1,11 @@
+util-linux (2.17.2-2) unstable; urgency=low
+
+  * should build Depend: dpkg or install-info.  Closes: #581579
+  * pretty up the removal of /usr/share/info/dir
+  * Fix fallocate configure check.  Closes: #581358
+
+ -- LaMont Jones <lamont@debian.org>  Fri, 14 May 2010 04:49:37 -0600
+
 util-linux (2.17.2-1) unstable; urgency=low
 
   [Pascal Terjan]
