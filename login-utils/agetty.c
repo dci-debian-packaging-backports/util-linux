@@ -36,7 +36,11 @@
 #include "nls.h"
 #include "pathnames.h"
 
-#ifdef __linux__
+#if defined(__FreeBSD_kernel__)
+#include <pty.h>
+#endif
+
+#if defined(__linux__) || defined(__FreeBSD_kernel__)
 #include <sys/param.h>
 #define USE_SYSLOG
 #endif
@@ -280,7 +284,7 @@ main(argc, argv)
 
     parse_args(argc, argv, &options);
 
-#ifdef __linux__
+#if defined (__linux__) || defined(__FreeBSD_kernel__)
 	setsid();
 #endif
 	
@@ -668,6 +672,13 @@ open_tty(tty, tp, local)
 
     if (tcgetattr(0, tp) < 0)
 	error("%s: tcgetattr: %m", tty);
+
+     /*
+     * login_tty: steal tty from other process group.
+     */
+#if defined(__FreeBSD_kernel__)
+     login_tty (0);
+#endif
 
     /*
      * It seems to be a terminal. Set proper protections and ownership. Mode

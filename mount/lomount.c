@@ -18,6 +18,7 @@
 
 #include "loop.h"
 #include "lomount.h"
+#include "rmd160.h"
 #include "xstrncpy.h"
 #include "nls.h"
 #include "sundries.h"
@@ -666,7 +667,8 @@ digits_only(const char *s) {
  */
 int
 set_loop(const char *device, const char *file, unsigned long long offset,
-	 unsigned long long sizelimit, const char *encryption, int pfd, int *options) {
+	 unsigned long long sizelimit, const char *encryption, int pfd, int *options,
+	 int keysz, int hash_pass) {
 	struct loop_info64 loopinfo64;
 	int fd, ffd, mode, i;
 	char *pass;
@@ -734,20 +736,87 @@ set_loop(const char *device, const char *file, unsigned long long offset,
 	}
 #endif
 
+
+	if (keysz==0)
+		keysz=LO_KEY_SIZE*8;
 	switch (loopinfo64.lo_encrypt_type) {
 	case LO_CRYPT_NONE:
 		loopinfo64.lo_encrypt_key_size = 0;
 		break;
 	case LO_CRYPT_XOR:
 		pass = getpass(_("Password: "));
-		goto gotpass;
-	default:
-		pass = xgetpass(pfd, _("Password: "));
-	gotpass:
 		memset(loopinfo64.lo_encrypt_key, 0, LO_KEY_SIZE);
 		xstrncpy((char *)loopinfo64.lo_encrypt_key, pass, LO_KEY_SIZE);
 		memset(pass, 0, strlen(pass));
 		loopinfo64.lo_encrypt_key_size = LO_KEY_SIZE;
+		break;
+#define HASHLENGTH 20
+#if 0
+	case LO_CRYPT_FISH2:
+	case LO_CRYPT_BLOW:
+	case LO_CRYPT_IDEA:
+	case LO_CRYPT_CAST128:
+	case LO_CRYPT_SERPENT:
+	case LO_CRYPT_MARS:
+	case LO_CRYPT_RC6:
+	case LO_CRYPT_3DES:
+	case LO_CRYPT_DFC:
+	case LO_CRYPT_RIJNDAEL:
+	    {
+		char keybits[2*HASHLENGTH]; 
+		char *pass2;
+		int passwdlen;
+		int keylength;
+		int i;
+
+  		pass = xgetpass(pfd, _("Password: "));
+		passwdlen=strlen(pass);
+		pass2=malloc(passwdlen+2);
+		pass2[0]='A';
+		strcpy(pass2+1,pass);
+		rmd160_hash_buffer(keybits,pass,passwdlen);
+		rmd160_hash_buffer(keybits+HASHLENGTH,pass2,passwdlen+1);
+		memcpy((char*)loopinfo64.lo_encrypt_key,keybits,2*HASHLENGTH);
+		memset(pass, 0, passwdlen);
+		memset(pass2, 0, passwdlen+1);
+		free(pass2);
+		keylength=0;
+		for(i=0; crypt_type_tbl[i].id != -1; i++){
+		         if(loopinfo64.lo_encrypt_type == crypt_type_tbl[i].id){
+			         keylength = crypt_type_tbl[i].keylength;
+				 break;
+			 }
+		}
+		loopinfo64.lo_encrypt_key_size=keylength;
+		break;
+	    }
+#endif
+	default:
+		if (hash_pass) {
+		    char keybits[2*HASHLENGTH]; 
+		    char *pass2;
+		    int passwdlen;
+
+		    pass = xgetpass(pfd, _("Password: "));
+		    passwdlen=strlen(pass);
+		    pass2=malloc(passwdlen+2);
+		    pass2[0]='A';
+		    strcpy(pass2+1,pass);
+		    rmd160_hash_buffer(keybits,pass,passwdlen);
+		    rmd160_hash_buffer(keybits+HASHLENGTH,pass2,passwdlen+1);
+		    memset(pass, 0, passwdlen);
+		    memset(pass2, 0, passwdlen+1);
+		    free(pass2);
+
+		    memcpy((char*)loopinfo64.lo_encrypt_key,keybits,keysz/8);
+		    loopinfo64.lo_encrypt_key_size = keysz/8;
+		} else {
+		    pass = xgetpass(pfd, _("Password: "));
+		    memset(loopinfo64.lo_encrypt_key, 0, LO_KEY_SIZE);
+		    xstrncpy(loopinfo64.lo_encrypt_key, pass, LO_KEY_SIZE);
+		    memset(pass, 0, strlen(pass));
+		    loopinfo64.lo_encrypt_key_size = LO_KEY_SIZE;
+		}
 	}
 
 	if (ioctl(fd, LOOP_SET_FD, ffd) < 0) {
@@ -854,8 +923,8 @@ mutter(void) {
 
 int
 set_loop(const char *device, const char *file, unsigned long long offset,
-         unsigned long long sizelimit, const char *encryption, int pfd, int *loopro,
-         int keysz, int hash_pass) {
+	 unsigned long long sizelimit, const char *encryption, int pfd, int *options,
+	 int keysz, int hash_pass) {
 	mutter();
 	return 1;
 }
@@ -903,6 +972,12 @@ usage(void) {
   " -p | --pass-fd <num>     read passphrase from file descriptor <num>\n"
   " -r | --read-only         setup read-only loop device\n"
   "      --show              print device name (with -f <file>)\n"
+  " -N | --nohashpass        Do not hash the given password (Debian hashes)\n"
+  " -k | --keybits <num>     specify number of bits in the hashed key given\n"
+  "                          to the cipher.  Some ciphers support several key\n"
+  "                          sizes and might be more efficient with a smaller\n"
+  "                          key size.  Key sizes < 128 are generally not\n"
+  "                          recommended\n"
   " -v | --verbose           verbose mode\n\n"));
 	exit(1);
  }
@@ -910,12 +985,15 @@ usage(void) {
 int
 main(int argc, char **argv) {
 	char *p, *offset, *sizelimit, *encryption, *passfd, *device, *file, *assoc;
+	char *keysize;
 	int delete, find, c, all, capacity;
 	int res = 0;
 	int showdev = 0;
 	int ro = 0;
 	int pfd = -1;
 	uintmax_t off = 0, slimit = 0;
+	int keysz = 0;
+	int hash_pass = 1;
 	struct option longopts[] = {
 		{ "all", 0, 0, 'a' },
 		{ "set-capacity", 0, 0, 'c' },
@@ -923,6 +1001,9 @@ main(int argc, char **argv) {
 		{ "encryption", 1, 0, 'e' },
 		{ "find", 0, 0, 'f' },
 		{ "help", 0, 0, 'h' },
+		{ "keybits", 1, 0, 'k' },
+		{ "nopasshash", 0, 0, 'N' },
+		{ "nohashpass", 0, 0, 'N' },
 		{ "associated", 1, 0, 'j' },
 		{ "offset", 1, 0, 'o' },
 		{ "sizelimit", 1, 0, 128 },
@@ -939,12 +1020,13 @@ main(int argc, char **argv) {
 
 	capacity = delete = find = all = 0;
 	assoc = offset = sizelimit = encryption = passfd = NULL;
+	keysize = NULL;
 
 	progname = argv[0];
 	if ((p = strrchr(progname, '/')) != NULL)
 		progname = p+1;
 
-	while ((c = getopt_long(argc, argv, "acde:E:fhj:o:p:rsv",
+	while ((c = getopt_long(argc, argv, "acde:E:fhj:k:No:p:rsv",
 				longopts, NULL)) != -1) {
 		switch (c) {
 		case 'a':
@@ -968,6 +1050,11 @@ main(int argc, char **argv) {
 			break;
 		case 'j':
 			assoc = optarg;
+		case 'k':
+			keysize = optarg;
+			break;
+		case 'N':
+			hash_pass = 0;
 			break;
 		case 'o':
 			offset = optarg;
@@ -1058,8 +1145,10 @@ main(int argc, char **argv) {
 	else {
 		if (passfd && sscanf(passfd, "%d", &pfd) != 1)
 			usage();
+		if (keysize && sscanf(keysize,"%d",&keysz) != 1)
+			usage();
 		do {
-			res = set_loop(device, file, off, slimit, encryption, pfd, &ro);
+			res = set_loop(device, file, off, slimit, encryption, pfd, &ro, keysz, hash_pass);
 			if (res == 2 && find) {
 				if (verbose)
 					printf(_("stolen loop=%s...trying again\n"),
