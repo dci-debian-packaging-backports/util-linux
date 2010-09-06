@@ -1,3 +1,467 @@
+util-linux (2.18-0) unstable; urgency=low
+
+  * New upstream version
+  [Jason Borden]
+
+  * swaplabel: new command
+
+  [Yoshihiro Takahashi]
+
+  * mount: posix option of vfat is obsolete
+
+  [Pascal Terjan]
+
+  * libblkid: reset BLKID_TINY_DEV flag in blkid_probe_set_device
+
+  [Ævar Arnfjörð Bjarmason]
+
+  * ionice: non-cryptic error message when ionice can't execvp
+
+  [Timo Juhani Lindfors]
+
+  * hwclock: add --predict for predicting RTC reading at a given time
+
+  [Thomas Fehr]
+
+  * addpart: use atoll() for parsing command line arguments
+
+  [Christoph Hellwig]
+
+  * mount: fix information about XFS log buffers in mount.8
+
+  [Jon Ringle]
+
+  * fdisk: replace bzero with memset
+
+  [Karel Zak]
+
+  * update TODO file
+  * fdisk: don't include scsi.h
+  * libblkid: restrict RAID/FS proving for small devices (1.4MiB)
+  * libblkid: read() optimization for small devices
+  * tests: fix RAIDs tests
+  * libblkid: call read() per FAT root dir entry
+  * libblkid: set minimal size for jfs, reiser, swap and zfs
+  * libblkid: read whole SB buffer (69kB) on large disks
+  * libblkid: don't call read() per FAT dir-entry on large disks
+  * libblkid: add minimal sizes for OCFS and GFS
+  * tests: update FS test images
+  * libblkid: rewrite blkid_probe_get_buffer()
+  * blkid: probe for PT, don't probe for FS on small whole-disks
+  * libblkid: add sanity checks for FAT to DOS PT parser
+  * libblkid: don't probe for GPT and Unixware PT on floppies
+  * login: don't link PAMed version with libcrypt
+  * libblkid: more robust minix probing
+  * blkid: add newline when only one value is printed
+  * login: check that after tty reopen we still work with a terminal
+  * fdisk: use optimal_io_size
+  * fdisk: use "optimal I/O size" in warnings
+  * libblkid: add blkid_openat(), cleanup blkid_fstatat()
+  * libblkid: add blkid_probe_all_removable()
+  * tests: add BeFS test image
+  * libblkid: minor fixes in befs.c
+  * chrt: add --reset-on-fork
+  * wipefs: ignore devices with partition table
+  * docs: update TODO file
+  * libblkid: don't return error on empty files
+  * fdisk: don't check alignment_offset against geometry
+  * fdisk: fix check_alignment()
+  * fdisk: cleanup alignment, default to 1MiB offset
+  * fdisk: fix default first sector
+  * fdisk: cleanup warnings
+  * tests: add fdisk alignment tests
+  * tests: fix and update old fdisk tests
+  * mount: warn users that mtab is read-only
+  * cal: fix first day of the week calculation on BE systems
+  * docs: update TODO file
+  * build-sys: remove duplicate #includes
+  * blkid: fix #ifdef HAVE_TERMIO[S]_H
+  * build-sys: add missing tests for libuuid and libblkid
+  * mount: advise users to use "modprobe", not "insmod"
+  * include: add min/max macros
+  * fdisk: use more elegant way to count and check alignment
+  * tests: update fdisk tests
+  * fdisk: cleanup help, add -h option
+  * fdisk: fallback for topology values
+  * fdisk: fix ALIGN_UP
+  * fdisk: add -c option (switch off DOS mode)
+  * fdisk: use 1MiB offset and grain always when possible
+  * tests: update fdisk tests
+  * fdisk: don't use 1MiB grain on small devices
+  * blkid: report open() errors in low-level probing
+  * swapon: fix swapsize calculation
+  * libblkid: add generic functions for sysfs attributes
+  * libblkid: don't probe for nested PT on tiny disks (<=1.44MiB)
+  * libblkid: add support for PART_ENTRY_* values
+  * blkid: export ID_PART_ENTRY_* variables for udev
+  * libblkid: add blkid_partition_set_type()
+  * libblkid: add support for partition flags/attributes
+  * libblkid: add PART_ENTRY_{SCHEME,NUMBER}
+  * blkid: encode PART_ENTRY_TYPE
+  * blkid: fix blkid_probe_lookup_value() usage
+  * libblkid: improve Sun VTOC
+  * fdisk: swap VTOC values for warning messages
+  * wipefs: fix license (GPL -> GPLv2+)
+  * fdisk: fix 'p' output for sun label
+  * ldattach: create a generic functions for name=value tables
+  * ldattach: prints help to stdout
+  * libblkid: support alignment_offset=-1
+  * libblkid: cleanup usage of empty topology values
+  * libblkid: more robust minix probing
+  * libblkid: fix display of device size
+  * liblkid: move getsize.c code to lib/
+  * libblkid: add blkid_probe_get_{offset,fd} functions
+  * swapon: remove " (deleted)" from filenames from /proc/swaps
+  * lib: add mangle.c for mtab (fstab or swaps) encoding
+  * swapon: use unmangle() for filenames from /proc/swaps
+  * mount: use unmangle/mangle() from lib
+  * lib: use fstat() as fallback in blkdev_get_size()
+  * libblkid: don't use fstat() in blkid_get_dev_size()
+  * mkswap: don't call blkdev_find_size()
+  * tests: update fdisk tests
+  * libblkid: remove "0x" prefix from DRBD UUID
+  * tests: fix whitespaces
+  * wipefs: cleanup usage() and man page
+  * mount: report ambivalent FS detection, improve brute force detection
+  * mount: more explicitly explain fstab usage in mount.8
+  * mount: automatically detect and loop-mount regular files
+  * docs: update TODO file
+  * lib: add #ifndef around min() max() macros
+  * lib: fix blkdev_find_size()
+  * libblkid: add microsecond resolution for cache entries
+  * docs: update TODO file
+  * fdisk: fix -b <sectorsize>
+  * blkid: cleanup -u <list> parsing
+  * blkid: add -n <list> option
+  * docs: update TODO file
+  * blkid: cleanup man page
+  * lib: add strtosize() function
+  * blkid: support suffixes for -O <offset> and -S <size>
+  * wipefs: support suffixes for --offset
+  * mkswap: more robust strtoull() usage
+  * fallocate: support suffixes for --offset and --lenght
+  * losetup: support suffixes and hex numbers for --offset and --sizelimit
+  * mount: more robust offset= and sizelimit= parsing
+  * mount: support suffixes for offset= and sizelimit=
+  * partx: fix infinite loop
+  * docs: update tests/README
+  * mkswap: move write_all() to include/writeall.h
+  * swapon: move DELETED_SUFFIX to include/pathnames.h
+  * mkswap: zap bootbits on regular files
+  * libblkid: fix blkid_partlist_devno_to_partition() for extended partitions
+  * libblkid: fix 'partno' usage
+  * libblkid: add ultrix PT support
+  * swaplabel: fix typo in man page
+  * rtcwake: does miss the "off" option
+  * rtcwake: add --dry-run option
+  * mount: use auto-loopdev for all known filesystems
+  * blkid: add \n to the "-o udev" output when probe more devices
+  * libblkid: export functions to get whole-disk devno
+  * libblkid: cleanup fstat() usage
+  * libblkid: add partial support for superblock binary API
+  * liblkid: export magic strings from raids
+  * libblkid: fix collision between RAID and PT probing
+  * blkid: improve RAIDs and tiny devices probing
+  * wipefs: print warning is PT detected
+  * libblkid: don't gather PART_ENTRY_* values for binary interface
+  * libblkid: add blkid_partlist_get_table()
+  * libblkid: cleanup some docs
+  * libblkid: reset superblocks result after error
+  * logger: add note about 'kern' to the man page
+  * script: preserve child exit status
+  * mount: revert ugly ENOMEDIUM support
+  * tests: explicitly use --chunk and --metadata in MD test
+  * libblkid: fix LUKS version
+  * fdisk: improve add partition dialog
+  * fdisk: improve 'move begin of partition' command
+  * script: optionally compile with libutempter to update utmp
+  * tests: add blkid tests for RAID1
+  * unshare: drop potential euid privileges before exec
+  * tests: add blkid test for TuxOnIce
+  * libblkid: fix readline usage
+  * tests: update blkid/md-raid1-* tests
+  * cfdisk: support non-ascii characters in input
+  * blkid: update man page/usage()
+  * blkid: add -i option to print I/O limits
+  * blkid: add 'export' output format
+  * fallocate: check for number of arguments
+  * libblkid: improve MD 1.0 detection, add UUID_SUB
+  * libblkid: tiny change in debug output
+  * libblkid: improve MD 0.90 detection
+  * libblkid: cleanup superblocks_safeprobe()
+  * libblkid: probe for (non-linux) RAIDs on whole devices only
+  * libblkid: improbe DDF detection
+  * rdev: remove this deprecated command
+  * tests: update fdisk tests
+  * libblkid: improve MD 0.90.0 detection (use sb->size)
+  * blkid: remove duplicate option from man page
+  * build-sys: replace ../ with $top_srcdir
+  * mount: fix coding style
+  * taskset: move bitmap routines to lib/cpuset.c
+  * tests: add cpuset regression test
+  * taskset: use libc based cpu_set_t
+  * lib: add fallback for libc (uClibc) without CPU_ALLOC
+  * taskset: add NLS support, use err.h, cleanup
+  * lscpu: cleanup path_scanstr()
+  * lscpu: cleanup used names
+  * lscpu: improve --sysroot code
+  * taskset: move NR_CPUS determination to lib/cpuset.c
+  * lscpu: use cpuset masks, read data for all CPUs
+  * tests: update lscpu
+  * tests: add lscpu dump from Dell R710, 8-core Nehalem w/HT (RHEL 5.5)
+  * blkid: remove _ENC from ID_PART_ENTRY_{NAME,TYPE} variables
+  * libmount: add basic dirs
+  * libmount: add version.c
+  * libmount: add basic utils
+  * libmount: add debug support
+  * libmount: add test_version
+  * libblkid: add paths and tags cache
+  * libmount: add mnt_optstr_* functions
+  * libmount: add list routines and generic iterator
+  * libmount: add optls (options container)
+  * libmount: proper tests definition in Makefile.am
+  * libmount: add mtab locking code
+  * libmount: add mnt_entry
+  * libmount: rename mnt_optls_iterate_options()
+  * libmount: add fstab/mtab/mountinfo parsing routines
+  * libmount: add mnt_match_{fstype,options} functions
+  * libmount: add fstab/mtab/mountinfo lookup routines
+  * libmount: update symbols table
+  * findmnt: add new command
+  * libmount: read devno, ID and parent ID from /proc/self/mountinfo
+  * libblkid: add mnt_iter_get_direction()
+  * libmount: add support for userdata and work with VFS tree
+  * libmount: add mnt_cache_find_tag_value()
+  * findmnt: add tree support
+  * include: move shlibs/.../list.h to the include/ directory
+  * lib: add tt.c (Tree and Table output)
+  * findmnt: rewrite to use lib/tt.c
+  * lib: tt.c: don't print header for empty table
+  * libmount: export mnt_init_debug()
+  * libmount: cleanup cache flags and debug messages
+  * libmount: add new debug messages
+  * libmount: fix mnt_fs_match_source()
+  * findmnt: don't swap source and target for tags
+  * findmnt: add man page
+  * libmount: cleanup docs
+  * libmount: add docs
+  * libmount: merge vfs and fs options more carefully
+  * lib: tt.c - fix minimal width of column
+  * libmount: fix name of mnt_fs_get_*_optstr()
+  * findmnt: add {fs,vfs}-options columns
+  * lib: remove unwanted debug messages
+  * findmnt: small change in usage()
+  * findmnt: minor coding style fixes
+  * findmnt: move from /sbin to /bin
+  * libmount: remove mnt_open_device()
+  * libmount: fix some gtkdoc warnings
+  * libmount: add #warning libmount API is not stable yet!
+  * libblkid: optimize UDF label reading
+  * tests: update lscpu test
+  * tests: mount cramfs read-only
+  * tests: update blkid test for raid1
+  * build-sys: use include/list.h
+  * build-sys: update include/Makefile.am
+  * libmount: fix Makefile.am
+  * libmount: use mangle function from lib/
+  * libmount: another Makefile.am fix
+  * docs: update AUTHORS file
+  * docs: update  ReleaseNotes
+  * build-sys: cleanup lib{mount,blkid} building
+  * libmount: don't build tests by default
+  * build-sys: release++ (v2.18-rc1)
+  * docs: fix umount --fake note in ReleaseNotes
+  * mount: don't create loopdev for MS_BIND
+  * lscpu: add CPU_EQUAL_S definition for old/obscure libc
+  * mount: add notes about -o remount,ro,bind to mount.8
+  * textual: fix typos
+  * mount: use %u for uid_t and gid_t
+  * fdisk: disable DOS mode and cylinders by default
+  * cal: remove unnecessary info from man page
+  * fdisk: extend -c and -u options to support old DOS stuff
+  * tests: update fdisk tests
+  * lscpu: fix CPU_EQUAL_S macro
+  * wipefs: fix mem usage
+  * wipefs: fix memory leaks
+  * mkswap: use calloc(), remove obsolete v1 header usage
+  * mkswap: don't use too small user-specified page size
+  * mkswap: add a note that -p is uncecessary
+  * docs: update v2.18 ReleaseNotes
+  * build-sys: release++ (v2.18-rc2)
+  * cfdisk: fix warning: implicit declaration of function ‘wcwidth’
+  * docs: update TODO
+  * docs: update v2.18 ReleaseNotes
+  * build-sys: release++ (v2.18)
+  * po: update list of files
+  * po: merge changes
+
+  [Vladimir Brednikov]
+
+  * namei: fix man page formatting
+
+  [Petr Uzel]
+
+  * mount: fix typo in comment
+  * umount: do not sync() as the kernel does it by itself
+  * git: ignore index files generated by ctags and cscope
+  * mount: detect when kernel silently adds MS_RDONLY flag
+  * mount: fix typos in mount.8
+  * mount: fix memory leak
+
+  [Adrian Knoth]
+
+  * chrt: add support for SCHED_RESET_ON_FORK
+
+  [Francesco Cosoleto]
+
+  * cfdisk: set '[Quit]' as default menu item on first run instead of
+    '[Bootable]'.
+  * cfdisk: set '[New]' as default item on menu for non allocated space
+    instead of '[Help]'.
+  * blockdev: reduce usage text width
+  * ipcs: get rid of colons from header strings for consistency
+  * ipcs: add missing "PIDs" to related shared memory header text
+  * tests: update ipcs/headers test
+  * ipcs: reorganize help and usage texts
+  * lscpu: gettextize "CPU(s)"
+  * lscpu: fix typo in lscpu.1
+  * fsck: fix typo in fsck.8
+  * ipcs: advise translators a different output format
+  * ipcrm: remove redundant message in case of invalid option
+  * lscpu: replace LC_MESSAGES with LC_ALL in setlocate()
+
+  [M.S.Colclough]
+
+  * libblkid: avoid probing CDs for RAID
+
+  [Tilman Schmidt]
+
+  * ldattach: add --iflag command line option
+
+  [Matthias König]
+
+  * libblkid: fix segfault in drdb
+  * cfdisk: use libblkid
+
+  [Bryn M. Reeves]
+
+  * sfdisk: make sure writes make it to disk in write_partitions()
+
+  [Andreas Dilger]
+
+  * libblkid: fix ZSF detection
+  * libblkid: improve ZFS detection and add LABEL and UUID extraction
+
+  [Milan Broz]
+
+  * libblkid: fix some typos
+
+  [Miklos Szeredi]
+
+  * umount: add --fake option to umount(8)
+
+  [Jim Meyering]
+
+  * lib: avoid compilation failure on rawhide
+
+  [Chow Loong Jin]
+
+  * libblkid: set correct offsets for TuxOnIce signature
+
+  [Andrew Nayenko]
+
+  * libblkid: add exFAT file system detection support
+
+  [Jan Kara]
+
+  * mount: update documentation about barrier mount options
+
+  [Linus Torvalds]
+
+  * libblkid: disable read-ahead when probing device files
+
+  [Samuel Thibault]
+
+  * build-sys: minor changes for GNU/Hurd
+
+  [Benno Schulenberg]
+
+  * uuidd: spell the plural of "UUID" consistently as "UUIDs"
+  * textual: fix typos, and rephrase some things for clarity
+  * messages: gettextize a few skipped or forgotten ones
+  * findmnt: ungettextize the directions and fix spelling
+  * chrt: change two messages into four translatable sentences
+  * chrt: slice help text into manageable chunks for translators
+  * chrt: add --verbose to man page, correct -V for --version, alphabetize
+  * fdisk: untangle the reporting of deprecated mode and unit
+  * fdisk: remove erroneous <size> argument from -u option in help text
+  * lscpu: fix typo, "faild" to "failed"
+  * fdisk: improve the description of -c and -u options on man page
+  * mkswap: tweak the man page
+  * textual: slightly improve two README files
+  * po: update nl.po (from translationproject.org)
+
+  [Mike Frysinger]
+
+  * fsck/mkfs/mount: unify default search paths for helpers
+  * mount: properly ignore comments in /etc/filesystems
+
+  [Jeroen Oortwijn]
+
+  * libblkid: Add initial support for BeFS detection
+  * libblkid: Add probing function for BeFS
+  * libblkid: prevent overflow in BeFS
+
+  [Pierre Hauweele]
+
+  * ionice: fix typo
+
+  [Marek Otahal]
+
+  * rtcwake : add disable action for rtc alarm
+  * rtcwake: add disable action to rtcwake man page
+
+  [Henne Vogelsang]
+
+  * lscpu: fix cpuid opcode detection
+
+  [Phillip Susi]
+
+  * partx: do not add nonexistent partitions
+
+  [Colin Watson]
+
+  * libblkid: fix infinite loop when probe chain bails out early
+
+  [Hajime Taira]
+
+  * fsfreeze: new command
+
+  [Yann Droneaud]
+
+  * login: use fd instead of pathname for update tty's owner and permissions
+  * mkswap: fixed strtoll() usage
+  * tests: use POSIX locale
+  * build-sys: improved check for fallocate()
+  * tests: added tests against strtosize
+
+  [Pádraig Brady]
+
+  * cal: factor out and update multibyte alignment code
+  * fdisk: correctly truncate and align translated partition names
+
+  [localization folks]
+
+  * po: update id.po (from translationproject.org) (Arif E. Nugroho)
+  * po: update ja.po (from translationproject.org) (Makoto Kato)
+  * po: update cs.po (from translationproject.org) (Petr Pisar)
+  * po: update eu.po (from translationproject.org) (Mikel Olasagasti Uranga)
+  * po: update pl.po (from translationproject.org) (Jakub Bogusz)
+  * po: update es.po (from translationproject.org) (Santiago Vila Doncel)
+  * po: update vi.po (from translationproject.org) (Clytie Siddall)
+
+ -- LaMont Jones <lamont@debian.org>  Mon, 06 Sep 2010 14:31:51 -0600
+
 util-linux (2.17.2-3) unstable; urgency=low
 
   [LaMont Jones]
