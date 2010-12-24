@@ -1,3 +1,9 @@
+util-linux (2.17.2-5) unstable; urgency=low
+
+  * Merge in all those NMUs that were never pushed to me in bugs.
+
+ -- LaMont Jones <lamont@debian.org>  Fri, 24 Dec 2010 14:52:10 -0700
+
 util-linux (2.17.2-4) unstable; urgency=low
 
   [Miklos Szeredi]
