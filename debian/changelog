@@ -5,17 +5,21 @@ util-linux (2.17.2-4) unstable; urgency=low
   * mount: don't canonicalize "spec" with --no-canonicalize option. 
     Closes: #593336
 
-  [LaMont Jones]
-
-  * Deliver agetty as both agetty and getty, preferring agetty. 
-    Closes: #117596
-
   [Karel Zak]
 
   * fdisk: fix freespace boundaries calculation on SGI disklabel. 
     Closes: #510130
 
- -- LaMont Jones <lamont@debian.org>  Fri, 17 Dec 2010 15:00:16 -0700
+  [LaMont Jones]
+
+  * Deliver agetty as both agetty and getty, preferring agetty. 
+    Closes: #117596
+  * Declare source format (1.0)
+  * use debconf (iff installed) to warn about noauto fileysstems with non-zero
+    pass numbers.  Closes: #566072
+  * update lintian-overrides, actually install them in the deb
+
+ -- LaMont Jones <lamont@debian.org>  Fri, 24 Dec 2010 14:06:47 -0700
 
 util-linux (2.17.2-3) unstable; urgency=low
 
