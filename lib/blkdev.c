@@ -3,6 +3,10 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
+#ifdef __FreeBSD_kernel__
+#include <sys/disk.h>
+#endif
+
 #include "blkdev.h"
 #include "linux_version.h"
 
@@ -66,6 +70,17 @@ blkdev_get_size(int fd, unsigned long long *bytes)
 
 	return -1;
 #endif /* BLKGETSIZE */
+
+#ifdef __FreeBSD_kernel__
+	{
+		off_t size;
+
+		if (ioctl(fd, DIOCGMEDIASIZE, &size) >= 0) {
+			*bytes = size;
+			return 0;
+		}
+	}
+#endif
 
 	*bytes = blkdev_find_size(fd);
 	return 0;
