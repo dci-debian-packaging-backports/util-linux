@@ -48,6 +48,15 @@ autofiles:
 	AM_OPTS=--copy ./autogen.sh
 	rm -rf autom4te.cache
 
+newtemplate:
+	debconf-updatepo
+
+msgstats:
+	@cd debian/po && for i in *.po; do x=$$(msgfmt --statistics $$i 2>&1); echo $$i $$x; done; rm -f messages.mo *.po~
+
+msg-email:
+	@podebconf-report-po
+
 clean-preunpatch: 
 	dh_testdir
 	dh_testroot
@@ -165,6 +174,7 @@ endif
 binary-indep: build install
 	dh_testdir -i
 	dh_testroot -i
+	dh_installdebconf
 	dh_installdeb -i
 	dh_gencontrol -i -- -VUpstream=$(Upstream)
 	dh_md5sums -i
