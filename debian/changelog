@@ -1,3 +1,56 @@
+util-linux (2.17.2-6) unstable; urgency=low
+
+  [Bjørn Steensrud]
+
+  * nb translations.  Closes: #608325
+
+  [Américo Monteiro]
+
+  * Portuguese debconf translations. Closes: #608233
+
+  [Vincenzo Campanella]
+
+  * Italian translations.  Closes: #608307
+
+  [Yuri Kozlov]
+
+  * russian debconf translations.  Closes: #608302
+
+  [Martin Ågren]
+
+  * Swedish debconf translations.  Closes: #608483
+
+  [Joe Dalton]
+
+  * Danish translations.  Closes: #608330
+
+  [Christian Perrier]
+
+  * French debconf translations.  Closes: #608464
+
+  [Martin Eberhard Schauer]
+
+  * German debconf translations.  Closes: #608463
+
+  [Camaleón]
+
+  * Spanish debconf translations.  Closes: #608518
+
+  [Thorsten Glaser]
+
+  * hwclock: [m68k] unbreak FTBFS with recent (>= 2.4.18?) kernels. 
+    Closes: #578168
+
+  [Slavko]
+
+  * Slovak transtions.  Closes: #608305
+
+  [Michal Simunek]
+
+  * Czech debconf translations.  Closes: #608495
+
+ -- LaMont Jones <lamont@debian.org>  Fri, 31 Dec 2010 18:21:19 -0700
+
 util-linux (2.17.2-5) unstable; urgency=low
 
   * Merge in all those NMUs that were never pushed to me in bugs.
