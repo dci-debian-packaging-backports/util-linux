@@ -1,5 +1,5 @@
 # Danish translation util-linux.
-# Copyright (C) 2010 util-linux & nedenst??ende overs??ttere.
+# Copyright (C) 2010 util-linux & nedenstående oversættere.
 # This file is distributed under the same license as the util-linux package.
 # Joe Hansen (joedalton2@yahoo.dk), 2010.
 #
@@ -30,9 +30,9 @@ msgid ""
 "automatically mounted upon boot, yet should be checked by fsck, the file "
 "system check utility)."
 msgstr ""
-"/etc/fstab indeholder mindst et punkt, som er markeret som ??noauto?? med "
-"et non-zero pass number (hvilket betyder at filsystemet ikke b??r monteres "
-"automatisk ved opstart, men dog stadig skal tjekkes af fsck, v??rkt??jet "
+"/etc/fstab indeholder mindst et punkt, som er markeret som »noauto« med "
+"et non-zero pass number (hvilket betyder at filsystemet ikke bør monteres "
+"automatisk ved opstart, men dog stadig skal tjekkes af fsck, værktøjet "
 "til filsystemtjekning)."
 
 #. Type: note
@@ -45,8 +45,8 @@ msgid ""
 "mode during boot."
 msgstr ""
 "Fra og med denne udgave, vil fsck fejle for filsystemer, som har et non-"
-"zero pass number og som ikke er tilg??ngelige (det vil sige de er afkoblet) "
-"p?? det tidspunkt, som fsck k??rer p??. Dette vil f?? systemet til at g?? i "
+"zero pass number og som ikke er tilgængelige (det vil sige de er afkoblet) "
+"på det tidspunkt, som fsck kører på. Dette vil få systemet til at gå i "
 "reparationstilstanden for filsystemet under opstart."
 
 #. Type: note
@@ -57,6 +57,6 @@ msgid ""
 "devices, by either setting their pass number to zero, or adding the \"nofail"
 "\" option. For more details, please see mount(8)."
 msgstr ""
-"Tilpas s??danne fstab-punkter for eksterne enheder for at undg?? dette problem, "
-"enten ved at angive deres pass number til zero, eller tilf??je tilvalget "
-"??nofail??. For yderligere detaljer se mount(8)."
+"Tilpas sådanne fstab-punkter for eksterne enheder for at undgå dette problem, "
+"enten ved at angive deres pass number til zero, eller tilføje tilvalget "
+"»nofail«. For yderligere detaljer se mount(8)."

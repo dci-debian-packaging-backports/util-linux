@@ -1,5 +1,5 @@
 # Slovak translations for util-linux package
-# Slovensk?? preklady pre bal??k util-linux.
+# Slovenské preklady pre balík util-linux.
 # Copyright (C) 2010 THE util-linux's COPYRIGHT HOLDER
 # This file is distributed under the same license as the util-linux package.
 # Automatically generated, 2010.
@@ -24,7 +24,7 @@ msgstr ""
 #: ../util-linux.templates:1001
 msgid "Filesystem entries with noauto and non-zero pass number"
 msgstr ""
-"Polo??ky s??borov??ho syst??mu s vo??bou noauto a nenulov??m porad??m kontroly"
+"Položky súborového systému s voľbou noauto a nenulovým poradím kontroly"
 
 #. Type: note
 #. Description
@@ -35,10 +35,10 @@ msgid ""
 "automatically mounted upon boot, yet should be checked by fsck, the file "
 "system check utility)."
 msgstr ""
-"/etc/fstab obsahuje aspo?? jednu polo??ku, ktor?? je ozna??en?? ako ???noauto??? a m?? "
-"nenulov?? poradie kontroly (tzn. ??e s??borov?? syst??m nem?? by?? automaticky "
-"pripojen?? pri ??tarte syst??mu, ale m?? by?? kontrolovan?? pomocou fsck, "
-"n??strojom na kontrolu s??borov??ho syst??mu)."
+"/etc/fstab obsahuje aspoň jednu položku, ktorá je označené ako „noauto” a má "
+"nenulové poradie kontroly (tzn. že súborový systém nemá byť automaticky "
+"pripojený pri štarte systému, ale má byť kontrolovaný pomocou fsck, "
+"nástrojom na kontrolu súborového systému)."
 
 #. Type: note
 #. Description
@@ -49,10 +49,10 @@ msgid ""
 "the time fsck runs. This will cause the system to enter file system repair "
 "mode during boot."
 msgstr ""
-"Od tejto verzie ??alej, fsck zlyh?? pri s??borov??ch syst??moch, ktor?? maj?? "
-"nenulov?? poradie kontroly a nie s?? dostupn?? (napr. preto??e nie s?? pripojen??) "
-"v okam??iku spustenia fsck. Toto bude ma?? za n??sledok vstup do re??imu opravy "
-"s??borov??ho syst??mu po??as ??tartu po????ta??a."
+"Od tejto verzie ďalej, fsck zlyhá pri súborových systémoch, ktoré majú "
+"nenulové poradie kontroly a nie sú dostupné (napr. pretože nie sú pripojené) "
+"v okamžiku spustenia fsck. Toto bude mať za následok vstup do režimu opravy "
+"súborového systému počas štartu počítača."
 
 #. Type: note
 #. Description
@@ -62,6 +62,6 @@ msgid ""
 "devices, by either setting their pass number to zero, or adding the \"nofail"
 "\" option. For more details, please see mount(8)."
 msgstr ""
-"Aby ste predi??li tomuto probl??mu, pros??m upravte polo??ky vymenite??n??ch "
-"zariaden?? vo svojom fstab tak, aby mali bu?? nulov?? poradie kontroly alebo "
-"mali nastaven?? vo??bu ???nofail???. ??al??ie podrobnosti h??adajte v mount(8)."
+"Aby ste predišli tomuto problému, prosím upravte položky vymeniteľných "
+"zariadení vo svojom fstab tak, aby mali buď nulové poradie kontroly alebo "
+"mali nastavenú voľbu „nofail”. Ďalšie podrobnosti hľadajte v mount(8)."
