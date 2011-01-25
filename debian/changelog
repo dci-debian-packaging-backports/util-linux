@@ -1,3 +1,14 @@
+util-linux (2.17.2-9) unstable; urgency=low
+
+  * Ack NMU from Christian Perrier <bubulle@debian.org>
+    - Fix encoding for Danish and Slovak debconf translations
+
+  [Adriano Rafael Gomes]
+
+  * Brazilian Portuguese debconf templates translation.  Closes: #610489
+
+ -- LaMont Jones <lamont@debian.org>  Tue, 25 Jan 2011 12:11:43 -0700
+
 util-linux (2.17.2-8) unstable; urgency=low
 
   * fix mangled characters in debconf translations
