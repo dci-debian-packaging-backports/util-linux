@@ -1,3 +1,14 @@
+util-linux (2.17.2-9.1) unstable; urgency=low
+
+  * NMU
+  * Bump to Standards-Version 3.9.1.
+  * Drop XS- prefixes on Vcs-Git and Vcs-Browser fields.
+  * Patch from Konstantinos Margaritis to add preliminary armhf
+    support.  closes: #596948.
+  * Add watch file.  closes: #543721.
+
+ -- Clint Adams <clint@debian.org>  Sun, 13 Feb 2011 10:38:14 -0500
+
 util-linux (2.17.2-9) unstable; urgency=low
 
   * Ack NMU from Christian Perrier <bubulle@debian.org>
