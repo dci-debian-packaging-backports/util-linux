@@ -45,7 +45,7 @@ build-stamp:
 	touch build-stamp
 
 autofiles:
-	AM_OPTS=--copy ./autogen.sh
+	AM_OPTS=--copy LT_OPTS=--copy ./autogen.sh
 	rm -rf autom4te.cache
 
 newtemplate:
