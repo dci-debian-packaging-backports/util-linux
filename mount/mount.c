@@ -61,6 +61,12 @@ static int nomtab = 0;
 /* True for explicit readonly (-r).  */
 static int readonly = 0;
 
+/* Nonzero for chatty (-v).  */
+int verbose = 0;
+
+/* Do we hash the password or not */
+int hash_pass = 1;
+
 /* Nonzero for sloppy (-s).  */
 static int sloppy = 0;
 
@@ -95,6 +101,9 @@ static unsigned long mtab_flags;
 static void prepare_mtab_entry(const char *spec, const char *node,
 			const char *type, const char *opts, unsigned long flags);
 #endif
+
+/* Contains the preferred keysize in bits we want to use */
+static int keysz = 0;
 
 /* mount(2) options */
 struct mountargs {
@@ -210,6 +219,7 @@ static int opt_nofail = 0;
 
 static const char *opt_loopdev, *opt_vfstype, *opt_offset, *opt_sizelimit,
         *opt_encryption, *opt_speed, *opt_comment, *opt_uhelper;
+static const char *opt_keybits, *opt_nohashpass;
 
 static int is_readonly(const char *node);
 static int mounted (const char *spec0, const char *node0);
@@ -226,6 +236,8 @@ static struct string_opt_map {
   { "offset=",	0, &opt_offset },
   { "sizelimit=",  0, &opt_sizelimit },
   { "encryption=", 0, &opt_encryption },
+  { "keybits=", 0, &opt_keybits },
+  { "nohashpass", 0, &opt_nohashpass },
   { "speed=", 0, &opt_speed },
   { "comment=", 1, &opt_comment },
   { "uhelper=", 0, &opt_uhelper },
@@ -664,7 +676,7 @@ create_mtab (void) {
 		mnt.mnt_freq = mnt.mnt_passno = 0;
 		free(extra_opts);
 
-		if (my_addmntent (mfp, &mnt) == 1) {
+		if (mnt.mnt_fsname && my_addmntent (mfp, &mnt) == 1) {
 			int errsv = errno;
 			die (EX_FILEIO, _("mount: error writing %s: %s"),
 			     _PATH_MOUNTED, strerror (errsv));
@@ -1220,7 +1232,7 @@ loop_check(const char **spec, const char **type, int *flags,
       *type = opt_vfstype;
   }
 
-  *loop = ((*flags & MS_LOOP) || *loopdev || opt_offset || opt_sizelimit || opt_encryption);
+  *loop = ((*flags & MS_LOOP) || *loopdev || opt_offset || opt_sizelimit || opt_encryption || opt_keybits);
   *loopfile = *spec;
 
   /* Automatically create a loop device from a regular file if a filesystem
@@ -1283,9 +1295,12 @@ loop_check(const char **spec, const char **type, int *flags,
 	  return EX_SYSERR;	/* no more loop devices */
 	if (verbose)
 	  printf(_("mount: going to use the loop device %s\n"), *loopdev);
-
+	if (!keysz && opt_keybits)
+	  keysz  = strtoul(opt_keybits, NULL, 0);
+	if (opt_nohashpass)
+	  hash_pass=0;
 	if ((res = set_loop(*loopdev, *loopfile, offset, sizelimit,
-			    opt_encryption, pfd, &loop_opts))) {
+			    opt_encryption, pfd, &loop_opts, keysz, hash_pass))) {
 	  if (res == 2) {
 	     /* loop dev has been grabbed by some other process,
 	        try again, if not given explicitly */
@@ -2230,6 +2245,7 @@ static struct option longopts[] = {
 	{ "options", 1, 0, 'o' },
 	{ "test-opts", 1, 0, 'O' },
 	{ "pass-fd", 1, 0, 'p' },
+	{ "keybits", 1, 0, 'k' },
 	{ "types", 1, 0, 't' },
 	{ "bind", 0, 0, 'B' },
 	{ "move", 0, 0, 'M' },
@@ -2393,6 +2409,7 @@ main(int argc, char *argv[]) {
 	char *options = NULL, *test_opts = NULL, *node;
 	const char *spec = NULL;
 	char *label = NULL;
+	char *keysize = NULL;
 	char *uuid = NULL;
 	char *types = NULL;
 	char *p;
@@ -2423,7 +2440,7 @@ main(int argc, char *argv[]) {
 	initproctitle(argc, argv);
 #endif
 
-	while ((c = getopt_long (argc, argv, "aBfFhilL:Mno:O:p:rRsU:vVwt:",
+	while ((c = getopt_long (argc, argv, "aBfFhik:lL:Mno:O:p:rRsU:vVwt:",
 				 longopts, NULL)) != -1) {
 		switch (c) {
 		case 'a':	       /* mount everything in fstab */
@@ -2443,6 +2460,9 @@ main(int argc, char *argv[]) {
 			break;
 		case 'i':
 			external_allowed = 0;
+			break;
+		case 'k':
+			keysize = optarg;
 			break;
 		case 'l':
 			list_with_volumelabel = 1;
@@ -2591,6 +2611,9 @@ main(int argc, char *argv[]) {
 			die (EX_USAGE, _("mount: only root can do that"));
 		}
 	}
+
+	if (keysize && sscanf(keysize,"%d",&keysz) != 1)
+		die (EX_USAGE, _("mount: argument to --keybits or -k must be a number"));
 
 	atexit(unlock_mtab);
 

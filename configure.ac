@@ -734,6 +734,7 @@ dnl when _FILE_OFFSET_BITS==64, fallocate() is redirect to fallocate64()
 dnl and program can't be linked.
 dnl AC_CHECK_FUNC can't catch such errors since it's redefining
 dnl function prototype.
+AC_CHECK_HEADERS([fcntl.h linux/falloc.h sys/types.h unistd.h])
 AC_MSG_CHECKING([for valid fallocate() function])
 AC_LINK_IFELSE([
 AC_LANG_PROGRAM([[
