@@ -2,6 +2,7 @@ libblkid.so.1 libblkid1 #MINVER#
  BLKID_1.0@BLKID_1.0 2.16
  BLKID_2.15@BLKID_2.15 2.16
  BLKID_2.17@BLKID_2.17 2.17.2
+ BLKID_2.18@BLKID_2.18 2.19.1
  blkid_dev_devname@BLKID_1.0 2.16
  blkid_dev_has_tag@BLKID_1.0 2.16
  blkid_dev_iterate_begin@BLKID_1.0 2.16
@@ -30,6 +31,7 @@ libblkid.so.1 libblkid1 #MINVER#
  blkid_new_probe_from_filename@BLKID_2.17 2.17.2
  blkid_parse_tag_string@BLKID_1.0 2.16
  blkid_parse_version_string@BLKID_1.0 2.16
+ blkid_partition_get_flags@BLKID_2.18 2.19.1
  blkid_partition_get_name@BLKID_2.17 2.17.2
  blkid_partition_get_partno@BLKID_2.17 2.17.2
  blkid_partition_get_size@BLKID_2.17 2.17.2
@@ -41,13 +43,16 @@ libblkid.so.1 libblkid1 #MINVER#
  blkid_partition_is_extended@BLKID_2.17 2.17.2
  blkid_partition_is_logical@BLKID_2.17 2.17.2
  blkid_partition_is_primary@BLKID_2.17 2.17.2
+ blkid_partlist_devno_to_partition@BLKID_2.18 2.19.1
  blkid_partlist_get_partition@BLKID_2.17 2.17.2
+ blkid_partlist_get_table@BLKID_2.18 2.19.1
  blkid_partlist_numof_partitions@BLKID_2.17 2.17.2
  blkid_parttable_get_offset@BLKID_2.17 2.17.2
  blkid_parttable_get_parent@BLKID_2.17 2.17.2
  blkid_parttable_get_type@BLKID_2.17 2.17.2
  blkid_probe_all@BLKID_1.0 2.16
  blkid_probe_all_new@BLKID_1.0 2.16
+ blkid_probe_all_removable@BLKID_2.18 2.19.1
  blkid_probe_enable_partitions@BLKID_2.17 2.17.2
  blkid_probe_enable_superblocks@BLKID_2.17 2.17.2
  blkid_probe_enable_topology@BLKID_2.17 2.17.2
@@ -57,15 +62,20 @@ libblkid.so.1 libblkid1 #MINVER#
  blkid_probe_filter_types@BLKID_2.15 2.16
  blkid_probe_filter_usage@BLKID_2.15 2.16
  blkid_probe_get_devno@BLKID_2.17 2.17.2
+ blkid_probe_get_fd@BLKID_2.18 2.19.1
+ blkid_probe_get_offset@BLKID_2.18 2.19.1
  blkid_probe_get_partitions@BLKID_2.17 2.17.2
+ blkid_probe_get_sectors@BLKID_2.17 2.19.1
  blkid_probe_get_sectorsize@BLKID_2.17 2.17.2
  blkid_probe_get_size@BLKID_2.17 2.17.2
  blkid_probe_get_topology@BLKID_2.17 2.17.2
  blkid_probe_get_value@BLKID_2.15 2.16
+ blkid_probe_get_wholedisk_devno@BLKID_2.18 2.19.1
  blkid_probe_has_value@BLKID_2.15 2.16
  blkid_probe_invert_filter@BLKID_2.15 2.16
  blkid_probe_invert_partitions_filter@BLKID_2.17 2.17.2
  blkid_probe_invert_superblocks_filter@BLKID_2.17 2.17.2
+ blkid_probe_is_wholedisk@BLKID_2.18 2.19.1
  blkid_probe_lookup_value@BLKID_2.15 2.16
  blkid_probe_numof_values@BLKID_2.15 2.16
  blkid_probe_reset_filter@BLKID_2.15 2.16

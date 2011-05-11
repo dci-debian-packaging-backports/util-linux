@@ -20,7 +20,6 @@
 #include "lomount.h"
 #include "strutils.h"
 #include "rmd160.h"
-#include "xstrncpy.h"
 #include "nls.h"
 #include "sundries.h"
 #include "xmalloc.h"
