@@ -3,7 +3,7 @@ Build-Depends: libncurses5-dev, libslang2-dev (>=2.0.4), gettext, zlib1g-dev, dp
 Section: base
 Priority: required
 Uploaders: Scott James Remnant <scott@ubuntu.com>
-Standards-Version: 3.9.1
+Standards-Version: 3.9.2
 Maintainer: LaMont Jones <lamont@debian.org>
 Vcs-Browser: http://git.debian.org/?p=users/lamont/util-linux.git
 Vcs-Git: git://git.debian.org/~lamont/util-linux.git
@@ -117,6 +117,35 @@ Description: block device id library - headers and static libraries
  system instead.
  .
  This package contains the development environment for the blkid library.
+
+Package: libmount1
+Section: libs
+Priority: required
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Architecture: any
+Description: block device id library
+ The device mounting library, used by mount and mount helpers.
+
+Package: libmount1-udeb
+XC-Package-Type: udeb
+Section: debian-installer
+Priority: optional
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Architecture: any
+Description: block device id library
+ The device mounting library, used by mount and mount helpers.
+ .
+ This is a minimal package for debian-installer.
+
+Package: libmount-dev
+Section: libdevel
+Priority: extra
+Depends: libc6-dev | libc-dev, libmount1 (= ${binary:Version}), uuid-dev, ${misc:Depends}
+Architecture: any
+Description: block device id library - headers and static libraries
+ The device mounting library, used by mount and mount helpers.
+ .
+ This package contains the development environment for the mount library.
 
 Package: libuuid1
 Section: libs
