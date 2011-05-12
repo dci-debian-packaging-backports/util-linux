@@ -7,6 +7,7 @@ Standards-Version: 3.9.2
 Maintainer: LaMont Jones <lamont@debian.org>
 Vcs-Browser: http://git.debian.org/?p=users/lamont/util-linux.git
 Vcs-Git: git://git.debian.org/~lamont/util-linux.git
+Homepage: http://userweb.kernel.org/~kzak/util-linux/
 
 Package: util-linux
 Architecture: any
