@@ -1,3 +1,41 @@
+util-linux (2.19.1-2) unstable; urgency=low
+
+  [LaMont Jones]
+
+  * deliver findmnt in mount, rather than util-linux
+
+  [Jeroen Schot]
+
+  * Dutch transations.  Closes: #624858
+
+  [Hideki Yamane]
+
+  * Japanese translation.  Closes: #626383
+
+  [Esko Arajärvi]
+
+  * Finnish debconf templates.  Closes: #615472
+
+  [Roger Leigh]
+
+  * Update with current translations
+  * Enable libmount; new packages libmount1, libmount-udeb and libmount-dev
+    added; bump standards-version
+
+  [Arief S Fitrianto]
+
+  * update Indonesian translations.  Closes: #611319
+
+  [Innocent De Marchi]
+
+  * debconf po file for Catalan.  Closes: #628367
+
+  [Paul Menzel]
+
+  * Add Homepage: to control.  Closes: #590708
+
+ -- LaMont Jones <lamont@debian.org>  Tue, 31 May 2011 14:12:57 -0600
+
 util-linux (2.19.1-1) experimental; urgency=low
 
   * New upstream
