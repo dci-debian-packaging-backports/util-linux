@@ -8,6 +8,16 @@ dist_man_MANS =
 
 EXTRA_DIST = README.poeigl
 
+if BUILD_AGETTY
+sbin_PROGRAMS += agetty
+dist_man_MANS += agetty.8
+agetty_SOURCES = agetty.c
+if !HAVE_LANGINFO
+agetty_SOURCES += $(top_srcdir)/lib/langinfo.c
+agetty_LDADD = -lutil
+endif
+endif
+
 if BUILD_LAST
 usrbin_exec_PROGRAMS += last
 dist_man_MANS += last.1
