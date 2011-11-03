@@ -1,3 +1,16 @@
+util-linux (2.20.1-1) unstable; urgency=low
+
+  * New upstream
+
+  [Roger Leigh]
+
+  * Various merge fixes [with edits - lamont]
+    - drop old unused patches
+    - cleanup debian/rules
+    - updated symbols files for lib{blkid,mount,uuid}1
+
+ -- LaMont Jones <lamont@debian.org>  Thu, 03 Nov 2011 15:38:23 -0600
+
 util-linux (2.19.1-5) unstable; urgency=low
 
   * Conflict/Replace fstrim to provide smooth upgrades (closes: #627579)
