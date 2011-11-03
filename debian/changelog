@@ -1,3 +1,29 @@
+util-linux (2.19.1-5) unstable; urgency=low
+
+  * Conflict/Replace fstrim to provide smooth upgrades (closes: #627579)
+  * Don't run hwclock-set when running under systemd (closes: #629811)
+  * Switch to using linux-any in place of lists (closes: #635530, #634722)
+
+ -- Adam Conrad <adconrad@0c3.net>  Wed, 03 Aug 2011 13:43:21 +0000
+
+util-linux (2.19.1-4) unstable; urgency=low
+
+  * Add missing patch from #631468 to fix agetty linkage on k*bsd
+
+ -- Adam Conrad <adconrad@0c3.net>  Sun, 17 Jul 2011 03:55:11 -0600
+
+util-linux (2.19.1-3) unstable; urgency=low
+
+  * Apply two patches from Michael Biebl <biebl@debian.org>:
+    - disable libmount on !linux, fixing kfreebsd FTBFS (closes: #631468)
+    - remove empty /usr/share/locale/ from util-linux (closes: #633412)
+  * Apply patch from Roger Leigh <rleigh@debian.org> to make hwclock.sh
+    correctly support /run/udev in addition to /dev/.udev (closes: #629274)
+  * Build with arch:all to resurrect util-linux-locales (closes: #630859)
+  * Add myself to Uploaders, following a short conversation with LaMont.
+
+ -- Adam Conrad <adconrad@0c3.net>  Sun, 17 Jul 2011 06:41:42 +0000
+
 util-linux (2.19.1-2) unstable; urgency=low
 
   [LaMont Jones]

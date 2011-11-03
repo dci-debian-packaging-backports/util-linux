@@ -32,9 +32,9 @@ export arch = $(DEB_HOST_ARCH)
 version := $(shell sed -e '1{;s|^util-linux (\(.*\))\ .*|\1|;q;}' debian/changelog)
 Upstream := $(shell sed 's/^.*(\(.*\)-.*).*/\1/; q' debian/changelog)
 
-CONFOPTS= --enable-raw --enable-partx --with-slang --enable-libmount-mount 
+CONFOPTS= --enable-raw --enable-rdev --enable-partx --with-slang
 ifeq ($(DEB_HOST_ARCH_OS),linux)
-CONFOPTS += --with-selinux
+CONFOPTS += --with-selinux --enable-libmount-mount
 endif
 
 build: build-stamp
@@ -82,6 +82,7 @@ install: build
 	dh_installinfo -i -s
 	dh_installchangelogs docs/v*-ReleaseNotes -i -s
 	dh_movefiles --sourcedir=debian/util-linux -i -s
+	rm -rf debian/util-linux/usr/share/locale
 	#
 	# XXX - push things to where debian has always(?) had them...
 ifeq ($(DEB_HOST_ARCH_OS),linux)
@@ -127,9 +128,11 @@ endif
 	    install -m 644 debian/hwclock.rules debian/util-linux/lib/udev/rules.d/85-hwclock.rules; \
 	    install -m 755 debian/hwclock-set debian/util-linux/lib/udev/hwclock-set; \
 	fi
+ifeq ($(DEB_HOST_ARCH_OS),linux)
 	# copy mount library and symlink into udeb
 	ln debian/libmount1/lib/libmount.so.1.* debian/libmount1-udeb/lib/
 	ln debian/libmount1/lib/libmount.so.1   debian/libmount1-udeb/lib/
+endif
 	# copy blkid library and symlink into udeb
 	ln debian/libblkid1/lib/libblkid.so.1.* debian/libblkid1-udeb/lib/
 	ln debian/libblkid1/lib/libblkid.so.1   debian/libblkid1-udeb/lib/

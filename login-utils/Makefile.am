@@ -12,9 +12,9 @@ if BUILD_AGETTY
 sbin_PROGRAMS += agetty
 dist_man_MANS += agetty.8
 agetty_SOURCES = agetty.c
+agetty_LDADD = -lutil
 if !HAVE_LANGINFO
 agetty_SOURCES += $(top_srcdir)/lib/langinfo.c
-agetty_LDADD = -lutil
 endif
 endif
 

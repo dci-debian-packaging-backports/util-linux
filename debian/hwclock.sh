@@ -67,7 +67,7 @@ hwclocksh()
 
     case "$1" in
 	start)
-	    if [ -d /dev/.udev ]; then
+	    if [ -d /run/udev ] || [ -d /dev/.udev ]; then
 		return 0
 	    fi
 
