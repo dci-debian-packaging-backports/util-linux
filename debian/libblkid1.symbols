@@ -3,6 +3,7 @@ libblkid.so.1 libblkid1 #MINVER#
  BLKID_2.15@BLKID_2.15 2.16
  BLKID_2.17@BLKID_2.17 2.17.2
  BLKID_2.18@BLKID_2.18 2.19.1
+ BLKID_2.20@BLKID_2.20 2.20.1
  blkid_dev_devname@BLKID_1.0 2.16
  blkid_dev_has_tag@BLKID_1.0 2.16
  blkid_dev_iterate_begin@BLKID_1.0 2.16
@@ -15,6 +16,7 @@ libblkid.so.1 libblkid1 #MINVER#
  blkid_do_probe@BLKID_2.15 2.16
  blkid_do_safeprobe@BLKID_2.15 2.16
  blkid_encode_string@BLKID_2.15 2.16
+ blkid_evaluate_spec@BLKID_2.20 2.20.1
  blkid_evaluate_tag@BLKID_2.15 2.16
  blkid_find_dev_with_tag@BLKID_1.0 2.16
  blkid_free_probe@BLKID_2.15 2.16
@@ -89,6 +91,7 @@ libblkid.so.1 libblkid1 #MINVER#
  blkid_reset_probe@BLKID_2.15 2.16
  blkid_safe_string@BLKID_2.15 2.16
  blkid_send_uevent@BLKID_2.15 2.16
+ blkid_superblocks_get_name@BLKID_2.20 2.20.1
  blkid_tag_iterate_begin@BLKID_1.0 2.16
  blkid_tag_iterate_end@BLKID_1.0 2.16
  blkid_tag_next@BLKID_1.0 2.16
