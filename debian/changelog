@@ -9,6 +9,19 @@ util-linux (2.20.1-1) unstable; urgency=low
     - cleanup debian/rules
     - updated symbols files for lib{blkid,mount,uuid}1
 
+  [LaMont Jones]
+
+  * merge in 2.19.1-{3..5}
+  * deliver /etc/fstab.d
+
+  [김종규]
+
+  * add korean debconf pofile.  Closes: #632421, #632425
+
+  [Niels Thykier]
+
+  * Add build-arch and build-indep targets.  Closes: #648467
+
  -- LaMont Jones <lamont@debian.org>  Thu, 03 Nov 2011 15:38:23 -0600
 
 util-linux (2.19.1-5) unstable; urgency=low
