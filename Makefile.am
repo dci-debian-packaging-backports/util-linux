@@ -116,6 +116,7 @@ edit_cmd = sed \
 	 -e 's|@usrlib_execdir[@]|$(usrlib_execdir)|g' \
 	 -e 's|@usrbin_execdir[@]|$(usrbin_execdir)|g' \
 	 -e 's|@usrsbin_execdir[@]|$(usrsbin_execdir)|g' \
+	 -e 's|@libexecdir[@]|$(libexecdir)|g' \
 	 -e 's|@VERSION[@]|$(VERSION)|g' \
 	 -e 's|@ADJTIME_PATH[@]|$(ADJTIME_PATH)|g' \
 	 -e 's|@LIBUUID_VERSION[@]|$(LIBUUID_VERSION)|g' \

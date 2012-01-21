@@ -71,7 +71,6 @@ AS_CASE([$prefix:$localstatedir],
 )
 AC_SUBST([localstatedir])
 
-
 # The original default values of {bin,sbin,lib}dir
 usrbin_execdir='${exec_prefix}/bin'
 AC_SUBST([usrbin_execdir])
@@ -82,9 +81,10 @@ AC_SUBST([usrsbin_execdir])
 AS_CASE([$libdir],
  ['${exec_prefix}/'* | '${prefix}/'* | /usr/* | "${prefix}"/* ],
    [usrlib_execdir=$libdir],
- [usrlib_execdir='${exec_prefix}'$libdir]
+ [usrlib_execdir='${libexecdir}']
 )
 AC_SUBST([usrlib_execdir])
+AC_SUBST([libexecdir])
 
 
 AM_PROG_CC_C_O
