@@ -212,6 +212,10 @@ static const struct opt_map opt_map[] = {
   { "nostrictatime", 0, 1, MS_STRICTATIME }, /* kernel default atime */
 #endif
   { "nofail",	0, 0, MS_COMMENT},	/* Do not fail if ENOENT on dev */
+  { "bootwait",	0, 0, MS_COMMENT },
+  { "nobootwait", 0, 0, MS_COMMENT },
+  { "optional",	0, 0, MS_COMMENT },
+  { "showthrough", 0, 0, MS_COMMENT },
   { NULL,	0, 0, 0		}
 };
 
@@ -2422,6 +2426,15 @@ getfs(const char *spec, const char *uuid, const char *label)
 	 */
 	if (!mc && (devname || spec))
 		mc = getmntfilebackward (devname ? devname : spec, NULL);
+
+	/*
+	 * E) try /lib/init/fstab
+	 *    These are things mounted by mountall, unless overridden by
+	 *    just about everything else -- it makes sense to use it here
+	 *    too so "mount /sys" just works.
+	 */
+	if (!mc && spec)
+		mc = getmountalldir (spec);
 
 	my_free(devname);
 	return mc;

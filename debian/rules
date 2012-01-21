@@ -9,6 +9,7 @@ DISTRO :=$(shell lsb_release -is 2>/dev/null || echo Debian)
 
 DEB_HOST_GNU_TYPE=$(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
 DEB_BUILD_GNU_TYPE=$(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+DEB_HOST_MULTIARCH=$(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
 ifneq ($(DEB_HOST_GNU_TYPE),$(DEB_BUILD_GNU_TYPE))
 CROSS= --build $(DEB_BUILD_GNU_TYPE) --host $(DEB_HOST_GNU_TYPE) --cache-file=$(DEB_HOST_GNU_TYPE).cache
 else
@@ -32,9 +33,9 @@ export arch = $(DEB_HOST_ARCH)
 version := $(shell sed -e '1{;s|^util-linux (\(.*\))\ .*|\1|;q;}' debian/changelog)
 Upstream := $(shell sed 's/^.*(\(.*\)-.*).*/\1/; q' debian/changelog)
 
-CONFOPTS= --enable-raw --enable-rdev --with-slang --enable-ddate
+CONFOPTS= --enable-raw --enable-rdev --enable-partx --with-slang --libdir=/lib/$(DEB_HOST_MULTIARCH) --libexecdir=\$${prefix}/lib/$(DEB_HOST_MULTIARCH)
 ifeq ($(DEB_HOST_ARCH_OS),linux)
-CONFOPTS += --enable-partx --with-selinux --enable-libmount-mount
+CONFOPTS += --with-selinux --enable-libmount-mount
 endif
 
 build: build-arch build-indep
@@ -106,9 +107,9 @@ endif
 	rm -f debian/bsdutils/usr/bin/ul debian/bsdutils/usr/share/man/man1/ul*.1
 	rm -f debian/bsdutils/usr/bin/cal debian/bsdutils/usr/share/man/man1/cal.1
 	# remove *.la files and empty directories which do not belong into util-linux
-	rm -f debian/util-linux/usr/lib/*.la
+	rm -f debian/util-linux/usr/lib/*/*.la
 	rm -rf debian/util-linux/usr/include
-	rm -rf debian/util-linux/usr/lib/pkgconfig
+	rm -rf debian/util-linux/usr/lib/$(DEB_HOST_MULTIARCH)/pkgconfig
 	# perl gets to do rename, not us.
 	mv debian/util-linux/usr/bin/rename debian/util-linux/usr/bin/rename.ul
 	mv debian/util-linux/usr/share/man/man1/rename.1 debian/util-linux/usr/share/man/man1/rename.ul.1
@@ -119,6 +120,7 @@ endif
 	rmdir  debian/util-linux/usr/share/getopt
 	for pkg in bsdutils mount uuid-runtime; do install -m 644 debian/$${pkg}.lintian-overrides debian/$${pkg}/usr/share/lintian/overrides/$${pkg}; done
 	install -m 644 debian/mime.util-linux debian/util-linux/usr/lib/mime/packages/util-linux
+ifeq ($(DISTRO),Debian)
 	if [ -f debian/util-linux/sbin/hwclock ] ; then \
 	    install -m 755 debian/hwclock.sh debian/util-linux/etc/init.d/hwclock.sh; \
 	    install -m 755 debian/hwclock.sh debian/util-linux/etc/init.d/hwclockfirst.sh; \
@@ -133,21 +135,26 @@ endif
 	    install -m 644 debian/hwclock.rules debian/util-linux/lib/udev/rules.d/85-hwclock.rules; \
 	    install -m 755 debian/hwclock-set debian/util-linux/lib/udev/hwclock-set; \
 	fi
+else
+	# blkid.conf file and blkid.tab symlink
+	install -m 644 debian/blkid.conf debian/libblkid1/etc/
+	ln -s /dev/.blkid.tab debian/libblkid1/etc/blkid.tab
+endif
 ifeq ($(DEB_HOST_ARCH_OS),linux)
 	# copy mount library and symlink into udeb
-	ln debian/libmount1/lib/libmount.so.1.* debian/libmount1-udeb/lib/
-	ln debian/libmount1/lib/libmount.so.1   debian/libmount1-udeb/lib/
+	ln debian/libmount1/lib/*/libmount.so.1.* debian/libmount1-udeb/lib/
+	ln debian/libmount1/lib/*/libmount.so.1   debian/libmount1-udeb/lib/
 endif
 	# copy blkid library and symlink into udeb
-	ln debian/libblkid1/lib/libblkid.so.1.* debian/libblkid1-udeb/lib/
-	ln debian/libblkid1/lib/libblkid.so.1   debian/libblkid1-udeb/lib/
+	ln debian/libblkid1/lib/*/libblkid.so.1.* debian/libblkid1-udeb/lib/
+	ln debian/libblkid1/lib/*/libblkid.so.1   debian/libblkid1-udeb/lib/
 	ln debian/util-linux/sbin/blkid debian/util-linux-udeb/sbin/
 	# overwrite copyright
 	install -m 644 debian/libblkid.copyright debian/libblkid1/usr/share/doc/libblkid1/copyright
 	install -m 644 debian/libblkid.copyright debian/libblkid-dev/usr/share/doc/libblkid-dev/copyright
 	# copy uuid library and symlink into udeb
-	ln debian/libuuid1/lib/libuuid.so.1.* debian/libuuid1-udeb/lib/
-	ln debian/libuuid1/lib/libuuid.so.1   debian/libuuid1-udeb/lib/
+	ln debian/libuuid1/lib/*/libuuid.so.1.* debian/libuuid1-udeb/lib/
+	ln debian/libuuid1/lib/*/libuuid.so.1   debian/libuuid1-udeb/lib/
 	# overwrite copyright
 	install -m 644 debian/libuuid.copyright debian/libuuid1/usr/share/doc/libuuid1/copyright
 	install -m 644 debian/libuuid.copyright debian/uuid-dev/usr/share/doc/uuid-dev/copyright
@@ -199,7 +206,12 @@ binary-arch: build install
 	dh_testdir -s
 	dh_testroot -s
 	dh_lintian -s
+ifeq ($(DISTRO),Debian)
 	dh_installinit -s -- defaults 15 85
+else
+	dh_installinit -putil-linux --name=hwclock --no-start
+	dh_installinit -putil-linux --name=hwclock-save --upstart-only --no-start
+endif
 	[ -n "$(STRIP)" ] || dh_strip -s
 	dh_makeshlibs -s
 	dh_installdebconf -s

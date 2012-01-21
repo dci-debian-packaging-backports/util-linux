@@ -1,1 +1,1 @@
-lib/libblkid*.so.*
+lib/*/libblkid*.so.*

@@ -16,11 +16,15 @@
 #		before changing this file. You risk serious clock
 #		misbehaviour otherwise.
 
+# In Ubuntu, it is normal that this init script is not run at startup;
+# the system clock is set from the hardware clock by the kernel, and
+# adjusted if the hardware clock was in localtime by udev.
+
 ### BEGIN INIT INFO
 # Provides:          hwclock
 # Required-Start:    checkroot
 # Required-Stop:     $local_fs
-# Default-Start:     S
+# Default-Start:     
 # Default-Stop:      0 6
 ### END INIT INFO
 
@@ -136,18 +140,6 @@ hwclocksh()
 	    	NOADJ=""
 	    fi
 
-	    # Preserve an ACPI wakeup time
-	    # (see http://www.mythtv.org/wiki/index.php/ACPI_Wakeup)
-	    if [ -f /sys/class/rtc/rtc0/wakealarm ]; then
-		ACPITIME_LOCATION=""
-	    elif [ -f /proc/acpi/alarm ]; then
-		ACPITIME_LOCATION="/proc/acpi/alarm"
-	    else
-		ACPITIME_LOCATION=""
-	    fi 
-	    if [ "$ACPITIME_LOCATION" ]; then
-		ACPITIME=$(cat $ACPITIME_LOCATION)
-	    fi
 	    if [ "$HWCLOCKACCESS" != no ]; then
 		log_action_msg "Saving the system clock"
 		if [ "$GMT" = "-u" ]; then
@@ -155,9 +147,6 @@ hwclocksh()
 		fi
 		if /sbin/hwclock --rtc=/dev/$HCTOSYS_DEVICE --systohc $GMT $HWCLOCKPARS $BADYEAR $NOADJ; then
 		    verbose_log_action_msg "Hardware Clock updated to `date`"
-		fi
-		if [ "$ACPITIME_LOCATION" ]; then
-		    echo "$ACPITIME" > $ACPITIME_LOCATION
 		fi
 	    else
 		verbose_log_action_msg "Not saving System Clock"
