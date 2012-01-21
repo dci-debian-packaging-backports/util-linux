@@ -33,9 +33,10 @@ export arch = $(DEB_HOST_ARCH)
 version := $(shell sed -e '1{;s|^util-linux (\(.*\))\ .*|\1|;q;}' debian/changelog)
 Upstream := $(shell sed 's/^.*(\(.*\)-.*).*/\1/; q' debian/changelog)
 
-CONFOPTS= --enable-raw --enable-rdev --enable-partx --with-slang --libdir=/lib/$(DEB_HOST_MULTIARCH) --libexecdir=\$${prefix}/lib/$(DEB_HOST_MULTIARCH)
+CONFOPTS= --enable-raw --enable-rdev --with-slang --enable-ddate --enable-line
+CONFOPTS += --libdir=/lib/$(DEB_HOST_MULTIARCH) --libexecdir=\$${prefix}/lib/$(DEB_HOST_MULTIARCH)
 ifeq ($(DEB_HOST_ARCH_OS),linux)
-CONFOPTS += --with-selinux --enable-libmount-mount
+CONFOPTS += --with-selinux --enable-libmount-mount --enable-partx
 endif
 
 build: build-arch build-indep
@@ -43,7 +44,8 @@ build-arch: build-stamp
 build-indep: build-stamp
 build-stamp:
 	dh_testdir
-	./configure $(CONFOPTS) $(CROSS)
+	autoreconf -vfi
+	./configure  $(shell dpkg-buildflags --export=configure) $(CONFOPTS) $(CROSS)
 	$(MAKE) all CPU=$(arch) arch=$(arch)
 	touch build-stamp
 
@@ -83,7 +85,7 @@ install: build
 	dh_installmenu -i -s
 	dh_installcron -i -s
 	dh_installinfo -i -s
-	dh_installchangelogs docs/v*-ReleaseNotes -i -s
+	dh_installchangelogs docs/v$(Upstream)-ReleaseNotes -i -s
 	dh_movefiles --sourcedir=debian/util-linux -i -s
 	rm -rf debian/util-linux/usr/share/locale
 	#

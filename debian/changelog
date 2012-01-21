@@ -1,3 +1,26 @@
+util-linux (2.20.1-1.2) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Fixing FTBFS on !linux (Closes: #650185)
+    * Only enable partx where it is supported
+    * Handle vc flags missing on FreeBSD
+    * Fix tty creation on kFreeBSD taking patch from 2.19
+
+ -- Christoph Egger <christoph@debian.org>  Mon, 16 Jan 2012 22:30:04 +0100
+
+util-linux (2.20.1-1.1) unstable; urgency=high
+
+  * Non-maintainer upload.
+  * Fix FTBFS by running autoreconf -vfi before calling ./configure, which
+    looks better than patching Makefile.in's manually. Thanks to Thorsten
+    Glaser for reporting, and to Simon Ruderich for suggesting a patch
+    (Closes: #650534).
+  * Add autoconf, automake, autopoint, and libtool to Build-Depends
+    accordingly.
+  * Set severity to “high” for the RC bug fix.
+
+ -- Cyril Brulebois <kibi@debian.org>  Thu, 05 Jan 2012 18:24:37 +0100
+
 util-linux (2.20.1-1ubuntu1) precise; urgency=low
 
   * Merge from Debian unstable, remaining changes:
