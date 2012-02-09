@@ -1,3 +1,46 @@
+util-linux (2.20.1-2) unstable; urgency=low
+
+  [Reuben Thomas]
+
+  * Better english in mount.8.  Closes: #603096
+
+  [Steve Langasek]
+
+  * Multiarch support in util-linux build.  Closes: #631175
+
+  [LaMont Jones]
+
+  * Drop ancient and technically incorrect workaround for hwclock ordering in
+    postinst.  Closes: #195720
+  * Re-enable ddate, disabled by default upstream in 2.20.  Closes: #650321
+  * Ack 2.20.1-1.2
+  * Re-enable ddate.  Closes: #650321
+  * reenable line.  Closes: #653414
+  * Deliver the correct upstream changelog.  Closes: #656228
+
+  [Christoph Biedl]
+
+  * Fix typo in misc-utils/blkid.c.  Closes: #655127
+
+  [Samuel Thibault]
+
+  * fix FTBFS on !linux-any.  Closes: #650185
+
+  [Andrew Pollock]
+
+  * Preserve the ACPI wakeup time when updating the hardware clock. 
+    Closes: #505138
+
+  [Jakub Wilk]
+
+  * Fix typo in unshare manpage.  Closes: #619666
+
+  [Moritz Muehlenhoff]
+
+  * Enable hardened build flags.  Closes: #653856
+
+ -- LaMont Jones <lamont@debian.org>  Thu, 09 Feb 2012 10:06:42 -0700
+
 util-linux (2.20.1-1.2) unstable; urgency=low
 
   * Non-maintainer upload.
