@@ -130,6 +130,7 @@ Package: libmount1
 Section: libs
 Priority: required
 Depends: ${shlibs:Depends}, ${misc:Depends}
+Pre-Depends: multiarch-support
 Architecture: linux-any
 Description: block device id library
  The device mounting library, used by mount and mount helpers.
