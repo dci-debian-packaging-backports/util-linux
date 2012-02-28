@@ -102,7 +102,6 @@ Priority: optional
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Architecture: any
 Multi-Arch: same
-Pre-Depends: multiarch-support
 Description: block device id library
  The blkid library which allows system programs like fsck and
  mount to quickly and easily find block devices by filesystem UUID and
