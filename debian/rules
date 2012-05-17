@@ -124,15 +124,8 @@ endif
 	install -m 644 debian/mime.util-linux debian/util-linux/usr/lib/mime/packages/util-linux
 	if [ -f debian/util-linux/sbin/hwclock ] ; then \
 	    install -m 755 debian/hwclock.sh debian/util-linux/etc/init.d/hwclock.sh; \
-	    install -m 755 debian/hwclock.sh debian/util-linux/etc/init.d/hwclockfirst.sh; \
-	    sed -i -e '/^FIRST=/s/no/yes/' -e '/Provides:/s/ck/ckfirst/' \
-		-e '/Required-Start:/s/checkroot/mountdevsubfs/' \
-		-e '/Required-Start:/a# Required-Stop:' -e '/Required-Stop:/d' \
-		-e '/Default-Start:/a# X-Start-Before:    checkroot' \
-		-e '/Default-Start:/a# Default-Stop:' -e '/Default-Stop:/d' \
-		debian/util-linux/etc/init.d/hwclockfirst.sh; \
-	fi
-	if [ -f debian/util-linux/sbin/hwclock ] ; then \
+	    install -m 644 debian/hwclock.default debian/util-linux/etc/default/hwclock; \
+	    install -m 644 debian/hwclock.5 debian/util-linux/usr/share/man/man5; \
 	    install -m 644 debian/hwclock.rules debian/util-linux/lib/udev/rules.d/85-hwclock.rules; \
 	    install -m 755 debian/hwclock-set debian/util-linux/lib/udev/hwclock-set; \
 	fi
