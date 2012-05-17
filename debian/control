@@ -64,7 +64,7 @@ Description: Basic utilities from 4.4BSD-Lite
  The remaining standard BSD utilities are provided by bsdmainutils.
 
 Package: fdisk-udeb
-Architecture: linux-any
+Architecture: linux-any hurd-any
 Priority: extra
 Section: debian-installer
 Depends: ${shlibs:Depends}, ${misc:Depends}
@@ -73,7 +73,7 @@ XB-Installer-Menu-Item: 99999
 Description: Manually partition a hard drive (fdisk)
 
 Package: cfdisk-udeb
-Architecture: linux-any
+Architecture: linux-any hurd-any
 Priority: extra
 Section: debian-installer
 Depends: ${shlibs:Depends}, ${misc:Depends}
