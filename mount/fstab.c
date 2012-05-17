@@ -319,9 +319,11 @@ getmntdevbackward (const char *name, struct mntentchn *mcprev) {
 			return mc;
 	}
 
-	/* non-canonical names in mtab (this is BAD THING!) */
+	/* non-canonical names in mtab (this is BAD THING!) 
+	 * but it should be allowed only for spec fsname(s) 
+	 */
 	for (mc = mcprev->prev; mc && mc != mc0; mc = mc->prev) {
-		char *cn = canonicalize(mc->m.mnt_fsname);
+		char *cn = canonicalize_spec(mc->m.mnt_fsname);
 		int res = cn ? streq(cn, name) : 0;
 
 		free(cn);
