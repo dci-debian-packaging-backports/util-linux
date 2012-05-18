@@ -2175,7 +2175,7 @@ do_mount_all (char *types, char *options, char *test_opts) {
 		if (has_noauto (mc->m.mnt_opts))
 			continue;
 		if (matching_type (mc->m.mnt_type, types)
-		    && matching_opts (mc->m.mnt_opts ? mc->m.mnt_opts : "defaults", test_opts)
+		    && matching_opts (mc->m.mnt_opts, test_opts)
 		    && !streq (mc->m.mnt_dir, "/")
 		    && !streq (mc->m.mnt_dir, "root")
 		    && !is_fstab_entry_mounted(mc, verbose)) {

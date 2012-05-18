@@ -140,12 +140,6 @@ matching_type (const char *type, const char *types) {
 	  return 0;
      if (types == NULL)
 	  return 1;
-     
-     if(options == NULL)
-     {
-	error(_("Invalid options set while testing against %s"), test_opts);
-	return 0;
-     }
 
      no = 0;
      if (!strncmp(types, "no", 2)) {
