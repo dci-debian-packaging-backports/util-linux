@@ -24,5 +24,5 @@ fi
 if [ yes = "$BADYEAR" ] ; then
     /sbin/hwclock --rtc=$dev --systz --badyear
 else
-    /sbin/hwclock --rtc=$dev --systzif [ yes != "$UTC" ] ; then
+    /sbin/hwclock --rtc=$dev --systz
 fi
