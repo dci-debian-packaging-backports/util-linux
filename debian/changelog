@@ -1,3 +1,10 @@
+util-linux (2.20.1-5.1ubuntu8) raring; urgency=low
+
+  * Cherry pick upstream support for resizepart and the
+    -u ( update ) switch to partx (LP: #1096999)
+
+ -- Phillip Susi <psusi@ubuntu.com>  Mon, 04 Feb 2013 15:40:51 -0500
+
 util-linux (2.20.1-5.1ubuntu7) raring; urgency=low
 
   * libblkid/src/superblocks/promise_raid.c: Add missing metadata
