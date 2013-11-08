@@ -29,7 +29,7 @@ nodist_libmount_la_SOURCES = mountP.h
 
 libmount_la_LIBADD = $(ul_libblkid_la) $(SELINUX_LIBS)
 
-libmount_la_DEPENDENCIES = $(libmount_la_LIBADD) libmount.sym libmount.h.in
+libmount_la_DEPENDENCIES = $(ul_libblkid_la) libmount.sym libmount.h.in
 
 libmount_la_LDFLAGS = -Wl,--version-script=$(ul_libmount_srcdir)/libmount.sym \
                       -version-info $(LIBMOUNT_VERSION_INFO)
