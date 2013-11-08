@@ -1,3 +1,10 @@
+util-linux (2.20.1-5.1ubuntu6) raring; urgency=low
+
+  * Set iversion as option itself and delete double nofail options
+    in mount/mount.8 (LP: #1095521)
+
+ -- Alessandro Losavio <alessandro.losavio@yahoo.com>  Thu, 24 Jan 2013 21:02:16 +0000
+
 util-linux (2.20.1-5.1ubuntu5) raring; urgency=low
 
   * Add arm64 support to fdisk (thanks, Wookey; LP: #1061609).
