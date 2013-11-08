@@ -1,3 +1,13 @@
+util-linux (2.20.1-5.1ubuntu2) quantal; urgency=low
+
+  * misc-utils/wipefs.c: In --all mode, wipe several times until no further
+    signatures are found. This is required for file systems like VFAT which
+    can be detected in multiple different ways. This is fixed properly in 2.21
+    (see LP #1012081), but does not backport well, so use this local hack for
+    now. (LP: #1046665)
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Thu, 06 Sep 2012 08:00:00 +0200
+
 util-linux (2.20.1-5.1ubuntu1) quantal-proposed; urgency=low
 
   * Merge from Debian unstable, remaining changes:
