@@ -45,9 +45,6 @@ if [ -n "$2" ] && dpkg --compare-versions "$2" lt "2.20.1-5"; then
     else
         sed -i -e 's:^LOCAL$:UTC:' /etc/adjtime
     fi
-    if [ -f /etc/default/rcS ]; then
-        sed -i -e 's:^\(UTC=.*\)$:#\1 # OBSOLETE; see /etc/adjtime and hwclock(8).:' /etc/default/rcS
-    fi
 fi
 
 if [ -x /usr/sbin/update-mime ]; then
