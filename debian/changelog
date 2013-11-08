@@ -1,3 +1,11 @@
+util-linux (2.20.1-5.5) unstable; urgency=medium
+
+  * Non-maintainer upload by the Security Team.
+  * Fix cve-2013-0157: mount discloses information about the existence of
+    folders (closes: #697464) 
+
+ -- Michael Gilbert <mgilbert@debian.org>  Wed, 03 Jul 2013 01:39:47 +0000
+
 util-linux (2.20.1-5.4) unstable; urgency=low
 
   * Non-maintainer upload.
