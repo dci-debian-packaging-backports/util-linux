@@ -1,3 +1,11 @@
+util-linux (2.20.1-5.3) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Ship the /var/lib/libuuid/ directory in the package instead of creating it
+    in postinst. Closes: #694898
+
+ -- David Prévot <taffit@debian.org>  Sun, 09 Dec 2012 12:46:41 -0400
+
 util-linux (2.20.1-5.2) unstable; urgency=low
 
   * Non-maintainer upload.
