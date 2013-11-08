@@ -1,3 +1,10 @@
+util-linux (2.20.1-5.1ubuntu4) raring; urgency=low
+
+  * Configure with --disable-silent-rules.
+  * Fix cross build.
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 04 Jan 2013 19:18:13 +0100
+
 util-linux (2.20.1-5.1ubuntu3) raring; urgency=low
 
   * Revert build-dependency from gettext:any to gettext, now that gettext is
