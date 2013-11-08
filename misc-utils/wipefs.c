@@ -377,15 +377,21 @@ main(int argc, char **argv)
 	if (optind != argc)
 		errx(EXIT_FAILURE, _("only one device as argument is currently supported."));
 
-	wp = read_offsets(wp, fname, all);
+        /* we need to wipe several times for some file systems like VFAT, see
+         * https://launchpad.net/bugs/1046665 */
+        do {
+                wp = read_offsets(wp, fname, all);
 
-	if (wp) {
-		if (has_offset || all)
-			do_wipe(wp, fname, noact);
-		else
-			print_all(wp, mode);
+                if (wp) {
+                        if (has_offset || all)
+                                do_wipe(wp, fname, noact);
+                        else
+                                print_all(wp, mode);
 
-		free_wipe(wp);
-	}
+                        free_wipe(wp);
+                        wp = NULL;
+                } else
+                        break;
+        } while (!noact && all);
 	return EXIT_SUCCESS;
 }
