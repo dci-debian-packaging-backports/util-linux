@@ -1,3 +1,12 @@
+util-linux (2.20.1-5.4) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Rebuild against new eglibc; no source changes.  libblkid.a uses the
+    symbol __secure_getenv which is no longer present (it provides
+    secure_getenv).  Closes: #707996
+
+ -- Roger Leigh <rleigh@debian.org>  Sun, 12 May 2013 20:31:11 +0100
+
 util-linux (2.20.1-5.3) unstable; urgency=low
 
   * Non-maintainer upload.
