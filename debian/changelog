@@ -1,3 +1,9 @@
+util-linux (2.20.1-5.1ubuntu5) raring; urgency=low
+
+  * Add arm64 support to fdisk (thanks, Wookey; LP: #1061609).
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Thu, 17 Jan 2013 05:11:03 +0000
+
 util-linux (2.20.1-5.1ubuntu4) raring; urgency=low
 
   * Configure with --disable-silent-rules.
