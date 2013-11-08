@@ -1,3 +1,169 @@
+util-linux (2.20.1-5.1ubuntu1) quantal-proposed; urgency=low
+
+  * Merge from Debian unstable, remaining changes:
+    - Install custom blkid.conf to use /dev/.blkid.tab since we don't
+      expect device names to survive a reboot
+    - Build-depend on gettext:any for cross-building support.
+    - Mark libmount1 Multi-Arch: same.
+    - Replace hwclock udev rule with an Upstart job.
+    - Since upstart is required in Ubuntu, the hwclock.sh init script is not
+      called on startup.
+    - Drop depends on initscripts for the above.
+    - Mention mountall(8) in fstab(5) manpages, along with its special
+      options.
+    - For the case where mount is called with a directory to mount, look
+      that directory up in mountall's /lib/init/fstab if we couldn't find
+      it mentioned anywhere else.  This means "mount /proc", "mount /sys",
+      etc. work.
+    - mount.8 points to the cifs-utils package, not the obsolete smbfs one. 
+  * Dropped changes, included in Debian:
+    - Build for multiarch.
+    - Add pre-depends on multiarch-support.
+    - Use canonicalize_spec in getmntdevbackward. proc should not be
+      interpreted as a non-canonical-path.
+    - term-utils/agetty.c: allow getty to work on /dev/pts/N
+    - Fix up the .pc.in files to know about libexecdir, so our substitutions
+      don't leave us with unusable pkg-config files.
+    - configure.ac: don't try to be clever about extracting a path name from
+      $libdir to append to /usr in a way that's not overridable; instead,
+      reuse the built-in configurable libexecdir.
+    - Remove the hwclockfirst.sh init script.
+  * Do not replace /etc/default/rcS with /etc/adjtime.  This has already
+    been analyzed carefully in Ubuntu, and /etc/adjtime is not beneficial
+    at all.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Fri, 29 Jun 2012 03:14:53 +0000
+
+util-linux (2.20.1-5.1) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * agetty: don't use log_err() for non-fatal errors
+  * agetty: Eliminate another log_err() call. Closes: #675569
+  * Fix watch file
+
+ -- Hilko Bengen <bengen@debian.org>  Fri, 22 Jun 2012 00:00:36 +0200
+
+util-linux (2.20.1-5) unstable; urgency=low
+
+  [Petr Uzel]
+
+  * sfdisk: fix calculation due to type mismatch (ix86)  Closes: #670127
+
+  [Eduard Bloch]
+
+  * Make sure we have non-null mount options.  Closes: #632118
+
+  [Francesco Del Degan]
+
+  * tries to umount /proc when told to umount /some/dir/proc without an
+    /etc/mtab entry.  Closes: #634107
+
+  [Pino Toscano]
+
+  * Deliver {c,}fdisk-udeb on hurd.  Closes: #672551
+
+  [Roger Leigh]
+
+  * Improve handling of the hardware clock
+    - Remove redundant hwclockfirst.sh and hwclock.sh.  The reason for
+      this redundant script existing (/etc/localtime not being present
+      until after /usr was mounted AFAICT) no longer exists.  The
+      hwclock script has been adjusted to run before checkroot.
+      Closes: #660365
+    - Migrate existing
+      UTC= setting in /etc/default/rcS to UTC/LOCAL in /etc/adjtime.
+      This removes needless duplication of the setting, and prevents the
+      behaviour of hwclock being overridden, and its configuration
+      overwritten every shutdown.  Closes: #554345
+    - The hwclock init scripts now use /etc/adjtime instead of the
+      --utc and --localtime options (based on the UTC setting).
+    - Add /etc/default/hwclock and hwclock(5) which permit
+      configuration without editing the initscript, and also document
+      all the undocumented variables used by the scripts.
+      Closes: #481357, #659654
+    - The udev hwclock-set script runs hwclock --tzset unconditionally
+      in all cases (it's a no-op for UTC).
+    - The user running "hwclock --systohc (--utc|--localtime)" is now
+      handled correctly.  The clock state is recorded in /etc/adjtime
+      and correctly handled on system restart.  This means the UTC
+      setting in /etc/default/rcS doesn't create problems by requiring
+      two separate changes (changing the UTC setting and running
+      hwclock) to do the same thing.
+    - Comment out the now-obsolete UTC= setting in /etc/default/rcS,
+      with a reference to /etc/adjtime and hwclock(8).
+    - systemd uses /etc/adjtime as for hwclock to store the hardware
+      clock UTC/LOCAL configuration.  This change means there's a
+      single place to store the hardware clock configuration for all
+      init systems.
+
+ -- LaMont Jones <lamont@debian.org>  Thu, 17 May 2012 12:11:44 -0600
+
+util-linux (2.20.1-4) unstable; urgency=low
+
+  [Michał Kułach]
+
+  * Polish Debconf Translation.  Closes: #658507
+
+  [LaMont Jones]
+
+  * fix lintian error
+  * Drop broken Pre-Depends: multiarch-support on udeb.  Closes: #661562
+
+  [Roger Leigh]
+
+  * Support /etc/default/hwclock.  Closes: #659654
+
+ -- LaMont Jones <lamont@debian.org>  Mon, 27 Feb 2012 20:53:43 -0700
+
+util-linux (2.20.1-3) unstable; urgency=low
+
+  * fix lintian error
+
+ -- LaMont Jones <lamont@debian.org>  Fri, 24 Feb 2012 05:34:39 -0700
+
+util-linux (2.20.1-2) unstable; urgency=low
+
+  [Reuben Thomas]
+
+  * Better english in mount.8.  Closes: #603096
+
+  [Steve Langasek]
+
+  * Multiarch support in util-linux build.  Closes: #631175
+
+  [LaMont Jones]
+
+  * Drop ancient and technically incorrect workaround for hwclock ordering in
+    postinst.  Closes: #195720
+  * Re-enable ddate, disabled by default upstream in 2.20.  Closes: #650321
+  * Ack 2.20.1-1.2
+  * Re-enable ddate.  Closes: #650321
+  * reenable line.  Closes: #653414
+  * Deliver the correct upstream changelog.  Closes: #656228
+
+  [Christoph Biedl]
+
+  * Fix typo in misc-utils/blkid.c.  Closes: #655127
+
+  [Samuel Thibault]
+
+  * fix FTBFS on !linux-any.  Closes: #650185
+
+  [Andrew Pollock]
+
+  * Preserve the ACPI wakeup time when updating the hardware clock.
+    Closes: #505138
+
+  [Jakub Wilk]
+
+  * Fix typo in unshare manpage.  Closes: #619666
+
+  [Moritz Muehlenhoff]
+
+  * Enable hardened build flags.  Closes: #653856
+
+ -- LaMont Jones <lamont@debian.org>  Thu, 09 Feb 2012 10:06:42 -0700
+
 util-linux (2.20.1-1.2) unstable; urgency=low
 
   * Non-maintainer upload.
@@ -20,6 +186,23 @@ util-linux (2.20.1-1.1) unstable; urgency=high
   * Set severity to “high” for the RC bug fix.
 
  -- Cyril Brulebois <kibi@debian.org>  Thu, 05 Jan 2012 18:24:37 +0100
+
+util-linux (2.20.1-1ubuntu3) precise; urgency=low
+
+  * Build-depend on gettext:any for cross-building support.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Thu, 29 Mar 2012 21:22:19 -0700
+
+util-linux (2.20.1-1ubuntu2) precise; urgency=low
+
+  * term-utils/agetty.c: allow getty to work on /dev/pts/N
+      
+    This takes upstream commit 1593b134ebf596ae7a2b1e73f2dcc8c4e7febddd,
+    plus an extra s/log_err/log_warn/ if when tcsetpgrp fails.
+
+    This is needed for libvirt-lxc and lxc consoles to work.
+
+ -- Serge Hallyn <serge.hallyn@ubuntu.com>  Thu, 12 Jan 2012 13:54:09 +0100
 
 util-linux (2.20.1-1ubuntu1) precise; urgency=low
 
@@ -299,7 +482,7 @@ util-linux (2.17.2-8) unstable; urgency=low
 
 util-linux (2.17.2-7) unstable; urgency=low
 
-  * dh_installdebconf is needed in binary-arch, not so much in -indep. 
+  * dh_installdebconf is needed in binary-arch, not so much in -indep.
     Based on report from Adam D. Barratt <adam@adam-barratt.org.uk>.
     Closes: #566072
 
@@ -345,7 +528,7 @@ util-linux (2.17.2-6) unstable; urgency=low
 
   [Thorsten Glaser]
 
-  * hwclock: [m68k] unbreak FTBFS with recent (>= 2.4.18?) kernels. 
+  * hwclock: [m68k] unbreak FTBFS with recent (>= 2.4.18?) kernels.
     Closes: #578168
 
   [Slavko]
@@ -368,17 +551,17 @@ util-linux (2.17.2-4) unstable; urgency=low
 
   [Miklos Szeredi]
 
-  * mount: don't canonicalize "spec" with --no-canonicalize option. 
+  * mount: don't canonicalize "spec" with --no-canonicalize option.
     Closes: #593336
 
   [Karel Zak]
 
-  * fdisk: fix freespace boundaries calculation on SGI disklabel. 
+  * fdisk: fix freespace boundaries calculation on SGI disklabel.
     Closes: #510130
 
   [LaMont Jones]
 
-  * Deliver agetty as both agetty and getty, preferring agetty. 
+  * Deliver agetty as both agetty and getty, preferring agetty.
     Closes: #117596
   * Declare source format (1.0)
   * use debconf (iff installed) to warn about noauto fileysstems with non-zero
@@ -992,7 +1175,7 @@ util-linux (2.16-2.1) unstable; urgency=low
   * Upload to unstable.
   * Don't ship *.la files.
   * Add avr32 to debian/control (closes: bug#528518).
-  
+
   [ Michael Biebl ]
   * Remove the outdated debian/shlibs.local file.
   * Remove the auto-update of symbols files from debian/rules.
@@ -1774,7 +1957,7 @@ util-linux (2.15~rc2-1) experimental; urgency=low
   * lib: do not include <linux/fd.h> in ismounted.c
 
   [LaMont Jones]
-  
+
   * Package
 
   [Matthew Garrett]
@@ -1832,7 +2015,7 @@ util-linux (2.15~rc1-1) experimental; urgency=low
 
   [Tim Gardner]
 
-  * Disable the fallback clause in hwclock when /dev/rtc cannot be opened. 
+  * Disable the fallback clause in hwclock when /dev/rtc cannot be opened.
     LP: #274402
 
   [Kalev Soikonen]
@@ -2381,7 +2564,7 @@ util-linux (2.15~rc1-1) experimental; urgency=low
   * blkid: Optimize devicemapper support
   * blkid: Unexport the private symbol blkid_devdirs
   * blkid: Give a priority bonus to "leaf" devicemapper devices
-  * blkid: Refuse to create a device structure for a non-existent device. 
+  * blkid: Refuse to create a device structure for a non-existent device.
     Closes: #502541
   * blkid: add fallback to ext4 for 2.6.29+ kernels if ext2 is not present
 
@@ -2472,7 +2655,7 @@ util-linux (2.14.2-1) unstable; urgency=low
 
   [LaMont Jones]
 
-  * mount: segfault when creating mtab and cannot determine fsname. 
+  * mount: segfault when creating mtab and cannot determine fsname.
     Closes: #488312
 
   [Kel Modderman]
@@ -3570,7 +3753,7 @@ util-linux (2.12r-20) unstable-UNRELEASED; urgency=low
  -- LaMont Jones <lamont@debian.org>  Sun, 17 Jun 2007 06:01:46 -0600
 
 util-linux (2.12r-19ubuntu2) gutsy; urgency=low
-  
+
   * Fix sparc disk label generation. This is required for LDOM
     and parallel installations with Solaris 10.
     Add patch: 80sparc-new-label
@@ -4120,10 +4303,10 @@ util-linux (2.12-7) unstable; urgency=low
       since it will not be shown in cfdisk and causes confusion amongst
       users, this change could be reverted when upstream manages
       8-bit characters better (Closes: #210363, #204162)
-    - mkswap manpage now mentiones --sparece=never option to cp 
+    - mkswap manpage now mentiones --sparece=never option to cp
       (Closes: #184492)
     - Added upstream maintainers to debian/copyright (Closes: #130858)
- 
+
  -- LaMont Jones <lamont@debian.org>  Fri,  6 Feb 2004 14:50:09 -0700
 
 util-linux (2.12-6) unstable; urgency=low
@@ -4494,7 +4677,7 @@ util-linux (2.11b-1) unstable; urgency=high
   * Moved the "install-info" call from the postrm to the prerm.
     (closes: #90883)
   * Install "HOSTORY" as "changelog.gz" in all packages.
-  * Removed the "swapdev" link to "rdev". Upstream says about swapdev:  
+  * Removed the "swapdev" link to "rdev". Upstream says about swapdev:
       Nevertheless, all this is ancient junk. I just checked swapdev
       and found that it was last used in kernel 0.12 but that swapdev
       (or rdev -s) has not done anything in any kernel later than 0.12.
@@ -4562,7 +4745,7 @@ util-linux (2.10s-1) unstable; urgency=low
 util-linux (2.10q-1) unstable; urgency=low
 
   * New upstream release
-  * New maintainer (possibly temporarily) 
+  * New maintainer (possibly temporarily)
   * I left out the alpha fdisk patch and the crypto patch.  Debian needs to
     line up with the upstream.  If there is demand, will see what I can do.
     Closes: #77259, #69717
@@ -4651,7 +4834,7 @@ util-linux (2.10f-5.1) frozen unstable; urgency=low
     (closes: #62688)
   * Change to line 879 of fdiskbsdlabel.c to allow building on sparc
     (patch sent to maintainer)
-    
+
  -- Stephen R. Gore <sgore@debian.org>  Sun, 25 Jun 2000 22:18:47 +0500
 
 util-linux (2.10f-5) frozen unstable; urgency=low
@@ -4725,8 +4908,8 @@ util-linux (2.10d-5) unstable; urgency=low
 
   * Included patch from "J.H.M. Dassen (Ray)" <jhm@cistron.nl>:
     - Restored enhanced losetup(8) manpage.
-    - Restored encrypted filesystem support, by applying util-linux-2.9w from 
-      patch-int-2.2.13.3.gz as found on ftp.kerneli.org (modified to work with 
+    - Restored encrypted filesystem support, by applying util-linux-2.9w from
+      patch-int-2.2.13.3.gz as found on ftp.kerneli.org (modified to work with
       Debian's kernel-patch-int's crypto.h).
     (closes: #54657)
   * Recompiled with ncurses5.
@@ -5113,7 +5296,7 @@ util-linux (2.9g-0.1) unstable; urgency=low
       - obsolete fseek flag L_SET -> SEEK_SET
       - control-F == f
       - $EDITOR support
-    (Fix bug #27635). 
+    (Fix bug #27635).
   * Link clock.8.gz to hwclock.8.gz (Fix bug #25852).
 
  -- Vincent Renardias <vincent@waw.com>  Thu, 31 Dec 1998 23:48:42 +0100
@@ -5174,7 +5357,7 @@ util-linux (2.7.1-3) unstable; urgency=low
   * Install rdev on only i386 (15228).
   * Don't strip perl script (15480).
   * Add type 17=Hidden IFS to cfdisk (16843).
-    
+
  -- Guy Maor <maor@ece.utexas.edu>  Sun, 11 Jan 1998 17:20:23 -0800
 
 util-linux (2.7.1-2) unstable; urgency=low
@@ -5201,7 +5384,7 @@ util-linux (2.7.1-1) unstable; urgency=low
   	* glibc patch (8815, 11687, 12738).
   	* Set tty to 660 root.dialout (8960).
   * Register pager alternative (12475).
-    
+
  -- Guy Maor <maor@ece.utexas.edu>  Mon, 22 Sep 1997 18:29:53 -0500
 
 util-linux (2.5-12) frozen unstable; urgency=low
@@ -5242,7 +5425,7 @@ util-linux (2.5-8) frozen unstable; urgency=low
 
   * disk-utils/cfdisk.c: cast sector number to ext2_loff_t in calls to
     ext2_llseek()
-  
+
  -- Guy Maor <maor@ece.utexas.edu>  Sat, 23 Nov 1996 23:07:59 -0600
 
 util-linux (2.5-7) unstable; urgency=low
