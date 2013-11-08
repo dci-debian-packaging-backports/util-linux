@@ -1,3 +1,9 @@
+util-linux (2.20.1-5.1ubuntu9) saucy; urgency=low
+
+  * Apply upstream patch for udf bug when blocksize < 2048 (LP: #1164683)
+
+ -- Jim Trigg (jktrigg) <jtrigg@spamcop.net>  Thu, 04 Apr 2013 15:42:05 -0400
+
 util-linux (2.20.1-5.1ubuntu8) raring; urgency=low
 
   * Cherry pick upstream support for resizepart and the
