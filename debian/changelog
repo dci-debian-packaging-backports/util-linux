@@ -1,3 +1,10 @@
+util-linux (2.20.1-5.1ubuntu3) raring; urgency=low
+
+  * Revert build-dependency from gettext:any to gettext, now that gettext is
+    Multi-Arch: foreign.
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Thu, 29 Nov 2012 15:37:58 +0000
+
 util-linux (2.20.1-5.1ubuntu2) quantal; urgency=low
 
   * misc-utils/wipefs.c: In --all mode, wipe several times until no further
