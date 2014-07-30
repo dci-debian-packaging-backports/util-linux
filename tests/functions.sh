@@ -94,6 +94,17 @@ function ts_failed_subtest {
 		ts_report " $msg ($1)"
 	fi
 
+	if [ "$TS_VERBOSE" = "yes" ]; then
+		echo ========= script: $TS_SCRIPT =================
+		echo ================= OUTPUT =====================
+		cat -n $TS_OUTPUT
+		echo ================= EXPECTED ===================
+		cat -n $TS_EXPECTED
+		echo ================= O/E diff ===================
+		diff -u $TS_OUTPUT $TS_EXPECTED
+		echo ==============================================
+	fi
+
 	return $ret
 }
 
