@@ -7486,9 +7486,8 @@ msgid "cannot set signal handler"
 msgstr "obsluhu signálu nelze nastavit"
 
 #: login-utils/su-common.c:367
-#, fuzzy
 msgid " (core dumped)"
-msgstr "%s (výpis paměti uložen)\n"
+msgstr " (výpis paměti uložen)"
 
 #: login-utils/su-common.c:383
 #, c-format

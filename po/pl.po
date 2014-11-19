@@ -7405,9 +7405,8 @@ msgid "cannot set signal handler"
 msgstr "nie można ustawić procedury obsługi sygnału"
 
 #: login-utils/su-common.c:367
-#, fuzzy
 msgid " (core dumped)"
-msgstr "%s (zrzut pamięci)\n"
+msgstr " (zrzut pamięci)"
 
 #: login-utils/su-common.c:383
 #, c-format

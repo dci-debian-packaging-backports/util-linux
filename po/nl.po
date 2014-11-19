@@ -7524,9 +7524,8 @@ msgid "cannot set signal handler"
 msgstr "kan geen signaalverwerker instellen"
 
 #: login-utils/su-common.c:367
-#, fuzzy
 msgid " (core dumped)"
-msgstr "%s (geheugendump gemaakt)\n"
+msgstr " (geheugendump gemaakt)"
 
 #: login-utils/su-common.c:383
 #, c-format

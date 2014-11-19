@@ -7402,9 +7402,8 @@ msgid "cannot set signal handler"
 msgstr "không đặt bộ tiếp hợp tín hiệu"
 
 #: login-utils/su-common.c:367
-#, fuzzy
 msgid " (core dumped)"
-msgstr "%s (lõi được đổ)\n"
+msgstr " (lõi được đổ)"
 
 #: login-utils/su-common.c:383
 #, c-format

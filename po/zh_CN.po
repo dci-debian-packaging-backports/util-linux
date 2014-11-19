@@ -7374,9 +7374,8 @@ msgid "cannot set signal handler"
 msgstr "无法设置信号处理函数"
 
 #: login-utils/su-common.c:367
-#, fuzzy
 msgid " (core dumped)"
-msgstr "%s (核心已转储)\n"
+msgstr " (核心已转储)"
 
 #: login-utils/su-common.c:383
 #, c-format
