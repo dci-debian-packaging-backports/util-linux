@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: util-linux 2.23.1\n"
 "Report-Msgid-Bugs-To: util-linux@vger.kernel.org\n"
-"POT-Creation-Date: 2014-10-24 12:30+0200\n"
+"POT-Creation-Date: 2014-11-19 12:21-0400\n"
 "PO-Revision-Date: 2013-06-07 23:29+0800\n"
 "Last-Translator: Wei-Lun Chao <bluebat@member.fsf.org>\n"
 "Language-Team: Chinese (traditional) <zh-l10n@linux.org.tw>\n"
@@ -578,7 +578,7 @@ msgstr "不受支援的命令"
 
 #: disk-utils/cfdisk.c:2034 include/c.h:286 schedutils/chrt.c:266
 #: schedutils/taskset.c:166 sys-utils/chcpu.c:330 sys-utils/dmesg.c:1335
-#: sys-utils/hwclock.c:1550 sys-utils/lscpu.c:1727 sys-utils/renice.c:102
+#: sys-utils/hwclock.c:1560 sys-utils/lscpu.c:1727 sys-utils/renice.c:102
 #: sys-utils/rtcwake.c:474 sys-utils/tunelp.c:249 term-utils/agetty.c:751
 #: term-utils/script.c:221 term-utils/scriptreplay.c:177
 #: term-utils/write.c:113 text-utils/col.c:208 text-utils/colcrt.c:118
@@ -2557,7 +2557,7 @@ msgstr "用法：%s [選項] [-t 型態 fs-options] 裝置 [大小]\n"
 
 #: disk-utils/mkfs.c:42 include/c.h:280 misc-utils/getopt.c:322
 #: misc-utils/look.c:370 misc-utils/namei.c:431 misc-utils/uuidd.c:75
-#: misc-utils/uuidgen.c:35 misc-utils/wipefs.c:455 sys-utils/hwclock.c:1591
+#: misc-utils/uuidgen.c:35 misc-utils/wipefs.c:455 sys-utils/hwclock.c:1601
 #: sys-utils/renice.c:62 term-utils/script.c:146 term-utils/scriptreplay.c:45
 #: term-utils/write.c:85
 #, c-format
@@ -4648,7 +4648,7 @@ msgstr "忽略 -U (UUIDs 不受支援)"
 
 #: include/c.h:279 misc-utils/getopt.c:314 misc-utils/look.c:366
 #: misc-utils/namei.c:427 misc-utils/uuidd.c:71 misc-utils/uuidgen.c:31
-#: misc-utils/wipefs.c:451 sys-utils/hwclock.c:1570 sys-utils/renice.c:55
+#: misc-utils/wipefs.c:451 sys-utils/hwclock.c:1580 sys-utils/renice.c:55
 #: term-utils/script.c:142 term-utils/scriptreplay.c:40 term-utils/write.c:80
 #, fuzzy
 msgid ""
@@ -11852,22 +11852,22 @@ msgstr "無法設定時鐘因為最後一次調整時間為零，因而歷史記
 msgid "Needed adjustment is less than one second, so not setting clock.\n"
 msgstr "所需的調整少於一秒鐘，因而無法設定時鐘。\n"
 
-#: sys-utils/hwclock.c:1270
+#: sys-utils/hwclock.c:1280
 #, c-format
 msgid "No usable clock interface found.\n"
 msgstr "找不到可用的時鐘介面。\n"
 
-#: sys-utils/hwclock.c:1399 sys-utils/hwclock.c:1405
+#: sys-utils/hwclock.c:1409 sys-utils/hwclock.c:1415
 #, c-format
 msgid "Unable to set system clock.\n"
 msgstr "無法設定系統時鐘。\n"
 
-#: sys-utils/hwclock.c:1418
+#: sys-utils/hwclock.c:1428
 #, c-format
 msgid "At %ld seconds after 1969, RTC is predicted to read %ld seconds after 1969.\n"
 msgstr "1969 年之後 %ld 秒, RTC 預計會讀取 1969 之後 %ld 秒。\n"
 
-#: sys-utils/hwclock.c:1447
+#: sys-utils/hwclock.c:1457
 #, fuzzy
 msgid ""
 "The kernel keeps an epoch value for the Hardware Clock only on an Alpha machine.\n"
@@ -11878,37 +11878,37 @@ msgstr ""
 "這個複製的 hwclock 是 built 用於機器不同於 Alpha\n"
 "(和因而是據推測無法執行中於 Alpha 現在)。 未採取任何行動。"
 
-#: sys-utils/hwclock.c:1464
+#: sys-utils/hwclock.c:1474
 #, fuzzy
 msgid "Unable to get the epoch value from the kernel."
 msgstr "無法提取時期值從內核。"
 
-#: sys-utils/hwclock.c:1466
+#: sys-utils/hwclock.c:1476
 #, c-format
 msgid "Kernel is assuming an epoch value of %lu\n"
 msgstr "內核假設時期值為 %lu\n"
 
-#: sys-utils/hwclock.c:1471
+#: sys-utils/hwclock.c:1481
 #, fuzzy
 msgid "To set the epoch value, you must use the 'epoch' option to tell to what value to set it."
 msgstr "要設定時期值，您必須使用『時期』選項到告訴到什麼值到設定它。"
 
-#: sys-utils/hwclock.c:1475
+#: sys-utils/hwclock.c:1485
 #, c-format
 msgid "Not setting the epoch to %d - testing only.\n"
 msgstr "不將時期設定為 %d - 只限於測試。\n"
 
-#: sys-utils/hwclock.c:1479
+#: sys-utils/hwclock.c:1489
 #, c-format
 msgid "Unable to set the epoch value in the kernel.\n"
 msgstr "無法在內核中設定時期值。\n"
 
-#: sys-utils/hwclock.c:1571
+#: sys-utils/hwclock.c:1581
 #, fuzzy
 msgid " hwclock [function] [option...]\n"
 msgstr " hwclock [函式] [選項...]\n"
 
-#: sys-utils/hwclock.c:1573
+#: sys-utils/hwclock.c:1583
 #, fuzzy
 msgid ""
 "\n"
@@ -11917,7 +11917,7 @@ msgstr ""
 "\n"
 "函式：\n"
 
-#: sys-utils/hwclock.c:1574
+#: sys-utils/hwclock.c:1584
 #, fuzzy
 msgid ""
 " -h, --help           show this help text and exit\n"
@@ -11928,7 +11928,7 @@ msgstr ""
 " -r, --show           讀取硬體時鐘和列印結果\n"
 "     --set            設定 RTC 到時間給定的與 --date\n"
 
-#: sys-utils/hwclock.c:1577
+#: sys-utils/hwclock.c:1587
 #, fuzzy
 msgid ""
 " -s, --hctosys        set the system time from the hardware clock\n"
@@ -11943,11 +11943,11 @@ msgstr ""
 "     --adjust         調整 RTC 到帳號用於 systematic 漂移自從\n"
 "                        時鐘是最後一筆設定或調整\n"
 
-#: sys-utils/hwclock.c:1582
+#: sys-utils/hwclock.c:1592
 msgid " -c, --compare        periodically compare the system clock with the CMOS clock\n"
 msgstr ""
 
-#: sys-utils/hwclock.c:1584
+#: sys-utils/hwclock.c:1594
 #, fuzzy
 msgid ""
 "     --getepoch       print out the kernel's hardware clock epoch value\n"
@@ -11958,7 +11958,7 @@ msgstr ""
 "     --setepoch       設定內核』s 硬體時鐘時期值到\n"
 "                        值給定的與 --epoch\n"
 
-#: sys-utils/hwclock.c:1588
+#: sys-utils/hwclock.c:1598
 #, fuzzy
 msgid ""
 "     --predict        predict RTC reading at time given with --date\n"
@@ -11967,7 +11967,7 @@ msgstr ""
 "     --predict        預測 RTC 讀取於時間給定的與 --date\n"
 " -V, --version        顯示版本資訊然後離開\n"
 
-#: sys-utils/hwclock.c:1592
+#: sys-utils/hwclock.c:1602
 #, fuzzy
 msgid ""
 " -u, --utc            the hardware clock is kept in UTC\n"
@@ -11976,12 +11976,12 @@ msgstr ""
 " -u, --utc            硬體時鐘被保持在中 UTC\n"
 "     --localtime      硬體時鐘被保持在中本地時間\n"
 
-#: sys-utils/hwclock.c:1595
+#: sys-utils/hwclock.c:1605
 #, fuzzy
 msgid " -f, --rtc <file>     special /dev/... file to use instead of default\n"
 msgstr " -f, --rtc <file>     特殊/dev/...檔案以使用以代替預設\n"
 
-#: sys-utils/hwclock.c:1598
+#: sys-utils/hwclock.c:1608
 #, fuzzy, c-format
 msgid ""
 "     --directisa      access the ISA bus directly instead of %s\n"
@@ -11996,7 +11996,7 @@ msgstr ""
 "     --epoch<年>  指定年該項是起始部分的\n"
 "                        硬體時鐘時期值\n"
 
-#: sys-utils/hwclock.c:1604
+#: sys-utils/hwclock.c:1614
 #, fuzzy, c-format
 msgid ""
 "     --noadjfile      do not access %s; this requires the use of\n"
@@ -12009,7 +12009,7 @@ msgstr ""
 "     --adjfile <file> 指定路徑到調整檔案；\n"
 "                        預設是 %s\n"
 
-#: sys-utils/hwclock.c:1608
+#: sys-utils/hwclock.c:1618
 #, fuzzy
 msgid ""
 "     --test           do not update anything, just show what would happen\n"
@@ -12020,7 +12020,7 @@ msgstr ""
 " -D, --debug          偵錯模式\n"
 "\n"
 
-#: sys-utils/hwclock.c:1611
+#: sys-utils/hwclock.c:1621
 #, fuzzy
 msgid ""
 " -J|--jensen, -A|--arc, -S|--srm, -F|--funky-toy\n"
@@ -12031,52 +12031,52 @@ msgstr ""
 "      告訴 hwclock 型態的 Alpha 您有 (參看 hwclock (8))\n"
 "\n"
 
-#: sys-utils/hwclock.c:1734
+#: sys-utils/hwclock.c:1744
 #, fuzzy
 msgid "Unable to connect to audit system"
 msgstr "無法連線到稽核系統"
 
-#: sys-utils/hwclock.c:1832
+#: sys-utils/hwclock.c:1842
 #, fuzzy
 msgid "invalid epoch argument"
 msgstr "無效的時期引數"
 
-#: sys-utils/hwclock.c:1871
+#: sys-utils/hwclock.c:1881
 #, c-format
 msgid "%s takes no non-option arguments.  You supplied %d.\n"
 msgstr "%s 無需非選項引數。 您卻已給定 %d。\n"
 
-#: sys-utils/hwclock.c:1880
+#: sys-utils/hwclock.c:1890
 #, fuzzy
 msgid "With --noadjfile, you must specify either --utc or --localtime"
 msgstr "與 --noadjfile，您必須指定還是 --utc 或 --localtime"
 
-#: sys-utils/hwclock.c:1893
+#: sys-utils/hwclock.c:1903
 #, fuzzy
 msgid "No usable set-to time.  Cannot set clock."
 msgstr "沒有可用 set-to 時間。 無法設定時鐘。"
 
-#: sys-utils/hwclock.c:1908
+#: sys-utils/hwclock.c:1918
 #, fuzzy
 msgid "Sorry, only the superuser can change the Hardware Clock."
 msgstr "抱歉，只有系統管理者可以變更硬體時鐘。"
 
-#: sys-utils/hwclock.c:1912
+#: sys-utils/hwclock.c:1922
 #, fuzzy
 msgid "Sorry, only the superuser can change the System Clock."
 msgstr "抱歉，只有系統管理者可以變更系統時鐘。"
 
-#: sys-utils/hwclock.c:1916
+#: sys-utils/hwclock.c:1926
 #, fuzzy
 msgid "Sorry, only the superuser can change the Hardware Clock epoch in the kernel."
 msgstr "抱歉，只有系統管理者可以變更硬體時鐘時期在中內核。"
 
-#: sys-utils/hwclock.c:1939
+#: sys-utils/hwclock.c:1949
 #, fuzzy
 msgid "Cannot access the Hardware Clock via any known method."
 msgstr "無法存取硬體時鐘透過任何已知方法。"
 
-#: sys-utils/hwclock.c:1942
+#: sys-utils/hwclock.c:1952
 #, fuzzy
 msgid "Use the --debug option to see the details of our search for an access method."
 msgstr "使用 --debug 選項到參看細節的我們的搜尋存取方法。"
@@ -12562,6 +12562,16 @@ msgstr "內核未組配支援共用記憶體\n"
 msgid "------ Shared Memory Status --------\n"
 msgstr "------ 共用記憶體狀態 --------\n"
 
+#. TRANSLATORS: This output format is maintained for backward
+#. compatibility as ipcs is used in scripts. For consistency
+#. with the rest, the translated form can follow this model:
+#. *
+#. "segments allocated = %d\n"
+#. "pages allocated = %ld\n"
+#. "pages resident = %ld\n"
+#. "pages swapped = %ld\n"
+#. "swap performance = %ld attempts, %ld successes\n"
+#.
 #: sys-utils/ipcs.c:232
 #, fuzzy, c-format
 msgid ""

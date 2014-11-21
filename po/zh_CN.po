@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: util-linux-2.25-rc3\n"
 "Report-Msgid-Bugs-To: util-linux@vger.kernel.org\n"
-"POT-Creation-Date: 2014-10-24 12:30+0200\n"
+"POT-Creation-Date: 2014-11-19 12:21-0400\n"
 "PO-Revision-Date: 2014-08-17 10:47+0800\n"
 "Last-Translator: Wylmer Wang <wantinghard@gmail.com>\n"
 "Language-Team: Chinese (simplified) <i18n-zh@googlegroups.com>\n"
@@ -561,7 +561,7 @@ msgstr "不支持的颜色模式"
 
 #: disk-utils/cfdisk.c:2034 include/c.h:286 schedutils/chrt.c:266
 #: schedutils/taskset.c:166 sys-utils/chcpu.c:330 sys-utils/dmesg.c:1335
-#: sys-utils/hwclock.c:1550 sys-utils/lscpu.c:1727 sys-utils/renice.c:102
+#: sys-utils/hwclock.c:1560 sys-utils/lscpu.c:1727 sys-utils/renice.c:102
 #: sys-utils/rtcwake.c:474 sys-utils/tunelp.c:249 term-utils/agetty.c:751
 #: term-utils/script.c:221 term-utils/scriptreplay.c:177
 #: term-utils/write.c:113 text-utils/col.c:208 text-utils/colcrt.c:118
@@ -2420,7 +2420,7 @@ msgstr " %s [选项] [-t <类型>] [文件系统选项] <设备> [<大小>]\n"
 
 #: disk-utils/mkfs.c:42 include/c.h:280 misc-utils/getopt.c:322
 #: misc-utils/look.c:370 misc-utils/namei.c:431 misc-utils/uuidd.c:75
-#: misc-utils/uuidgen.c:35 misc-utils/wipefs.c:455 sys-utils/hwclock.c:1591
+#: misc-utils/uuidgen.c:35 misc-utils/wipefs.c:455 sys-utils/hwclock.c:1601
 #: sys-utils/renice.c:62 term-utils/script.c:146 term-utils/scriptreplay.c:45
 #: term-utils/write.c:85
 #, c-format
@@ -4407,7 +4407,7 @@ msgstr "忽略 -U (不支持 UUID)"
 
 #: include/c.h:279 misc-utils/getopt.c:314 misc-utils/look.c:366
 #: misc-utils/namei.c:427 misc-utils/uuidd.c:71 misc-utils/uuidgen.c:31
-#: misc-utils/wipefs.c:451 sys-utils/hwclock.c:1570 sys-utils/renice.c:55
+#: misc-utils/wipefs.c:451 sys-utils/hwclock.c:1580 sys-utils/renice.c:55
 #: term-utils/script.c:142 term-utils/scriptreplay.c:40 term-utils/write.c:80
 msgid ""
 "\n"
@@ -11123,22 +11123,22 @@ msgstr "将不设置时钟，因为上次调整时间为零，历史有误。"
 msgid "Needed adjustment is less than one second, so not setting clock.\n"
 msgstr "需要的调整不到一秒，将不设置时钟。\n"
 
-#: sys-utils/hwclock.c:1270
+#: sys-utils/hwclock.c:1280
 #, c-format
 msgid "No usable clock interface found.\n"
 msgstr "未找到可用的时钟接口。\n"
 
-#: sys-utils/hwclock.c:1399 sys-utils/hwclock.c:1405
+#: sys-utils/hwclock.c:1409 sys-utils/hwclock.c:1415
 #, c-format
 msgid "Unable to set system clock.\n"
 msgstr "无法设置系统时钟。\n"
 
-#: sys-utils/hwclock.c:1418
+#: sys-utils/hwclock.c:1428
 #, c-format
 msgid "At %ld seconds after 1969, RTC is predicted to read %ld seconds after 1969.\n"
 msgstr "位于1969(年)后 %ld 秒，RTC 应读取到的是1969(年)后 %ld 秒。\n"
 
-#: sys-utils/hwclock.c:1447
+#: sys-utils/hwclock.c:1457
 msgid ""
 "The kernel keeps an epoch value for the Hardware Clock only on an Alpha machine.\n"
 "This copy of hwclock was built for a machine other than Alpha\n"
@@ -11148,34 +11148,34 @@ msgstr ""
 "这版 hwclock 程序不是为 Alpha 计算机编译的(因此目前也不打算在 Alpha\n"
 " 计算机上运行)。未执行任何操作。"
 
-#: sys-utils/hwclock.c:1464
+#: sys-utils/hwclock.c:1474
 msgid "Unable to get the epoch value from the kernel."
 msgstr "无法从内核获取纪元(epoch)值。"
 
-#: sys-utils/hwclock.c:1466
+#: sys-utils/hwclock.c:1476
 #, c-format
 msgid "Kernel is assuming an epoch value of %lu\n"
 msgstr "内核假设纪元(epoch)值为 %lu\n"
 
-#: sys-utils/hwclock.c:1471
+#: sys-utils/hwclock.c:1481
 msgid "To set the epoch value, you must use the 'epoch' option to tell to what value to set it."
 msgstr "要设置纪元(epoch)值，您必须使用“epoch”选项来指定设置的值。"
 
-#: sys-utils/hwclock.c:1475
+#: sys-utils/hwclock.c:1485
 #, c-format
 msgid "Not setting the epoch to %d - testing only.\n"
 msgstr "不会将纪元(epoch)设置为 %d - 纯测试。\n"
 
-#: sys-utils/hwclock.c:1479
+#: sys-utils/hwclock.c:1489
 #, c-format
 msgid "Unable to set the epoch value in the kernel.\n"
 msgstr "无法设置内核中的纪元(epoch)值。\n"
 
-#: sys-utils/hwclock.c:1571
+#: sys-utils/hwclock.c:1581
 msgid " hwclock [function] [option...]\n"
 msgstr " hwclock [功能] [选项...]\n"
 
-#: sys-utils/hwclock.c:1573
+#: sys-utils/hwclock.c:1583
 msgid ""
 "\n"
 "Functions:\n"
@@ -11183,7 +11183,7 @@ msgstr ""
 "\n"
 "功能：\n"
 
-#: sys-utils/hwclock.c:1574
+#: sys-utils/hwclock.c:1584
 msgid ""
 " -h, --help           show this help text and exit\n"
 " -r, --show           read hardware clock and print result\n"
@@ -11193,7 +11193,7 @@ msgstr ""
 " -r, --show           读取硬件时钟并打印结果\n"
 "     --set            将 RTC 设置为 --date 指定的时间\n"
 
-#: sys-utils/hwclock.c:1577
+#: sys-utils/hwclock.c:1587
 msgid ""
 " -s, --hctosys        set the system time from the hardware clock\n"
 " -w, --systohc        set the hardware clock from the current system time\n"
@@ -11207,11 +11207,11 @@ msgstr ""
 "     --adjust         根据自上次时钟设置或调整后的系统漂移\n"
 "                        来调整 RTC\n"
 
-#: sys-utils/hwclock.c:1582
+#: sys-utils/hwclock.c:1592
 msgid " -c, --compare        periodically compare the system clock with the CMOS clock\n"
 msgstr " -c, --compare        定期将系统时钟与 CMOS 时钟相比较\n"
 
-#: sys-utils/hwclock.c:1584
+#: sys-utils/hwclock.c:1594
 msgid ""
 "     --getepoch       print out the kernel's hardware clock epoch value\n"
 "     --setepoch       set the kernel's hardware clock epoch value to the \n"
@@ -11221,7 +11221,7 @@ msgstr ""
 "     --setepoch       将内核的硬件时钟纪元(epoch)值设置为\n"
 "                        --epoch 选项指定的值\n"
 
-#: sys-utils/hwclock.c:1588
+#: sys-utils/hwclock.c:1598
 msgid ""
 "     --predict        predict RTC reading at time given with --date\n"
 " -V, --version        display version information and exit\n"
@@ -11229,7 +11229,7 @@ msgstr ""
 "     --predict        预测 --date 选项所指定时刻读取到的 RTC 值\n"
 " -V, --version        显示版本信息并退出\n"
 
-#: sys-utils/hwclock.c:1592
+#: sys-utils/hwclock.c:1602
 msgid ""
 " -u, --utc            the hardware clock is kept in UTC\n"
 "     --localtime      the hardware clock is kept in local time\n"
@@ -11237,11 +11237,11 @@ msgstr ""
 " -u, --utc            硬件时钟保持为 UTC 时间\n"
 "     --localtime      硬件时钟保持为本地时间\n"
 
-#: sys-utils/hwclock.c:1595
+#: sys-utils/hwclock.c:1605
 msgid " -f, --rtc <file>     special /dev/... file to use instead of default\n"
 msgstr " -f, --rtc <文件>     代替默认文件的特殊 /dev/... 文件\n"
 
-#: sys-utils/hwclock.c:1598
+#: sys-utils/hwclock.c:1608
 #, c-format
 msgid ""
 "     --directisa      access the ISA bus directly instead of %s\n"
@@ -11255,7 +11255,7 @@ msgstr ""
 "     --date <时间>    指定要设置的硬件时钟时间\n"
 "     --epoch <年>     指定作为硬件纪元(epoch)值起始的年份\n"
 
-#: sys-utils/hwclock.c:1604
+#: sys-utils/hwclock.c:1614
 #, c-format
 msgid ""
 "     --noadjfile      do not access %s; this requires the use of\n"
@@ -11267,7 +11267,7 @@ msgstr ""
 "     --adjfile <文件> 指定调整文件的路径；\n"
 "                        默认为 %s\n"
 
-#: sys-utils/hwclock.c:1608
+#: sys-utils/hwclock.c:1618
 msgid ""
 "     --test           do not update anything, just show what would happen\n"
 " -D, --debug          debugging mode\n"
@@ -11277,7 +11277,7 @@ msgstr ""
 " -D, --debug          调试模式\n"
 "\n"
 
-#: sys-utils/hwclock.c:1611
+#: sys-utils/hwclock.c:1621
 msgid ""
 " -J|--jensen, -A|--arc, -S|--srm, -F|--funky-toy\n"
 "      tell hwclock the type of Alpha you have (see hwclock(8))\n"
@@ -11287,44 +11287,44 @@ msgstr ""
 "      告知 hwclock 您使用的 Alpha 类型(参阅 hwclock(8))\n"
 "\n"
 
-#: sys-utils/hwclock.c:1734
+#: sys-utils/hwclock.c:1744
 msgid "Unable to connect to audit system"
 msgstr "无法连接到审计系统"
 
-#: sys-utils/hwclock.c:1832
+#: sys-utils/hwclock.c:1842
 msgid "invalid epoch argument"
 msgstr "无效的纪元(epoch)参数"
 
-#: sys-utils/hwclock.c:1871
+#: sys-utils/hwclock.c:1881
 #, c-format
 msgid "%s takes no non-option arguments.  You supplied %d.\n"
 msgstr "%s 不接受无选项的参数。您提供了 %d。\n"
 
-#: sys-utils/hwclock.c:1880
+#: sys-utils/hwclock.c:1890
 msgid "With --noadjfile, you must specify either --utc or --localtime"
 msgstr "指定 --noadjfile 时，您必须指定 --utc 或 --localtime"
 
-#: sys-utils/hwclock.c:1893
+#: sys-utils/hwclock.c:1903
 msgid "No usable set-to time.  Cannot set clock."
 msgstr "无可用的待设置时间。无法设置时钟。"
 
-#: sys-utils/hwclock.c:1908
+#: sys-utils/hwclock.c:1918
 msgid "Sorry, only the superuser can change the Hardware Clock."
 msgstr "抱歉，只有超级用户才能设置硬件时钟。"
 
-#: sys-utils/hwclock.c:1912
+#: sys-utils/hwclock.c:1922
 msgid "Sorry, only the superuser can change the System Clock."
 msgstr "抱歉，只有超级用户才能设置系统时钟。"
 
-#: sys-utils/hwclock.c:1916
+#: sys-utils/hwclock.c:1926
 msgid "Sorry, only the superuser can change the Hardware Clock epoch in the kernel."
 msgstr "抱歉，只有超级用户才能更改内核中的硬件时钟纪元(epoch)。"
 
-#: sys-utils/hwclock.c:1939
+#: sys-utils/hwclock.c:1949
 msgid "Cannot access the Hardware Clock via any known method."
 msgstr "无法通过已知的任何方式访问硬件时钟。"
 
-#: sys-utils/hwclock.c:1942
+#: sys-utils/hwclock.c:1952
 msgid "Use the --debug option to see the details of our search for an access method."
 msgstr "请使用 --debug 选项来观察程序搜索访问方法的详情。"
 
@@ -11775,6 +11775,16 @@ msgstr "内核未做共享内存的相关配置\n"
 msgid "------ Shared Memory Status --------\n"
 msgstr "---------- 共享内存状态 ------------\n"
 
+#. TRANSLATORS: This output format is maintained for backward
+#. compatibility as ipcs is used in scripts. For consistency
+#. with the rest, the translated form can follow this model:
+#. *
+#. "segments allocated = %d\n"
+#. "pages allocated = %ld\n"
+#. "pages resident = %ld\n"
+#. "pages swapped = %ld\n"
+#. "swap performance = %ld attempts, %ld successes\n"
+#.
 #: sys-utils/ipcs.c:232
 #, c-format
 msgid ""

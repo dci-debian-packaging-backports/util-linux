@@ -19,7 +19,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: util-linux 2.25-rc3\n"
 "Report-Msgid-Bugs-To: util-linux@vger.kernel.org\n"
-"POT-Creation-Date: 2014-10-24 12:30+0200\n"
+"POT-Creation-Date: 2014-11-19 12:21-0400\n"
 "PO-Revision-Date: 2014-07-12 14:51+0300\n"
 "Last-Translator: Lauri Nurmi <lanurmi@iki.fi>\n"
 "Language-Team: Finnish <translation-team-fi@lists.sourceforge.net>\n"
@@ -589,7 +589,7 @@ msgstr "tuntematon värimoodi"
 
 #: disk-utils/cfdisk.c:2034 include/c.h:286 schedutils/chrt.c:266
 #: schedutils/taskset.c:166 sys-utils/chcpu.c:330 sys-utils/dmesg.c:1335
-#: sys-utils/hwclock.c:1550 sys-utils/lscpu.c:1727 sys-utils/renice.c:102
+#: sys-utils/hwclock.c:1560 sys-utils/lscpu.c:1727 sys-utils/renice.c:102
 #: sys-utils/rtcwake.c:474 sys-utils/tunelp.c:249 term-utils/agetty.c:751
 #: term-utils/script.c:221 term-utils/scriptreplay.c:177
 #: term-utils/write.c:113 text-utils/col.c:208 text-utils/colcrt.c:118
@@ -2542,7 +2542,7 @@ msgstr "Käyttö: mkfs [-V] [-t tied.järj. tyyppi] [tied.järj.valitsimet] lait
 
 #: disk-utils/mkfs.c:42 include/c.h:280 misc-utils/getopt.c:322
 #: misc-utils/look.c:370 misc-utils/namei.c:431 misc-utils/uuidd.c:75
-#: misc-utils/uuidgen.c:35 misc-utils/wipefs.c:455 sys-utils/hwclock.c:1591
+#: misc-utils/uuidgen.c:35 misc-utils/wipefs.c:455 sys-utils/hwclock.c:1601
 #: sys-utils/renice.c:62 term-utils/script.c:146 term-utils/scriptreplay.c:45
 #: term-utils/write.c:85
 #, c-format
@@ -4517,7 +4517,7 @@ msgstr ""
 
 #: include/c.h:279 misc-utils/getopt.c:314 misc-utils/look.c:366
 #: misc-utils/namei.c:427 misc-utils/uuidd.c:71 misc-utils/uuidgen.c:31
-#: misc-utils/wipefs.c:451 sys-utils/hwclock.c:1570 sys-utils/renice.c:55
+#: misc-utils/wipefs.c:451 sys-utils/hwclock.c:1580 sys-utils/renice.c:55
 #: term-utils/script.c:142 term-utils/scriptreplay.c:40 term-utils/write.c:80
 msgid ""
 "\n"
@@ -11437,22 +11437,22 @@ msgstr "Ei aseteta kelloa, koska siirtymäkerroin %f on aivan liian suuri.\n"
 msgid "Needed adjustment is less than one second, so not setting clock.\n"
 msgstr "Tarvittava muutos on alle sekunti, joten ei aseteta kelloa.\n"
 
-#: sys-utils/hwclock.c:1270
+#: sys-utils/hwclock.c:1280
 #, c-format
 msgid "No usable clock interface found.\n"
 msgstr "Käyttökelpoista kellorajapintaa ei löytynyt.\n"
 
-#: sys-utils/hwclock.c:1399 sys-utils/hwclock.c:1405
+#: sys-utils/hwclock.c:1409 sys-utils/hwclock.c:1415
 #, c-format
 msgid "Unable to set system clock.\n"
 msgstr "Järjestelmäkellon asetus ei onnistu.\n"
 
-#: sys-utils/hwclock.c:1418
+#: sys-utils/hwclock.c:1428
 #, c-format
 msgid "At %ld seconds after 1969, RTC is predicted to read %ld seconds after 1969.\n"
 msgstr ""
 
-#: sys-utils/hwclock.c:1447
+#: sys-utils/hwclock.c:1457
 msgid ""
 "The kernel keeps an epoch value for the Hardware Clock only on an Alpha machine.\n"
 "This copy of hwclock was built for a machine other than Alpha\n"
@@ -11462,50 +11462,50 @@ msgstr ""
 "Tämä hwclock on käännetty muulle koneelle kuin Alphalle\n"
 "(ja todennäköisesti sitä ei ajeta Alphassa nyt). Toimintoa ei suoritettu."
 
-#: sys-utils/hwclock.c:1464
+#: sys-utils/hwclock.c:1474
 #, fuzzy
 msgid "Unable to get the epoch value from the kernel."
 msgstr "Ytimen epoch-arvoa ei voi asettaa.\n"
 
-#: sys-utils/hwclock.c:1466
+#: sys-utils/hwclock.c:1476
 #, c-format
 msgid "Kernel is assuming an epoch value of %lu\n"
 msgstr "Ydin olettaa epoch-arvoksi %lu\n"
 
-#: sys-utils/hwclock.c:1471
+#: sys-utils/hwclock.c:1481
 #, fuzzy
 msgid "To set the epoch value, you must use the 'epoch' option to tell to what value to set it."
 msgstr "Epoch-arvon asettamiseksi on käytettävä ”epoch”-valitsinta.\n"
 
-#: sys-utils/hwclock.c:1475
+#: sys-utils/hwclock.c:1485
 #, c-format
 msgid "Not setting the epoch to %d - testing only.\n"
 msgstr "Ei aseteta epoch-arvoksi %d – vain kokeilu.\n"
 
-#: sys-utils/hwclock.c:1479
+#: sys-utils/hwclock.c:1489
 #, c-format
 msgid "Unable to set the epoch value in the kernel.\n"
 msgstr "Ytimen epoch-arvoa ei voi asettaa.\n"
 
-#: sys-utils/hwclock.c:1571
+#: sys-utils/hwclock.c:1581
 msgid " hwclock [function] [option...]\n"
 msgstr " hwclock [toiminto] [valitsin...]\n"
 
-#: sys-utils/hwclock.c:1573
+#: sys-utils/hwclock.c:1583
 #, fuzzy
 msgid ""
 "\n"
 "Functions:\n"
 msgstr "???\n"
 
-#: sys-utils/hwclock.c:1574
+#: sys-utils/hwclock.c:1584
 msgid ""
 " -h, --help           show this help text and exit\n"
 " -r, --show           read hardware clock and print result\n"
 "     --set            set the RTC to the time given with --date\n"
 msgstr ""
 
-#: sys-utils/hwclock.c:1577
+#: sys-utils/hwclock.c:1587
 msgid ""
 " -s, --hctosys        set the system time from the hardware clock\n"
 " -w, --systohc        set the hardware clock from the current system time\n"
@@ -11514,34 +11514,34 @@ msgid ""
 "                        the clock was last set or adjusted\n"
 msgstr ""
 
-#: sys-utils/hwclock.c:1582
+#: sys-utils/hwclock.c:1592
 msgid " -c, --compare        periodically compare the system clock with the CMOS clock\n"
 msgstr ""
 
-#: sys-utils/hwclock.c:1584
+#: sys-utils/hwclock.c:1594
 msgid ""
 "     --getepoch       print out the kernel's hardware clock epoch value\n"
 "     --setepoch       set the kernel's hardware clock epoch value to the \n"
 "                        value given with --epoch\n"
 msgstr ""
 
-#: sys-utils/hwclock.c:1588
+#: sys-utils/hwclock.c:1598
 msgid ""
 "     --predict        predict RTC reading at time given with --date\n"
 " -V, --version        display version information and exit\n"
 msgstr ""
 
-#: sys-utils/hwclock.c:1592
+#: sys-utils/hwclock.c:1602
 msgid ""
 " -u, --utc            the hardware clock is kept in UTC\n"
 "     --localtime      the hardware clock is kept in local time\n"
 msgstr ""
 
-#: sys-utils/hwclock.c:1595
+#: sys-utils/hwclock.c:1605
 msgid " -f, --rtc <file>     special /dev/... file to use instead of default\n"
 msgstr ""
 
-#: sys-utils/hwclock.c:1598
+#: sys-utils/hwclock.c:1608
 #, c-format
 msgid ""
 "     --directisa      access the ISA bus directly instead of %s\n"
@@ -11551,7 +11551,7 @@ msgid ""
 "                        hardware clock's epoch value\n"
 msgstr ""
 
-#: sys-utils/hwclock.c:1604
+#: sys-utils/hwclock.c:1614
 #, c-format
 msgid ""
 "     --noadjfile      do not access %s; this requires the use of\n"
@@ -11560,14 +11560,14 @@ msgid ""
 "                        the default is %s\n"
 msgstr ""
 
-#: sys-utils/hwclock.c:1608
+#: sys-utils/hwclock.c:1618
 msgid ""
 "     --test           do not update anything, just show what would happen\n"
 " -D, --debug          debugging mode\n"
 "\n"
 msgstr ""
 
-#: sys-utils/hwclock.c:1611
+#: sys-utils/hwclock.c:1621
 msgid ""
 " -J|--jensen, -A|--arc, -S|--srm, -F|--funky-toy\n"
 "      tell hwclock the type of Alpha you have (see hwclock(8))\n"
@@ -11577,48 +11577,48 @@ msgstr ""
 "      kertoo hwclockille Alphan tyypin (ks. hwclock(8))\n"
 "\n"
 
-#: sys-utils/hwclock.c:1734
+#: sys-utils/hwclock.c:1744
 #, fuzzy
 msgid "Unable to connect to audit system"
 msgstr "Järjestelmäkellon asetus ei onnistu.\n"
 
-#: sys-utils/hwclock.c:1832
+#: sys-utils/hwclock.c:1842
 #, fuzzy
 msgid "invalid epoch argument"
 msgstr "Virheellinen argumentti"
 
-#: sys-utils/hwclock.c:1871
+#: sys-utils/hwclock.c:1881
 #, c-format
 msgid "%s takes no non-option arguments.  You supplied %d.\n"
 msgstr "%s ottaa vain valitsimia argumentteina. Annoit %d muuta.\n"
 
-#: sys-utils/hwclock.c:1880
+#: sys-utils/hwclock.c:1890
 #, fuzzy
 msgid "With --noadjfile, you must specify either --utc or --localtime"
 msgstr "%s: Valitsimen --noadjfile kanssa on käytettävä joko valitsinta --utc tai --localtime\n"
 
-#: sys-utils/hwclock.c:1893
+#: sys-utils/hwclock.c:1903
 #, fuzzy
 msgid "No usable set-to time.  Cannot set clock."
 msgstr "tiedoston %s aikaleimojen asettaminen ei onnistu"
 
-#: sys-utils/hwclock.c:1908
+#: sys-utils/hwclock.c:1918
 msgid "Sorry, only the superuser can change the Hardware Clock."
 msgstr "Valitettavasti vain pääkäyttäjä voi säätää laitteistokelloa."
 
-#: sys-utils/hwclock.c:1912
+#: sys-utils/hwclock.c:1922
 msgid "Sorry, only the superuser can change the System Clock."
 msgstr "Valitettavasti vain pääkäyttäjä voi säätää järjestelmäkelloa."
 
-#: sys-utils/hwclock.c:1916
+#: sys-utils/hwclock.c:1926
 msgid "Sorry, only the superuser can change the Hardware Clock epoch in the kernel."
 msgstr "Valitettavasti vain pääkäyttäjä voi säätää laitteistokellon epoch-arvoa ytimessä."
 
-#: sys-utils/hwclock.c:1939
+#: sys-utils/hwclock.c:1949
 msgid "Cannot access the Hardware Clock via any known method."
 msgstr "Laitteistokelloa ei pystytä käyttämään millään tunnetulla tavalla."
 
-#: sys-utils/hwclock.c:1942
+#: sys-utils/hwclock.c:1952
 msgid "Use the --debug option to see the details of our search for an access method."
 msgstr "Käytä --debug -valitsinta nähdäksesi yksityiskohdat käyttötavan etsinnästä."
 
@@ -12100,6 +12100,16 @@ msgstr "------ Jaetun muistin rajat --------\n"
 msgid "------ Shared Memory Status --------\n"
 msgstr "------ Jaetun muistin tila ---------\n"
 
+#. TRANSLATORS: This output format is maintained for backward
+#. compatibility as ipcs is used in scripts. For consistency
+#. with the rest, the translated form can follow this model:
+#. *
+#. "segments allocated = %d\n"
+#. "pages allocated = %ld\n"
+#. "pages resident = %ld\n"
+#. "pages swapped = %ld\n"
+#. "swap performance = %ld attempts, %ld successes\n"
+#.
 #: sys-utils/ipcs.c:232
 #, c-format
 msgid ""

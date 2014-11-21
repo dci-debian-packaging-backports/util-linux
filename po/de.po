@@ -51,7 +51,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: util-linux 2.25.1-rc1\n"
 "Report-Msgid-Bugs-To: util-linux@vger.kernel.org\n"
-"POT-Creation-Date: 2014-10-24 12:30+0200\n"
+"POT-Creation-Date: 2014-11-19 12:21-0400\n"
 "PO-Revision-Date: 2014-08-27 22:21+0100\n"
 "Last-Translator: Mario Blättermann <mario.blaettermann@gmail.com>\n"
 "Language-Team: German <translation-team-de@lists.sourceforge.net>\n"
@@ -601,7 +601,7 @@ msgstr "nicht unterstützter Farbmodus"
 # "mkfs von util-linux-2.10d"
 #: disk-utils/cfdisk.c:2034 include/c.h:286 schedutils/chrt.c:266
 #: schedutils/taskset.c:166 sys-utils/chcpu.c:330 sys-utils/dmesg.c:1335
-#: sys-utils/hwclock.c:1550 sys-utils/lscpu.c:1727 sys-utils/renice.c:102
+#: sys-utils/hwclock.c:1560 sys-utils/lscpu.c:1727 sys-utils/renice.c:102
 #: sys-utils/rtcwake.c:474 sys-utils/tunelp.c:249 term-utils/agetty.c:751
 #: term-utils/script.c:221 term-utils/scriptreplay.c:177
 #: term-utils/write.c:113 text-utils/col.c:208 text-utils/colcrt.c:118
@@ -2471,7 +2471,7 @@ msgstr " %s [Optionen] [-t <Typ>] [Dateisystemoptionen] <Gerät> [<Größe>]\n"
 
 #: disk-utils/mkfs.c:42 include/c.h:280 misc-utils/getopt.c:322
 #: misc-utils/look.c:370 misc-utils/namei.c:431 misc-utils/uuidd.c:75
-#: misc-utils/uuidgen.c:35 misc-utils/wipefs.c:455 sys-utils/hwclock.c:1591
+#: misc-utils/uuidgen.c:35 misc-utils/wipefs.c:455 sys-utils/hwclock.c:1601
 #: sys-utils/renice.c:62 term-utils/script.c:146 term-utils/scriptreplay.c:45
 #: term-utils/write.c:85
 #, c-format
@@ -4496,7 +4496,7 @@ msgstr "-U ignorieren (UUIDs werden nicht unterstützt)"
 
 #: include/c.h:279 misc-utils/getopt.c:314 misc-utils/look.c:366
 #: misc-utils/namei.c:427 misc-utils/uuidd.c:71 misc-utils/uuidgen.c:31
-#: misc-utils/wipefs.c:451 sys-utils/hwclock.c:1570 sys-utils/renice.c:55
+#: misc-utils/wipefs.c:451 sys-utils/hwclock.c:1580 sys-utils/renice.c:55
 #: term-utils/script.c:142 term-utils/scriptreplay.c:40 term-utils/write.c:80
 msgid ""
 "\n"
@@ -11178,23 +11178,23 @@ msgid "Needed adjustment is less than one second, so not setting clock.\n"
 msgstr "Da die Anpassung weniger als eine Sekunde betragen hätte, wird sie nicht durchgeführt.\n"
 
 # "Schnittstelle"
-#: sys-utils/hwclock.c:1270
+#: sys-utils/hwclock.c:1280
 #, c-format
 msgid "No usable clock interface found.\n"
 msgstr "Keine brauchbare Uhrschnittstelle gefunden.\n"
 
 # "stellen"
-#: sys-utils/hwclock.c:1399 sys-utils/hwclock.c:1405
+#: sys-utils/hwclock.c:1409 sys-utils/hwclock.c:1415
 #, c-format
 msgid "Unable to set system clock.\n"
 msgstr "Die Systemuhr konnte nicht gestellt werden.\n"
 
-#: sys-utils/hwclock.c:1418
+#: sys-utils/hwclock.c:1428
 #, c-format
 msgid "At %ld seconds after 1969, RTC is predicted to read %ld seconds after 1969.\n"
 msgstr "Bei %ld Sekunden nach 1969 wird die Echtzeituhr %ld Sekunden nach 1969 anzeigen.\n"
 
-#: sys-utils/hwclock.c:1447
+#: sys-utils/hwclock.c:1457
 msgid ""
 "The kernel keeps an epoch value for the Hardware Clock only on an Alpha machine.\n"
 "This copy of hwclock was built for a machine other than Alpha\n"
@@ -11202,37 +11202,37 @@ msgid ""
 msgstr "Der Kernel bewahrt nur auf Alpha-Maschinen einen Epochen-Wert für die Hardware-Uhr auf. Dieses hwclock wurde für eine andere Maschine als Alpha erstellt (und läuft daher vermutlich gerade nicht auf einer Alpha). Es wird nichts ausgeführt."
 
 # Egger
-#: sys-utils/hwclock.c:1464
+#: sys-utils/hwclock.c:1474
 msgid "Unable to get the epoch value from the kernel."
 msgstr "Der Epochenwert kann nicht vom Kernel bekommen werden."
 
 # Egger
 # "Epochenwert"
-#: sys-utils/hwclock.c:1466
+#: sys-utils/hwclock.c:1476
 #, c-format
 msgid "Kernel is assuming an epoch value of %lu\n"
 msgstr "Kernel geht von einem Epochenwert von %lu aus.\n"
 
-#: sys-utils/hwclock.c:1471
+#: sys-utils/hwclock.c:1481
 msgid "To set the epoch value, you must use the 'epoch' option to tell to what value to set it."
 msgstr "Um den Epochenwert zu ändern, müssen sie die »epoch«-Option benutzen, um anzugeben, auf welchen Wert er gesetzt werden soll."
 
-#: sys-utils/hwclock.c:1475
+#: sys-utils/hwclock.c:1485
 #, c-format
 msgid "Not setting the epoch to %d - testing only.\n"
 msgstr "Der Epochenwert wird nicht auf %d gesetzt – Testmodus.\n"
 
 # Egger
-#: sys-utils/hwclock.c:1479
+#: sys-utils/hwclock.c:1489
 #, c-format
 msgid "Unable to set the epoch value in the kernel.\n"
 msgstr "Der Epochenwert im Kernel kann nicht geändert werden.\n"
 
-#: sys-utils/hwclock.c:1571
+#: sys-utils/hwclock.c:1581
 msgid " hwclock [function] [option...]\n"
 msgstr " hwclock [Funktion] [Option …]\n"
 
-#: sys-utils/hwclock.c:1573
+#: sys-utils/hwclock.c:1583
 msgid ""
 "\n"
 "Functions:\n"
@@ -11240,7 +11240,7 @@ msgstr ""
 "\n"
 "Funktionen:\n"
 
-#: sys-utils/hwclock.c:1574
+#: sys-utils/hwclock.c:1584
 msgid ""
 " -h, --help           show this help text and exit\n"
 " -r, --show           read hardware clock and print result\n"
@@ -11250,7 +11250,7 @@ msgstr ""
 " -r, --show           Hardware-Uhr auslesen und Ergebnis ausgeben\n"
 "     --set            RTC auf die mit --date angegebene Zeit setzen\n"
 
-#: sys-utils/hwclock.c:1577
+#: sys-utils/hwclock.c:1587
 msgid ""
 " -s, --hctosys        set the system time from the hardware clock\n"
 " -w, --systohc        set the hardware clock from the current system time\n"
@@ -11265,11 +11265,11 @@ msgstr ""
 "                        seit dem letzten Stellen oder Korrigieren der Hardware-Uhr\n"
 "                        auszugleichen\n"
 
-#: sys-utils/hwclock.c:1582
+#: sys-utils/hwclock.c:1592
 msgid " -c, --compare        periodically compare the system clock with the CMOS clock\n"
 msgstr " -c, --compare        periodisch die Systemuhr mit der CMOS-Uhr vergleichen\n"
 
-#: sys-utils/hwclock.c:1584
+#: sys-utils/hwclock.c:1594
 msgid ""
 "     --getepoch       print out the kernel's hardware clock epoch value\n"
 "     --setepoch       set the kernel's hardware clock epoch value to the \n"
@@ -11279,7 +11279,7 @@ msgstr ""
 "     --setepoch       setzt den Epoch-Wert der Hardware-Uhr des Kernels auf den\n"
 "                        mit --epoch angegebenen Wert\n"
 
-#: sys-utils/hwclock.c:1588
+#: sys-utils/hwclock.c:1598
 msgid ""
 "     --predict        predict RTC reading at time given with --date\n"
 " -V, --version        display version information and exit\n"
@@ -11288,7 +11288,7 @@ msgstr ""
 "                        angegebenen Zeitpunkt voraus\n"
 " -V, --version        zeigt Versionsinformationen an und beendet das Programm\n"
 
-#: sys-utils/hwclock.c:1592
+#: sys-utils/hwclock.c:1602
 msgid ""
 " -u, --utc            the hardware clock is kept in UTC\n"
 "     --localtime      the hardware clock is kept in local time\n"
@@ -11296,11 +11296,11 @@ msgstr ""
 " -u, --utc            die Hardwareuhr ist auf UTC gestellt\n"
 "     --localtime      die Hardwareuhr ist auf lokale Zeit gestellt\n"
 
-#: sys-utils/hwclock.c:1595
+#: sys-utils/hwclock.c:1605
 msgid " -f, --rtc <file>     special /dev/... file to use instead of default\n"
 msgstr " -f, --rtc <Datei>    spezielle /dev/…-Datei anstatt der Vorgabe verwenden\n"
 
-#: sys-utils/hwclock.c:1598
+#: sys-utils/hwclock.c:1608
 #, c-format
 msgid ""
 "     --directisa      access the ISA bus directly instead of %s\n"
@@ -11315,7 +11315,7 @@ msgstr ""
 "     --epoch <Jahr>   gibt das Jahr an, mit dem der Epoch-Wert der Hardware-Uhr\n"
 "                        beginnt\n"
 
-#: sys-utils/hwclock.c:1604
+#: sys-utils/hwclock.c:1614
 #, c-format
 msgid ""
 "     --noadjfile      do not access %s; this requires the use of\n"
@@ -11328,7 +11328,7 @@ msgstr ""
 "     --adjfile <Datei> gibt den Pfad zur adjust-Datei an;\n"
 "                         Vorgabe ist %s\n"
 
-#: sys-utils/hwclock.c:1608
+#: sys-utils/hwclock.c:1618
 msgid ""
 "     --test           do not update anything, just show what would happen\n"
 " -D, --debug          debugging mode\n"
@@ -11338,7 +11338,7 @@ msgstr ""
 " -D, --debug          Debug-Modus\n"
 "\n"
 
-#: sys-utils/hwclock.c:1611
+#: sys-utils/hwclock.c:1621
 msgid ""
 " -J|--jensen, -A|--arc, -S|--srm, -F|--funky-toy\n"
 "      tell hwclock the type of Alpha you have (see hwclock(8))\n"
@@ -11350,44 +11350,44 @@ msgstr ""
 "\n"
 
 # "stellen"
-#: sys-utils/hwclock.c:1734
+#: sys-utils/hwclock.c:1744
 msgid "Unable to connect to audit system"
 msgstr "Verbindung zum Audit-System konnte nicht aufgebaut werden"
 
-#: sys-utils/hwclock.c:1832
+#: sys-utils/hwclock.c:1842
 msgid "invalid epoch argument"
 msgstr "ungültiges Epoche-Argument"
 
-#: sys-utils/hwclock.c:1871
+#: sys-utils/hwclock.c:1881
 #, c-format
 msgid "%s takes no non-option arguments.  You supplied %d.\n"
 msgstr "%s nimmt keine Nicht-Options-Argumente an. Sie gaben %d an.\n"
 
-#: sys-utils/hwclock.c:1880
+#: sys-utils/hwclock.c:1890
 msgid "With --noadjfile, you must specify either --utc or --localtime"
 msgstr "mit --noadjfile müssen Sie entweder --utc oder --localtime angeben"
 
-#: sys-utils/hwclock.c:1893
+#: sys-utils/hwclock.c:1903
 msgid "No usable set-to time.  Cannot set clock."
 msgstr "Keine brauchbare Zeitangabe. Uhr kann nicht gestellt werden."
 
-#: sys-utils/hwclock.c:1908
+#: sys-utils/hwclock.c:1918
 msgid "Sorry, only the superuser can change the Hardware Clock."
 msgstr "Nur der Systemadministrator darf die Hardwareuhr ändern."
 
-#: sys-utils/hwclock.c:1912
+#: sys-utils/hwclock.c:1922
 msgid "Sorry, only the superuser can change the System Clock."
 msgstr "Nur der Systemadministrator darf die Systemuhr ändern."
 
-#: sys-utils/hwclock.c:1916
+#: sys-utils/hwclock.c:1926
 msgid "Sorry, only the superuser can change the Hardware Clock epoch in the kernel."
 msgstr "Nur der Systemadministrator darf den »Epoch«-Wert der Hardwareuhr im Kernel ändern."
 
-#: sys-utils/hwclock.c:1939
+#: sys-utils/hwclock.c:1949
 msgid "Cannot access the Hardware Clock via any known method."
 msgstr "Es wurde keine Zugriffsart gefunden, mit der auf die Hardwareuhr zugegriffen werden konnte."
 
-#: sys-utils/hwclock.c:1942
+#: sys-utils/hwclock.c:1952
 msgid "Use the --debug option to see the details of our search for an access method."
 msgstr "Benutzen Sie die »--debug«-Option, um die versuchten Zugriffsarten anzuzeigen."
 
@@ -11846,6 +11846,16 @@ msgstr "Der Kernel ist nicht konfiguriert, gemeinsamen Speicher zu unterstützen
 msgid "------ Shared Memory Status --------\n"
 msgstr "------ Gemeinsamer Speicher: Status --------\n"
 
+#. TRANSLATORS: This output format is maintained for backward
+#. compatibility as ipcs is used in scripts. For consistency
+#. with the rest, the translated form can follow this model:
+#. *
+#. "segments allocated = %d\n"
+#. "pages allocated = %ld\n"
+#. "pages resident = %ld\n"
+#. "pages swapped = %ld\n"
+#. "swap performance = %ld attempts, %ld successes\n"
+#.
 #: sys-utils/ipcs.c:232
 #, c-format
 msgid ""
