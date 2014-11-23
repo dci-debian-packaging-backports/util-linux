@@ -5,3 +5,4 @@ Disable-the-fallback-clause-in-hwclock-when-dev-rtc-.patch
 verbose-tests.patch
 Update-POT-file.patch
 Update-PO-files.patch
+Update-German-translation.patch
