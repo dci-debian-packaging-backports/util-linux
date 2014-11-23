@@ -3,3 +3,5 @@ cfdisk.8-mention-slang-next-to-curses.-Closes-295487.patch
 man-page-tweaks-cleanup-my_dev_t.h-ancient-stuff.patch
 Disable-the-fallback-clause-in-hwclock-when-dev-rtc-.patch
 verbose-tests.patch
+Update-POT-file.patch
+Update-PO-files.patch
