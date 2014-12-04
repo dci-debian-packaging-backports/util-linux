@@ -1,3 +1,20 @@
+util-linux (2.25.2-4) unstable; urgency=medium
+
+  * Update POT and PO files and clean up .gmo files
+  * Update German translation, thanks to Mario Blättermann
+  * Update Spanish translation, thanks to Antonio Ceballos Roa
+  * Update French translation (Closes: #770506)
+  * Update Ukrainian translation, thanks to Yuri Chornoivan
+  * Update Brazilian Portuguese translation, thanks to Rafael Ferreira
+  * Update Chinese (simplified) translation, thanks to Wylmer Wang
+  * Update Danish translation, thanks to Joe Hansen
+  * Update Finnish translation, thanks to Lauri Nurmi
+  * Update Japanese translation, thanks to Takeshi Hamasaki
+  * Update Russian translation, thanks to Pavel Maryanov
+  * Trivial unfuzzy
+
+ -- David Prévot <taffit@debian.org>  Thu, 04 Dec 2014 15:20:05 -0400
+
 util-linux (2.25.2-3) unstable; urgency=medium
 
   * Ship fstrim timer/service units as examples only (Closes: #767194)
