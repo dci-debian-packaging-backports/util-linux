@@ -208,7 +208,7 @@ Package: libuuid1
 Architecture: any
 Section: libs
 Pre-Depends: ${misc:Pre-Depends}
-Depends: ${misc:Depends}, ${shlibs:Depends}
+Depends: passwd, ${misc:Depends}, ${shlibs:Depends}
 Recommends: uuid-runtime
 Replaces: e2fsprogs (<< 1.34-1)
 Multi-Arch: same
