@@ -16,3 +16,4 @@ Update-Finnish-translation.patch
 Update-Japanese-translation.patch
 Update-Russian-translation.patch
 Trivial-unfuzzy.patch
+libblkid-care-about-unsafe-chars-in-cache.patch
