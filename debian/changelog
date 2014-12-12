@@ -1,5 +1,6 @@
 util-linux (2.25.2-4) unstable; urgency=medium
 
+  [ David Prévot ]
   * Update POT and PO files and clean up .gmo files
   * Update German translation, thanks to Mario Blättermann
   * Update Spanish translation, thanks to Antonio Ceballos Roa
@@ -13,7 +14,16 @@ util-linux (2.25.2-4) unstable; urgency=medium
   * Update Russian translation, thanks to Pavel Maryanov
   * Trivial unfuzzy
 
- -- David Prévot <taffit@debian.org>  Thu, 04 Dec 2014 15:20:05 -0400
+  [ Andreas Henriksson ]
+  * Add debian/patches/libblkid-care-about-unsafe-chars-in-cache.patch
+    - from upstream git master commit 89e90ae7
+      "libblkid: care about unsafe chars in cache"
+    - This fixes CVE-2014-9114: blkid command injection
+      see https://security-tracker.debian.org/tracker/CVE-2014-9114
+    Thanks to Salvatore Bonaccorso (Closes: #771274)
+  * libuuid1: add passwd dependency for user migration (Closes: #771092)
+
+ -- Andreas Henriksson <andreas@fatal.se>  Fri, 12 Dec 2014 18:23:24 +0100
 
 util-linux (2.25.2-3) unstable; urgency=medium
 
