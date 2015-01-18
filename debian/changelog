@@ -1,3 +1,11 @@
+util-linux (2.25.2-4.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Fix unhandled symlink_to_dir conversion for
+    /usr/share/doc/libblkid-dev (Closes: #775350)
+
+ -- Jonathan Wiltshire <jmw@debian.org>  Sat, 17 Jan 2015 16:17:40 +0000
+
 util-linux (2.25.2-4) unstable; urgency=medium
 
   [ David Prévot ]
