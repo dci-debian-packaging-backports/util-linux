@@ -134,6 +134,7 @@ Package: libblkid-dev
 Architecture: any
 Section: libdevel
 Priority: optional
+Pre-Depends: ${misc:Pre-Depends}
 Depends: libblkid1 (= ${binary:Version}),
          libc6-dev | libc-dev,
          uuid-dev,
