@@ -1,3 +1,10 @@
+util-linux (2.25.2-4.2) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Add Breaks: live-tools (<<4.0~alpha17-1)
+
+ -- Gaudenz Steinlin <gaudenz@debian.org>  Sun, 01 Feb 2015 13:16:26 +0100
+
 util-linux (2.25.2-4.1) unstable; urgency=medium
 
   * Non-maintainer upload.
