@@ -1,7 +1,21 @@
+util-linux (2.25.2-5) unstable; urgency=medium
+
+  * Revert "Trigger update of initramfs on upgrades" (Closes: #773354)
+  * Revert "Add Breaks: live-tools (<<4.0~alpha17-1)"
+    - No longer needed since dropping the update-initramfs call.
+  * Fix typo in symlink_to_dir and bump prior-version
+    - in other words, fix 2.25.2-4.1 upload. (Closes: #775350)
+  * Add Breaks: grml-debootstrap (<< 0.68)
+    - previous versions does not work properly with new util-linux which
+      always identifies atleast one label for every partition (PARTUUID)
+      so lets prevent partial upgrades. (Closes: #772846)
+
+ -- Andreas Henriksson <andreas@fatal.se>  Tue, 03 Feb 2015 20:55:38 +0100
+
 util-linux (2.25.2-4.2) unstable; urgency=medium
 
   * Non-maintainer upload.
-  * Add Breaks: live-tools (<<4.0~alpha17-1)
+  * Add Breaks: live-tools (<<4.0~alpha17-1) (Closes: #773354)
 
  -- Gaudenz Steinlin <gaudenz@debian.org>  Sun, 01 Feb 2015 13:16:26 +0100
 
