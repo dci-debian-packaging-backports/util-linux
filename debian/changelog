@@ -1,3 +1,12 @@
+util-linux (2.25.2-6) unstable; urgency=medium
+
+  * Add patch to fix `unshare -r` regression.
+    - Cherry-picked upstream commit 0bf159413bdb9e32486
+      "unshare: Fix --map-root-user to work on new kernels"
+    Thanks to Kirill Smelkov (Closes: #780841)
+
+ -- Andreas Henriksson <andreas@fatal.se>  Mon, 30 Mar 2015 00:28:09 +0200
+
 util-linux (2.25.2-5) unstable; urgency=medium
 
   * Revert "Trigger update of initramfs on upgrades" (Closes: #773354)
