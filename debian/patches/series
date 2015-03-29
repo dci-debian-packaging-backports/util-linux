@@ -17,3 +17,4 @@ Update-Japanese-translation.patch
 Update-Russian-translation.patch
 Trivial-unfuzzy.patch
 libblkid-care-about-unsafe-chars-in-cache.patch
+unshare-Fix-map-root-user-to-work-on-new-kernels.patch
