@@ -50,7 +50,7 @@
 #include "carefulputc.h"
 #include "strutils.h"
 #include "timeutils.h"
-#include "boottime.h"
+#include "monotonic.h"
 
 #if defined(_HAVE_UT_TV)
 # define UL_UT_TIME ut_tv.tv_sec
@@ -107,7 +107,6 @@ struct utmplist {
 	struct utmplist *next;
 	struct utmplist *prev;
 };
-struct utmplist *utmplist = NULL;
 
 /* Types of listing */
 enum {
@@ -143,6 +142,7 @@ static struct last_timefmt timefmts[] = {
 /* Global variables */
 static unsigned int recsdone;	/* Number of records listed */
 static time_t lastdate;		/* Last date we've seen */
+static time_t currentdate;	/* date when we started processing the file */
 
 /* --time-format=option parser */
 static int which_time_format(const char *optarg)
@@ -376,9 +376,9 @@ static void trim_trailing_spaces(char *s)
 /*
  *	Show one line of information on screen
  */
-static int list(const struct last_control *ctl, struct utmp *p, time_t t, int what)
+static int list(const struct last_control *ctl, struct utmp *p, time_t logout_time, int what)
 {
-	time_t		secs, tmp, epoch;
+	time_t		secs, utmp_time;
 	char		logintime[LAST_TIMESTAMP_LEN];
 	char		logouttime[LAST_TIMESTAMP_LEN];
 	char		length[LAST_TIMESTAMP_LEN];
@@ -417,22 +417,24 @@ static int list(const struct last_control *ctl, struct utmp *p, time_t t, int wh
 	/*
 	 *	Calculate times
 	 */
-	tmp = p->UL_UT_TIME;
+	utmp_time = p->UL_UT_TIME;
 
-	if (ctl->present && (ctl->present < tmp || (0 < t && t < ctl->present)))
-		return 0;
-
-	if (time_formatter(ctl, &logintime[0], sizeof(logintime), &tmp, 0) < 0 ||
-	    time_formatter(ctl, &logouttime[0], sizeof(logouttime), &t, 1) < 0)
+	if (ctl->present) {
+		if (ctl->present < utmp_time)
+			return 0;
+		if (0 < logout_time && logout_time < ctl->present)
+			return 0;
+	}
+	if (time_formatter(ctl, &logintime[0], sizeof(logintime), &utmp_time, 0) < 0 ||
+	    time_formatter(ctl, &logouttime[0], sizeof(logouttime), &logout_time, 1) < 0)
 		errx(EXIT_FAILURE, _("preallocation size exceeded"));
 
-	secs = t - p->UL_UT_TIME;
+	secs  = logout_time - utmp_time;
 	mins  = (secs / 60) % 60;
 	hours = (secs / 3600) % 24;
 	days  = secs / 86400;
 
-	epoch = time(NULL);
-	if (t == epoch) {
+	if (logout_time == currentdate) {
 		if (ctl->time_fmt > LAST_TIMEFTM_SHORT_CTIME) {
 			sprintf(logouttime, "  still running");
 			length[0] = 0;
@@ -552,6 +554,9 @@ static void __attribute__((__noreturn__)) usage(FILE *out)
 	fprintf(out, _(
 		" %s [options] [<username>...] [<tty>...]\n"), program_invocation_short_name);
 
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Show a listing of last logged in users.\n"), out);
+
 	fputs(USAGE_OPTIONS, out);
 	fputs(_(" -<number>            how many lines to show\n"), out);
 	fputs(_(" -a, --hostlast       display hostnames in the last column\n"), out);
@@ -616,8 +621,10 @@ static int is_phantom(const struct last_control *ctl, struct utmp *ut)
 static void process_wtmp_file(const struct last_control *ctl)
 {
 	FILE *fp;		/* Filepointer of wtmp file */
+	char *filename;
 
 	struct utmp ut;		/* Current utmp entry */
+	struct utmplist *ulist = NULL;	/* All entries */
 	struct utmplist *p;	/* Pointer into utmplist */
 	struct utmplist *next;	/* Pointer into utmplist */
 
@@ -634,11 +641,12 @@ static void process_wtmp_file(const struct last_control *ctl)
 
 	time(&lastdown);
 	lastrch = lastdown;
+	filename = ctl->altv[ctl->alti];
 
 	/*
 	 * Fill in 'lastdate'
 	 */
-	lastdate = lastdown;
+	lastdate = currentdate = lastrch = lastdown;
 
 	/*
 	 * Install signal handlers
@@ -649,8 +657,8 @@ static void process_wtmp_file(const struct last_control *ctl)
 	/*
 	 * Open the utmp file
 	 */
-	if ((fp = fopen(ctl->altv[ctl->alti], "r")) == NULL)
-		err(EXIT_FAILURE, _("cannot open %s"), ctl->altv[ctl->alti]);
+	if ((fp = fopen(filename, "r")) == NULL)
+		err(EXIT_FAILURE, _("cannot open %s"), filename);
 
 	/*
 	 * Optimize the buffer size.
@@ -664,7 +672,7 @@ static void process_wtmp_file(const struct last_control *ctl)
 		begintime = ut.UL_UT_TIME;
 	else {
 		if (fstat(fileno(fp), &st) != 0)
-			err(EXIT_FAILURE, _("stat failed %s"), ctl->altv[ctl->alti]);
+			err(EXIT_FAILURE, _("stat of %s failed"), filename);
 		begintime = st.st_ctime;
 		quit = 1;
 	}
@@ -781,7 +789,7 @@ static void process_wtmp_file(const struct last_control *ctl)
 			 * the same ut_line.
 			 */
 			c = 0;
-			for (p = utmplist; p; p = next) {
+			for (p = ulist; p; p = next) {
 				next = p->next;
 				if (strncmp(p->ut.ut_line, ut.ut_line,
 				    UT_LINESIZE) == 0) {
@@ -790,11 +798,12 @@ static void process_wtmp_file(const struct last_control *ctl)
 						quit = list(ctl, &ut, p->ut.UL_UT_TIME, R_NORMAL);
 						c = 1;
 					}
-					if (p->next) p->next->prev = p->prev;
+					if (p->next)
+						p->next->prev = p->prev;
 					if (p->prev)
 						p->prev->next = p->next;
 					else
-						utmplist = p->next;
+						ulist = p->next;
 					free(p);
 				}
 			}
@@ -823,10 +832,11 @@ static void process_wtmp_file(const struct last_control *ctl)
 				break;
 			p = xmalloc(sizeof(struct utmplist));
 			memcpy(&p->ut, &ut, sizeof(struct utmp));
-			p->next  = utmplist;
+			p->next  = ulist;
 			p->prev  = NULL;
-			if (utmplist) utmplist->prev = p;
-			utmplist = p;
+			if (ulist)
+				ulist->prev = p;
+			ulist = p;
 			break;
 
 		case EMPTY:
@@ -842,23 +852,24 @@ static void process_wtmp_file(const struct last_control *ctl)
 
 		/*
 		 * If we saw a shutdown/reboot record we can remove
-		 * the entire current utmplist.
+		 * the entire current ulist.
 		 */
 		if (down) {
 			lastboot = ut.UL_UT_TIME;
 			whydown = (ut.ut_type == SHUTDOWN_TIME) ? R_DOWN : R_CRASH;
-			for (p = utmplist; p; p = next) {
+			for (p = ulist; p; p = next) {
 				next = p->next;
 				free(p);
 			}
-			utmplist = NULL;
+			ulist = NULL;
 			down = 0;
 		}
 	}
 
-	printf(_("\n%s begins %s"), basename(ctl->altv[ctl->alti]), ctime(&begintime));
+	printf(_("\n%s begins %s"), basename(filename), ctime(&begintime));
 	fclose(fp);
-	for (p = utmplist; p; p = next) {
+
+	for (p = ulist; p; p = next) {
 		next = p->next;
 		free(p);
 	}
@@ -995,7 +1006,7 @@ int main(int argc, char **argv)
 		ctl.altc++;
 	}
 
-	for (; ctl.alti < ctl.altc; ctl.alti++) {
+	for (ctl.alti = 0; ctl.alti < ctl.altc; ctl.alti++) {
 		get_boot_time(&ctl.boot_time);
 		process_wtmp_file(&ctl);
 		free(ctl.altv[ctl.alti]);

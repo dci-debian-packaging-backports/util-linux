@@ -58,6 +58,7 @@
 #include "debug.h"
 
 UL_DEBUG_DEFINE_MASK(whereis);
+UL_DEBUG_DEFINE_MASKNAMES(whereis) = UL_DEBUG_EMPTY_MASKNAMES;
 
 #define WHEREIS_DEBUG_INIT	(1 << 1)
 #define WHEREIS_DEBUG_PATH	(1 << 2)
@@ -153,6 +154,7 @@ static const char *mandirs[] = {
 	"/usr/X11/man/*",
 	"/usr/TeX/man/*",
 	"/usr/interviews/man/mann",
+	"/usr/share/info",
 	NULL
 };
 
@@ -186,11 +188,14 @@ static void __attribute__((__noreturn__)) usage(FILE *out)
 	fputs(USAGE_HEADER, out);
 	fprintf(out, _(" %s [options] <file>\n"), program_invocation_short_name);
 
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Locate the binary, source, and manual-page files for a command.\n"), out);
+
 	fputs(USAGE_OPTIONS, out);
 	fputs(_(" -b         search only for binaries\n"), out);
 	fputs(_(" -B <dirs>  define binaries lookup path\n"), out);
-	fputs(_(" -m         search only for manuals\n"), out);
-	fputs(_(" -M <dirs>  define man lookup path\n"), out);
+	fputs(_(" -m         search only for manuals and infos\n"), out);
+	fputs(_(" -M <dirs>  define man and info lookup path\n"), out);
 	fputs(_(" -s         search only for sources\n"), out);
 	fputs(_(" -S <dirs>  define sources lookup path\n"), out);
 	fputs(_(" -f         terminate <dirs> argument list\n"), out);
@@ -368,7 +373,7 @@ static int filename_equal(const char *cp, const char *dp)
 {
 	int i = strlen(dp);
 
-	/*DBG(printf("compare '%s' and '%s'", cp, dp));*/
+	DBG(SEARCH, ul_debug("compare '%s' and '%s'", cp, dp));
 
 	if (dp[0] == 's' && dp[1] == '.' && filename_equal(cp, dp + 2))
 		return 1;
@@ -596,7 +601,7 @@ int main(int argc, char **argv)
 				usage(stderr);
 			}
 
-			if (arg_i < i)		/* moved the the next argv[] item */
+			if (arg_i < i)		/* moved to the next argv[] item */
 				break;
 		}
 	}

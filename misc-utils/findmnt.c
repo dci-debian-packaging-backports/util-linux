@@ -150,7 +150,7 @@ static struct colinfo infos[] = {
  * column twice. That's enough, dynamically allocated array of the columns is
  * unnecessary overkill and over-engineering in this case */
 static int columns[ARRAY_SIZE(infos) * 2];
-static int ncolumns;
+static size_t ncolumns;
 
 static inline size_t err_columns_index(size_t arysz, size_t idx)
 {
@@ -185,7 +185,8 @@ static int match_func(struct libmnt_fs *fs, void *data __attribute__ ((__unused_
 
 static int get_column_id(int num)
 {
-	assert(num < ncolumns);
+	assert(num >= 0);
+	assert((size_t) num < ncolumns);
 	assert((size_t) columns[num] < ARRAY_SIZE(infos));
 	return columns[num];
 }
@@ -259,28 +260,33 @@ static void set_source_match(const char *data)
 		set_match(COL_SOURCE, data);
 }
 
-static void enable_extra_target_match(void)
+/* @tb has to be from kernel (so no fstab or so)! */
+static void enable_extra_target_match(struct libmnt_table *tb)
 {
-	const char *cn = NULL, *mnt = NULL;
+	char *cn = NULL;
+	const char *tgt = NULL, *mnt = NULL;
+	struct libmnt_fs *fs;
 
 	/*
 	 * Check if match pattern is mountpoint, if not use the
 	 * real mountpoint.
 	 */
 	if (flags & FL_NOCACHE)
-		cn = get_match(COL_TARGET);
+		tgt = get_match(COL_TARGET);
 	else {
-		cn = mnt_resolve_path(get_match(COL_TARGET), cache);
+		tgt = cn = mnt_resolve_path(get_match(COL_TARGET), cache);
 		if (!cn)
 			return;
 	}
 
-	mnt = mnt_get_mountpoint(cn);
-	if (!mnt || strcmp(mnt, cn) == 0)
-		return;
+	fs = mnt_table_find_mountpoint(tb, tgt, MNT_ITER_BACKWARD);
+	if (fs)
+		mnt = mnt_fs_get_target(fs);
+	if (mnt && strcmp(mnt, tgt) != 0)
+		set_match(COL_TARGET, xstrdup(mnt));	/* replace the current setting */
 
-	/* replace the current setting with the real mountpoint */
-	set_match(COL_TARGET, mnt);
+	if (!cache)
+		free(cn);
 }
 
 
@@ -526,19 +532,22 @@ static char *get_data(struct libmnt_fs *fs, int num)
 	{
 		const char *root = mnt_fs_get_root(fs);
 		const char *spec = mnt_fs_get_srcpath(fs);
+		char *cn = NULL;
 
 		if (spec && (flags & FL_CANONICALIZE))
-			spec = mnt_resolve_path(spec, cache);
+			spec = cn = mnt_resolve_path(spec, cache);
 		if (!spec) {
 			spec = mnt_fs_get_source(fs);
 
 			if (spec && (flags & FL_EVALUATE))
-				spec = mnt_resolve_spec(spec, cache);
+				spec = cn = mnt_resolve_spec(spec, cache);
 		}
 		if (root && spec && !(flags & FL_NOFSROOT) && strcmp(root, "/"))
 			xasprintf(&str, "%s[%s]", spec, root);
 		else if (spec)
 			str = xstrdup(spec);
+		if (!cache)
+			free(cn);
 		break;
 	}
 	case COL_TARGET:
@@ -690,7 +699,7 @@ static char *get_tabdiff_data(struct libmnt_fs *old_fs,
 static struct libscols_line *add_line(struct libscols_table *table, struct libmnt_fs *fs,
 					struct libscols_line *parent)
 {
-	int i;
+	size_t i;
 	struct libscols_line *line = scols_table_new_line(table, parent);
 
 	if (!line) {
@@ -707,7 +716,7 @@ static struct libscols_line *add_line(struct libscols_table *table, struct libmn
 static struct libscols_line *add_tabdiff_line(struct libscols_table *table, struct libmnt_fs *new_fs,
 			struct libmnt_fs *old_fs, int change)
 {
-	int i;
+	size_t i;
 	struct libscols_line *line = scols_table_new_line(table, NULL);
 
 	if (!line) {
@@ -856,7 +865,7 @@ static struct libmnt_table *parse_tabfiles(char **files,
  * Parses mountinfo and calls mnt_cache_set_targets(cache, mtab). Only
  * necessary if @tb in main() was read from a non-kernel source.
  */
-static void cache_set_targets(struct libmnt_cache *cache)
+static void cache_set_targets(struct libmnt_cache *tmp)
 {
 	struct libmnt_table *tb;
 	const char *path;
@@ -870,7 +879,7 @@ static void cache_set_targets(struct libmnt_cache *cache)
 		_PATH_PROC_MOUNTS;
 
 	if (mnt_table_parse_file(tb, path) == 0)
-		mnt_cache_set_targets(cache, tb);
+		mnt_cache_set_targets(tmp, tb);
 
 	mnt_unref_table(tb);
 }
@@ -894,6 +903,26 @@ static int tab_is_tree(struct libmnt_table *tb)
 	return rc;
 }
 
+/* checks if all fs in @tb are from kernel */
+static int tab_is_kernel(struct libmnt_table *tb)
+{
+	struct libmnt_fs *fs = NULL;
+	struct libmnt_iter *itr = NULL;
+
+	itr = mnt_new_iter(MNT_ITER_BACKWARD);
+	if (!itr)
+		return 0;
+
+	while (mnt_table_next_fs(tb, itr, &fs) == 0) {
+		if (!mnt_fs_is_kernel(fs)) {
+			mnt_free_iter(itr);
+			return 0;
+		}
+	}
+
+	mnt_free_iter(itr);
+	return 1;
+}
 
 /* filter function for libmount (mnt_table_find_next_fs()) */
 static int match_func(struct libmnt_fs *fs,
@@ -1176,6 +1205,9 @@ static void __attribute__((__noreturn__)) usage(FILE *out)
 	" %1$s [options] [--source <device>] [--target <mountpoint>]\n"),
 		program_invocation_short_name);
 
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Find a (mounted) filesystem.\n"), out);
+
 	fputs(USAGE_OPTIONS, out);
 	fputs(_(" -s, --fstab            search in static table of filesystems\n"), out);
 	fputs(_(" -m, --mtab             search in table of mounted filesystems\n"), out);
@@ -1233,9 +1265,10 @@ int main(int argc, char *argv[])
 	struct libmnt_table *tb = NULL;
 	char **tabfiles = NULL;
 	int direction = MNT_ITER_FORWARD;
-	int i, c, rc = -1, timeout = -1;
+	int c, rc = -1, timeout = -1;
 	int ntabfiles = 0, tabtype = 0;
 	char *outarg = NULL;
+	size_t i;
 
 	struct libscols_table *table = NULL;
 
@@ -1501,6 +1534,9 @@ int main(int argc, char *argv[])
 	if (!tb)
 		goto leave;
 
+	if (tabtype == TABTYPE_MTAB && tab_is_kernel(tb))
+		tabtype = TABTYPE_KERNEL;
+
 	if ((flags & FL_TREE) && (ntabfiles > 1 || !tab_is_tree(tb)))
 		flags &= ~FL_TREE;
 
@@ -1574,7 +1610,7 @@ int main(int argc, char *argv[])
 			 * try it again with extra functionality for target
 			 * match
 			 */
-			enable_extra_target_match();
+			enable_extra_target_match(tb);
 			rc = add_matching_lines(tb, table, direction);
 		}
 	}

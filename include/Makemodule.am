@@ -4,7 +4,7 @@ dist_noinst_HEADERS += \
 	include/at.h \
 	include/bitops.h \
 	include/blkdev.h \
-	include/boottime.h \
+	include/monotonic.h \
 	include/c.h \
 	include/canonicalize.h \
 	include/carefulputc.h \
@@ -41,6 +41,7 @@ dist_noinst_HEADERS += \
 	include/rpmatch.h \
 	include/setproctitle.h \
 	include/strutils.h \
+	include/swapprober.h \
 	include/swapheader.h \
 	include/sysfs.h \
 	include/timer.h \
@@ -48,7 +49,6 @@ dist_noinst_HEADERS += \
 	include/ttyutils.h \
 	include/widechar.h \
 	include/xalloc.h \
-	include/xgetpass.h \
 	include/pt-sgi.h \
 	include/pt-bsd.h \
 	include/pt-mbr.h \

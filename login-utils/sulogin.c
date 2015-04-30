@@ -821,6 +821,9 @@ static void usage(FILE *out)
 	fprintf(out, _(
 		" %s [options] [tty device]\n"), program_invocation_short_name);
 
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Single-user login.\n"), out);
+
 	fputs(USAGE_OPTIONS, out);
 	fputs(_(" -p, --login-shell        start a login shell\n"
 		" -t, --timeout <seconds>  max time to wait for a password (default: no limit)\n"
@@ -1063,7 +1066,7 @@ int main(int argc, char **argv)
 			if (*usemask & (1<<con->id))
 				continue;
 			kill(con->pid, SIGHUP);
-			usleep(50000);
+			xusleep(50000);
 			kill(con->pid, SIGKILL);
 		}
 	}

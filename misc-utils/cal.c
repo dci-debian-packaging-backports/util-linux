@@ -59,6 +59,7 @@
 
 #include <ctype.h>
 #include <getopt.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -73,6 +74,9 @@
 #include "mbsalign.h"
 #include "strutils.h"
 
+static int has_term = 0;
+static const char *Senter = "", *Sexit = "";	/* enter and exit standout mode */
+
 #if defined(HAVE_LIBNCURSES) || defined(HAVE_LIBNCURSESW)
 # ifdef HAVE_NCURSES_H
 #  include <ncurses.h>
@@ -81,22 +85,31 @@
 # endif
 # include <term.h>
 
-static void my_setupterm(const char *term, int fildes, int *errret)
+static int setup_terminal(char *term)
 {
-	setupterm((char *)term, fildes, errret);
+	int ret;
+
+	if (setupterm(term, STDOUT_FILENO, &ret) != OK || ret != 1)
+		return -1;
+	return 0;
 }
 
 static void my_putstring(char *s)
 {
-	putp(s);
+	if (has_term)
+		putp(s);
+	else
+		fputs(s, stdout);
 }
 
 static const char *my_tgetstr(char *s __attribute__((__unused__)), char *ss)
 {
-	const char *ret = tigetstr(ss);
+	const char *ret = NULL;
+
+	if (has_term)
+		ret = tigetstr(ss);
 	if (!ret || ret == (char *)-1)
 		return "";
-
 	return ret;
 }
 
@@ -107,22 +120,29 @@ static char termbuffer[4096];
 static char tcbuffer[4096];
 static char *strbuf = termbuffer;
 
-static void my_setupterm(const char *term, int fildes __attribute__((__unused__)), int *errret)
+static int setup_terminal(char *term)
 {
-	*errret = tgetent(tcbuffer, term);
+	if (tgetent(tcbuffer, term) < 0)
+		return -1;
+	return 0;
 }
 
 static void my_putstring(char *s)
 {
-	tputs(s, 1, putchar);
+	if (has_term)
+		tputs(s, 1, putchar);
+	else
+		fputs(s, stdout);
 }
 
 static const char *my_tgetstr(char *s, char *ss __attribute__((__unused__)))
 {
-	const char *ret = tgetstr(s, &strbuf);
+	const char *ret = NULL;
+
+	if (has_term)
+		ret = tgetstr(s, &strbuf);
 	if (!ret)
 		return "";
-
 	return ret;
 }
 
@@ -135,11 +155,6 @@ static void my_putstring(char *s)
 
 #endif	/* end of LIBTERMCAP / NCURSES */
 
-#if defined(HAVE_LIBNCURSES) || defined(HAVE_LIBNCURSESW) || defined(HAVE_LIBTERMCAP)
-static const char	*term="";
-#endif
-
-static const char	*Senter="", *Sexit="";/* enter and exit standout mode */
 
 #include "widechar.h"
 
@@ -292,12 +307,15 @@ int main(int argc, char **argv)
 	atexit(close_stdout);
 
 #if defined(HAVE_LIBNCURSES) || defined(HAVE_LIBNCURSESW) || defined(HAVE_LIBTERMCAP)
-	if ((term = getenv("TERM"))) {
-		int ret;
-		my_setupterm(term, STDOUT_FILENO, &ret);
-		if (ret > 0) {
-			Senter = my_tgetstr("so","smso");
-			Sexit = my_tgetstr("se","rmso");
+	{
+		char *term = getenv("TERM");
+
+		if (term) {
+			has_term = setup_terminal(term) == 0;
+			if (has_term) {
+				Senter = my_tgetstr("so","smso");
+				Sexit = my_tgetstr("se","rmso");
+			}
 		}
 	}
 #endif
@@ -368,6 +386,7 @@ int main(int argc, char **argv)
 			ctl.weektype = WEEK_NUM_US;	/* default per weekstart */
 			break;
 		case OPT_COLOR:
+			ctl.colormode = UL_COLORMODE_AUTO;
 			if (optarg)
 				ctl.colormode = colormode_or_err(optarg,
 						_("unsupported color mode"));
@@ -807,9 +826,11 @@ static int day_in_week(int day, int month, int32_t year)
 		year -= (month < 3) + 14;
 	if (REFORMATION_YEAR < year
 	    || (year == REFORMATION_YEAR && 9 < month)
-	    || (year == REFORMATION_YEAR && month == 9 && 13 < day))
-		return (year + (year / 4) - (year / 100) + (year / 400) + reform[month - 1] +
+	    || (year == REFORMATION_YEAR && month == 9 && 13 < day)) {
+		int64_t long_year = year;
+		return (long_year + (year / 4) - (year / 100) + (year / 400) + reform[month - 1] +
 			day) % 7;
+	}
 	if (year < REFORMATION_YEAR
 	    || (year == REFORMATION_YEAR && month < 9)
 	    || (year == REFORMATION_YEAR && month == 9 && day < 3))
@@ -934,6 +955,8 @@ static void __attribute__ ((__noreturn__)) usage(FILE * out)
 	fputs(_(" -y, --year            show the whole year\n"), out);
 	fputs(_(" -w, --week[=<num>]    show US or ISO-8601 week numbers\n"), out);
 	fputs(_("     --color[=<when>]  colorize messages (auto, always or never)\n"), out);
+	fprintf(out,
+	        "                         %s\n", USAGE_COLORS_DEFAULT);
 
 	fputs(USAGE_SEPARATOR, out);
 	fputs(USAGE_HELP, out);

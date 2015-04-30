@@ -3,6 +3,9 @@
 /* Define if building universal (internal helper macro) */
 #undef AC_APPLE_UNIVERSAL_BUILD
 
+/* Enable agetty --reload feature */
+#undef AGETTY_RELOAD
+
 /* Should chfn and chsh require the user to enter the password? */
 #undef CHFN_CHSH_PASSWORD
 
@@ -29,6 +32,9 @@
 /* Define to 1 if you have the Mac OS X function CFPreferencesCopyAppValue in
    the CoreFoundation framework. */
 #undef HAVE_CFPREFERENCESCOPYAPPVALUE
+
+/* Define to 1 if you have the `clock_gettime' function. */
+#undef HAVE_CLOCK_GETTIME
 
 /* Define to 1 if the system has the type `cpu_set_t'. */
 #undef HAVE_CPU_SET_T
@@ -94,6 +100,9 @@
 /* Define to 1 if you have the `fsync' function. */
 #undef HAVE_FSYNC
 
+/* Define to 1 if you have the `futimens' function. */
+#undef HAVE_FUTIMENS
+
 /* Define to 1 if you have the `getdomainname' function. */
 #undef HAVE_GETDOMAINNAME
 
@@ -112,6 +121,9 @@
 /* Define to 1 if you have the `getrlimit' function. */
 #undef HAVE_GETRLIMIT
 
+/* Define to 1 if you have the `getsgnam' function. */
+#undef HAVE_GETSGNAM
+
 /* Define if the GNU gettext() function is already present or preinstalled. */
 #undef HAVE_GETTEXT
 
@@ -120,6 +132,9 @@
 
 /* Define to 1 if you have the `inotify_init' function. */
 #undef HAVE_INOTIFY_INIT
+
+/* Define to 1 if you have the `inotify_init1' function. */
+#undef HAVE_INOTIFY_INIT1
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
@@ -196,6 +211,9 @@
 /* Define to 1 if you have the <linux/fd.h> header file. */
 #undef HAVE_LINUX_FD_H
 
+/* Define to 1 if you have the <linux/gsmmux.h> header file. */
+#undef HAVE_LINUX_GSMMUX_H
+
 /* Define to 1 if you have the <linux/major.h> header file. */
 #undef HAVE_LINUX_MAJOR_H
 
@@ -262,6 +280,9 @@
 /* Define to 1 if you have the <net/if.h> header file. */
 #undef HAVE_NET_IF_H
 
+/* Define to 1 if you have the `ntp_gettime' function. */
+#undef HAVE_NTP_GETTIME
+
 /* Define to 1 if you have the `openat' function. */
 #undef HAVE_OPENAT
 
@@ -315,6 +336,12 @@
 
 /* Define to 1 if you have the `security_get_initial_context' function. */
 #undef HAVE_SECURITY_GET_INITIAL_CONTEXT
+
+/* Define to 1 if you have the <security/openpam.h> header file. */
+#undef HAVE_SECURITY_OPENPAM_H
+
+/* Define to 1 if you have the <security/pam_appl.h> header file. */
+#undef HAVE_SECURITY_PAM_APPL_H
 
 /* Define to 1 if you have the <security/pam_misc.h> header file. */
 #undef HAVE_SECURITY_PAM_MISC_H
@@ -379,9 +406,6 @@
 /* Define to 1 if have strsignal function prototype */
 #undef HAVE_STRSIGNAL_DECL
 
-/* Define to 1 if you have the `strtoull' function. */
-#undef HAVE_STRTOULL
-
 /* Define to 1 if `st_mtim.tv_nsec' is a member of `struct stat'. */
 #undef HAVE_STRUCT_STAT_ST_MTIM_TV_NSEC
 
@@ -418,6 +442,9 @@
 /* Define to 1 if you have the <sys/mkdev.h> header file. */
 #undef HAVE_SYS_MKDEV_H
 
+/* Define to 1 if you have the <sys/param.h> header file. */
+#undef HAVE_SYS_PARAM_H
+
 /* Define to 1 if you have the <sys/prctl.h> header file. */
 #undef HAVE_SYS_PRCTL_H
 
@@ -441,6 +468,9 @@
 
 /* Define to 1 if you have the <sys/syscall.h> header file. */
 #undef HAVE_SYS_SYSCALL_H
+
+/* Define to 1 if you have the <sys/timex.h> header file. */
+#undef HAVE_SYS_TIMEX_H
 
 /* Define to 1 if you have the <sys/time.h> header file. */
 #undef HAVE_SYS_TIME_H
@@ -511,6 +541,9 @@
 /* libblkid version string */
 #undef LIBBLKID_VERSION
 
+/* libfdisk version string */
+#undef LIBFDISK_VERSION
+
 /* libmount version string */
 #undef LIBMOUNT_VERSION
 
@@ -526,9 +559,6 @@
 /* Define to the sub-directory in which libtool stores uninstalled libraries.
    */
 #undef LT_OBJDIR
-
-/* Define to 1 if your C compiler doesn't accept -c and -o together. */
-#undef NO_MINUS_C_MINUS_O
 
 /* Should chsh allow only shells in /etc/shells? */
 #undef ONLY_LISTED_SHELLS
@@ -586,6 +616,12 @@
 
 /* Fallback syscall number for unshare */
 #undef SYS_unshare
+
+/* Enables colorized output from utils by default */
+#undef USE_COLORS_BY_DEFAULT
+
+/* Define to 1 if want to ignore mtab in all situations. */
+#undef USE_LIBMOUNT_FORCE_MOUNTINFO
 
 /* Should sulogin use a emergency mount of /dev and /proc? */
 #undef USE_SULOGIN_EMERGENCY_MOUNT

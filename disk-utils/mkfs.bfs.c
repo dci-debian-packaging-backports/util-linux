@@ -72,6 +72,10 @@ static void __attribute__ ((__noreturn__)) usage(FILE * out)
 	fprintf(out,
 		_("Usage: %s [options] device [block-count]\n"),
 		program_invocation_short_name);
+
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Make an SCO bfs filesystem.\n"), out);
+
 	fprintf(out, _("\nOptions:\n"
 		       " -N, --inodes=NUM    specify desired number of inodes\n"
 		       " -V, --vname=NAME    specify volume name\n"
@@ -83,6 +87,7 @@ static void __attribute__ ((__noreturn__)) usage(FILE * out)
 		       "                     -V as version must be only option\n"
 		       " -h, --help          display this help and exit\n\n"));
 
+	fprintf(out, USAGE_MAN_TAIL("mkfs.bfs(8)"));
 	exit(out == stderr ? EXIT_FAILURE : EXIT_SUCCESS);
 }
 
@@ -177,7 +182,7 @@ int main(int argc, char **argv)
 	device = argv[optind++];
 
 	if (stat(device, &statbuf) < 0)
-		err(EXIT_FAILURE, _("stat failed %s"), device);
+		err(EXIT_FAILURE, _("stat of %s failed"), device);
 
 	if (!S_ISBLK(statbuf.st_mode))
 		errx(EXIT_FAILURE, _("%s is not a block special device"), device);

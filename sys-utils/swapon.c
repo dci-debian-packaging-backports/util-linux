@@ -12,7 +12,6 @@
 #include <stdint.h>
 #include <ctype.h>
 
-#include <libmount.h>
 #include <libsmartcols.h>
 
 #include "c.h"
@@ -21,11 +20,13 @@
 #include "blkdev.h"
 #include "pathnames.h"
 #include "xalloc.h"
+#include "strutils.h"
+#include "optutils.h"
 #include "closestream.h"
 
 #include "swapheader.h"
+#include "swapprober.h"
 #include "swapon-common.h"
-#include "strutils.h"
 
 #define PATH_MKSWAP	"/sbin/mkswap"
 
@@ -97,13 +98,23 @@ struct colinfo {
 static int no_headings;
 static int raw;
 
-enum { COL_PATH, COL_TYPE, COL_SIZE, COL_USED, COL_PRIO };
+enum {
+	COL_PATH,
+	COL_TYPE,
+	COL_SIZE,
+	COL_USED,
+	COL_PRIO,
+	COL_UUID,
+	COL_LABEL
+};
 struct colinfo infos[] = {
 	[COL_PATH]     = { "NAME",	0.20, 0, N_("device file or partition path") },
 	[COL_TYPE]     = { "TYPE",	0.20, SCOLS_FL_TRUNC, N_("type of the device")},
 	[COL_SIZE]     = { "SIZE",	0.20, SCOLS_FL_RIGHT, N_("size of the swap area")},
 	[COL_USED]     = { "USED",	0.20, SCOLS_FL_RIGHT, N_("bytes in use")},
 	[COL_PRIO]     = { "PRIO",	0.20, SCOLS_FL_RIGHT, N_("swap priority")},
+	[COL_UUID]     = { "UUID",	0.20, 0, N_("swap uuid")},
+	[COL_LABEL]    = { "LABEL",	0.20, 0, N_("swap label")},
 };
 
 static int columns[ARRAY_SIZE(infos) * 2];
@@ -142,6 +153,8 @@ static void add_scols_line(struct libscols_table *table, struct libmnt_fs *fs, i
 {
 	int i;
 	struct libscols_line *line;
+	blkid_probe pr = NULL;
+	const char *data;
 
 	assert(table);
 	assert(fs);
@@ -149,7 +162,9 @@ static void add_scols_line(struct libscols_table *table, struct libmnt_fs *fs, i
 	line = scols_table_new_line(table, NULL);
 	if (!line)
 		err(EXIT_FAILURE, _("failed to initialize output line"));
-
+	data = mnt_fs_get_source(fs);
+	if (access(data, R_OK) == 0)
+		pr = get_swap_prober(data);
 	for (i = 0; i < ncolumns; i++) {
 		char *str = NULL;
 		off_t size;
@@ -180,6 +195,14 @@ static void add_scols_line(struct libscols_table *table, struct libmnt_fs *fs, i
 		case COL_PRIO:
 			xasprintf(&str, "%d", mnt_fs_get_priority(fs));
 			break;
+		case COL_UUID:
+			if (pr && !blkid_probe_lookup_value(pr, "UUID", &data, NULL))
+				xasprintf(&str, "%s", data);
+			break;
+		case COL_LABEL:
+			if (pr && !blkid_probe_lookup_value(pr, "LABEL", &data, NULL))
+				xasprintf(&str, "%s", data);
+			break;
 		default:
 			break;
 		}
@@ -187,6 +210,8 @@ static void add_scols_line(struct libscols_table *table, struct libmnt_fs *fs, i
 		if (str)
 			scols_line_refer_data(line, i, str);
 	}
+	if (pr)
+		blkid_free_probe(pr);
 	return;
 }
 
@@ -454,7 +479,7 @@ static int swapon_checks(const char *special)
 	int permMask;
 
 	if (stat(special, &st) < 0) {
-		warn(_("stat failed %s"), special);
+		warn(_("stat of %s failed"), special);
 		goto err;
 	}
 
@@ -616,6 +641,42 @@ static int swapon_by_uuid(const char *uuid, int prio, int dsc)
 			 cannot_find(uuid);
 }
 
+/* -o <options> or fstab */
+static int parse_options(const char *optstr,
+			 int *prio, int *disc, int *nofail)
+{
+	char *arg = NULL;
+
+	assert(optstr);
+	assert(prio);
+	assert(disc);
+	assert(nofail);
+
+	if (mnt_optstr_get_option(optstr, "nofail", NULL, 0) == 0)
+		*nofail = 1;
+
+	if (mnt_optstr_get_option(optstr, "discard", &arg, NULL) == 0) {
+		*disc |= SWAP_FLAG_DISCARD;
+
+		if (arg) {
+			/* only single-time discards are wanted */
+			if (strcmp(arg, "once") == 0)
+				*disc |= SWAP_FLAG_DISCARD_ONCE;
+
+			/* do discard for every released swap page */
+			if (strcmp(arg, "pages") == 0)
+				*disc |= SWAP_FLAG_DISCARD_PAGES;
+			}
+	}
+
+	arg = NULL;
+	if (mnt_optstr_get_option(optstr, "pri", &arg, NULL) == 0 && arg)
+		*prio = atoi(arg);
+
+	return 0;
+}
+
+
 static int swapon_all(void)
 {
 	struct libmnt_table *tb = get_fstab();
@@ -633,26 +694,14 @@ static int swapon_all(void)
 	while (mnt_table_find_next_fs(tb, itr, match_swap, NULL, &fs) == 0) {
 		/* defaults */
 		int pri = priority, dsc = discard, nofail = ifexists;
-		char *p, *src, *dscarg;
+		const char *opts, *src;
 
 		if (mnt_fs_get_option(fs, "noauto", NULL, NULL) == 0)
 			continue;
-		if (mnt_fs_get_option(fs, "discard", &dscarg, NULL) == 0) {
-			dsc |= SWAP_FLAG_DISCARD;
-			if (dscarg) {
-				/* only single-time discards are wanted */
-				if (strcmp(dscarg, "once") == 0)
-					dsc |= SWAP_FLAG_DISCARD_ONCE;
 
-				/* do discard for every released swap page */
-				if (strcmp(dscarg, "pages") == 0)
-					dsc |= SWAP_FLAG_DISCARD_PAGES;
-			}
-		}
-		if (mnt_fs_get_option(fs, "nofail", NULL, NULL) == 0)
-			nofail = 1;
-		if (mnt_fs_get_option(fs, "pri", &p, NULL) == 0 && p)
-			pri = atoi(p);
+		opts = mnt_fs_get_options(fs);
+		if (opts)
+			parse_options(opts, &pri, &dsc, &nofail);
 
 		src = mnt_resolve_spec(mnt_fs_get_source(fs), mntcache);
 		if (!src) {
@@ -670,25 +719,29 @@ static int swapon_all(void)
 	return status;
 }
 
+
 static void __attribute__ ((__noreturn__)) usage(FILE * out)
 {
 	size_t i;
 	fputs(USAGE_HEADER, out);
-
 	fprintf(out, _(" %s [options] [<spec>]\n"), program_invocation_short_name);
 
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Enable devices and files for paging and swapping.\n"), out);
+
 	fputs(USAGE_OPTIONS, out);
-	fputs(_(" -a, --all                enable all swaps from /etc/fstab\n"
-		" -d, --discard[=<policy>] enable swap discards, if supported by device\n"
-		" -e, --ifexists           silently skip devices that do not exist\n"
-		" -f, --fixpgsz            reinitialize the swap space if necessary\n"
-		" -p, --priority <prio>    specify the priority of the swap device\n"
-		" -s, --summary            display summary about used swap devices (DEPRECATED)\n"
-		"     --show[=<columns>]   display summary in definable table\n"
-		"     --noheadings         don't print headings, use with --show\n"
-		"     --raw                use the raw output format, use with --show\n"
-		"     --bytes              display swap size in bytes in --show output\n"
-		" -v, --verbose            verbose mode\n"), out);
+	fputs(_(" -a, --all                enable all swaps from /etc/fstab\n"), out);
+	fputs(_(" -d, --discard[=<policy>] enable swap discards, if supported by device\n"), out);
+	fputs(_(" -e, --ifexists           silently skip devices that do not exist\n"), out);
+	fputs(_(" -f, --fixpgsz            reinitialize the swap space if necessary\n"), out);
+	fputs(_(" -o, --options <list>     comma-separated list of swap options\n"), out);
+	fputs(_(" -p, --priority <prio>    specify the priority of the swap device\n"), out);
+	fputs(_(" -s, --summary            display summary about used swap devices (DEPRECATED)\n"), out);
+	fputs(_("     --show[=<columns>]   display summary in definable table\n"), out);
+	fputs(_("     --noheadings         don't print table heading (with --show)\n"), out);
+	fputs(_("     --raw                use the raw output format (with --show)\n"), out);
+	fputs(_("     --bytes              display swap size in bytes in --show output\n"), out);
+	fputs(_(" -v, --verbose            verbose mode\n"), out);
 
 	fputs(USAGE_SEPARATOR, out);
 	fputs(USAGE_HELP, out);
@@ -705,13 +758,13 @@ static void __attribute__ ((__noreturn__)) usage(FILE * out)
 		" <file>                 name of file to be used\n"), out);
 
 	fputs(_("\nAvailable discard policy types (for --discard):\n"
-		" once	  : only single-time area discards are issued. (swapon)\n"
-		" pages	  : discard freed pages before they are reused.\n"
-		" * if no policy is selected both discard types are enabled. (default)\n"), out);
+		" once    : only single-time area discards are issued\n"
+		" pages   : freed pages are discarded before they are reused\n"
+		"If no policy is selected, both discard types are enabled (default).\n"), out);
 
 	fputs(_("\nAvailable columns (for --show):\n"), out);
 	for (i = 0; i < ARRAY_SIZE(infos); i++)
-		fprintf(out, " %4s  %s\n", infos[i].name, _(infos[i].help));
+		fprintf(out, " %-5s  %s\n", infos[i].name, _(infos[i].help));
 
 	fprintf(out, USAGE_MAN_TAIL("swapon(8)"));
 	exit(out == stderr ? EXIT_FAILURE : EXIT_SUCCESS);
@@ -719,22 +772,24 @@ static void __attribute__ ((__noreturn__)) usage(FILE * out)
 
 int main(int argc, char *argv[])
 {
+	char *options = NULL;
 	int status = 0, c;
 	int show = 0;
 	int bytes = 0;
 	size_t i;
 
 	enum {
-		SHOW_OPTION = CHAR_MAX + 1,
-		RAW_OPTION,
+		BYTES_OPTION = CHAR_MAX + 1,
 		NOHEADINGS_OPTION,
-		BYTES_OPTION
+		RAW_OPTION,
+		SHOW_OPTION
 	};
 
 	static const struct option long_opts[] = {
 		{ "priority", 1, 0, 'p' },
 		{ "discard",  2, 0, 'd' },
 		{ "ifexists", 0, 0, 'e' },
+		{ "options",  2, 0, 'o' },
 		{ "summary",  0, 0, 's' },
 		{ "fixpgsz",  0, 0, 'f' },
 		{ "all",      0, 0, 'a' },
@@ -748,6 +803,15 @@ int main(int argc, char *argv[])
 		{ NULL, 0, 0, 0 }
 	};
 
+	static const ul_excl_t excl[] = {       /* rows and cols in in ASCII order */
+		{ 'a','o','s', SHOW_OPTION },
+		{ 'a','o', BYTES_OPTION },
+		{ 'a','o', NOHEADINGS_OPTION },
+		{ 'a','o', RAW_OPTION },
+		{ 0 }
+	};
+	int excl_st[ARRAY_SIZE(excl)] = UL_EXCL_STATUS_INIT;
+
 	setlocale(LC_ALL, "");
 	bindtextdomain(PACKAGE, LOCALEDIR);
 	textdomain(PACKAGE);
@@ -756,14 +820,20 @@ int main(int argc, char *argv[])
 	mnt_init_debug(0);
 	mntcache = mnt_new_cache();
 
-	while ((c = getopt_long(argc, argv, "ahd::efp:svVL:U:",
+	while ((c = getopt_long(argc, argv, "ahd::efo:p:svVL:U:",
 				long_opts, NULL)) != -1) {
+
+		err_exclusive_options(c, long_opts, excl, excl_st);
+
 		switch (c) {
 		case 'a':		/* all */
 			++all;
 			break;
 		case 'h':		/* help */
 			usage(stdout);
+			break;
+		case 'o':
+			options = optarg;
 			break;
 		case 'p':		/* priority */
 			priority = strtos16_or_err(optarg,
@@ -851,6 +921,9 @@ int main(int argc, char *argv[])
 
 	if (all)
 		status |= swapon_all();
+
+	if (options)
+		parse_options(options, &priority, &discard, &ifexists);
 
 	for (i = 0; i < numof_labels(); i++)
 		status |= swapon_by_label(get_label(i), priority, discard);

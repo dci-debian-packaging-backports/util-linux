@@ -50,7 +50,11 @@ enum
 #include <pwd.h>
 #include <grp.h>
 #include <security/pam_appl.h>
-#include <security/pam_misc.h>
+#ifdef HAVE_SECURITY_PAM_MISC_H
+# include <security/pam_misc.h>
+#elif defined(HAVE_SECURITY_OPENPAM_H)
+# include <security/openpam.h>
+#endif
 #include <signal.h>
 #include <sys/wait.h>
 #include <syslog.h>
@@ -220,8 +224,11 @@ static int su_pam_conv(int num_msg, const struct pam_message **msg,
 	    && msg
 	    && msg[0]->msg_style == PAM_TEXT_INFO)
 		return PAM_SUCCESS;
-
+#ifdef HAVE_SECURITY_PAM_MISC_H
 	return misc_conv(num_msg, msg, resp, appdata_ptr);
+#elif defined(HAVE_SECURITY_OPENPAM_H)
+	return openpam_ttyconv(num_msg, msg, resp, appdata_ptr);
+#endif
 }
 
 static struct pam_conv conv =
@@ -526,13 +533,15 @@ modify_environment (const struct passwd *pw, const char *shell)
     {
       /* Leave TERM unchanged.  Set HOME, SHELL, USER, LOGNAME, PATH.
          Unset all other environment variables.  */
-      char const *term = getenv ("TERM");
+      char *term = getenv ("TERM");
       if (term)
 	term = xstrdup (term);
       environ = xmalloc ((6 + !!term) * sizeof (char *));
       environ[0] = NULL;
-      if (term)
+      if (term) {
 	xsetenv ("TERM", term, 1);
+	free(term);
+      }
       xsetenv ("HOME", pw->pw_dir, 1);
       if (shell)
 	xsetenv ("SHELL", shell, 1);

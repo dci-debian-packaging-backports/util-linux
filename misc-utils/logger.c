@@ -50,10 +50,13 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <getopt.h>
+#include <pwd.h>
 
+#include "all-io.h"
 #include "c.h"
 #include "closestream.h"
 #include "nls.h"
+#include "pathnames.h"
 #include "strutils.h"
 #include "xalloc.h"
 
@@ -61,7 +64,12 @@
 #include <syslog.h>
 
 #ifdef HAVE_LIBSYSTEMD
+# include <systemd/sd-daemon.h>
 # include <systemd/sd-journal.h>
+#endif
+
+#ifdef HAVE_SYS_TIMEX_H
+# include <sys/timex.h>
 #endif
 
 enum {
@@ -71,31 +79,91 @@ enum {
 };
 
 enum {
-	OPT_PRIO_PREFIX = CHAR_MAX + 1,
-	OPT_JOURNALD
+	AF_UNIX_ERRORS_OFF = 0,
+	AF_UNIX_ERRORS_ON,
+	AF_UNIX_ERRORS_AUTO
 };
 
+enum {
+	OPT_PRIO_PREFIX = CHAR_MAX + 1,
+	OPT_JOURNALD,
+	OPT_RFC3164,
+	OPT_RFC5424,
+	OPT_SOCKET_ERRORS,
+	OPT_MSGID,
+	OPT_NOACT,
+	OPT_ID
+};
 
-static char* get_prio_prefix(char *msg, int *prio)
+struct logger_ctl {
+	int fd;
+	int pri;
+	pid_t pid;			/* zero when unwanted */
+	char *hdr;			/* the syslog header (based on protocol) */
+	char *tag;
+	char *msgid;
+	char *unix_socket;		/* -u <path> or default to _PATH_DEVLOG */
+	char *server;
+	char *port;
+	int socket_type;
+	size_t max_message_size;
+	void (*syslogfp)(struct logger_ctl *ctl);
+	unsigned int
+			unix_socket_errors:1,	/* whether to report or not errors */
+			noact:1,		/* do not write to sockets */
+			prio_prefix:1,		/* read priority from intput */
+			stderr_printout:1,	/* output message to stderr */
+			rfc5424_time:1,		/* include time stamp */
+			rfc5424_tq:1,		/* include time quality markup */
+			rfc5424_host:1,		/* include hostname */
+			skip_empty_lines:1; /* do not send empty lines when processing files */
+};
+
+/*
+ * For tests we want to be able to control datetime outputs
+ */
+#ifdef TEST_LOGGER
+static inline int logger_gettimeofday(struct timeval *tv, struct timezone *tz)
 {
-	int p;
-	char *end = NULL;
-	int facility = *prio & LOG_FACMASK;
+	char *str = getenv("LOGGER_TEST_TIMEOFDAY");
+	uintmax_t sec, usec;
 
-	errno = 0;
-	p = strtoul(msg + 1, &end, 10);
+	if (str && sscanf(str, "%ju.%ju", &sec, &usec) == 2) {
+		tv->tv_sec = sec;
+		tv->tv_usec = usec;
+		return tv->tv_sec >= 0 && tv->tv_usec >= 0 ? 0 : -EINVAL;
+	}
 
-	if (errno || !end || end == msg + 1 || end[0] != '>')
-		return msg;
-
-	if (p & LOG_FACMASK)
-		facility = p & LOG_FACMASK;
-
-	*prio = facility | (p & LOG_PRIMASK);
-	return end + 1;
+	return gettimeofday(tv, tz);
 }
 
-static int decode(char *name, CODE *codetab)
+static inline char *logger_xgethostname(void)
+{
+	char *str = getenv("LOGGER_TEST_HOSTNAME");
+	return str ? xstrdup(str) : xgethostname();
+}
+
+static inline pid_t logger_getpid(void)
+{
+	char *str = getenv("LOGGER_TEST_GETPID");
+	unsigned int pid;
+
+	if (str && sscanf(str, "%u", &pid) == 1)
+		return pid;
+	return getpid();
+}
+
+
+#undef HAVE_NTP_GETTIME		/* force to default non-NTP */
+
+#else /* !TEST_LOGGER */
+# define logger_gettimeofday(x, y)	gettimeofday(x, y)
+# define logger_xgethostname		xgethostname
+# define logger_getpid			getpid
+#endif
+
+
+static int decode(const char *name, CODE *codetab)
 {
 	register CODE *c;
 
@@ -105,6 +173,7 @@ static int decode(char *name, CODE *codetab)
 		int num;
 		char *end = NULL;
 
+		errno = 0;
 		num = strtol(name, &end, 10);
 		if (errno || name == end || (end && *end))
 			return -1;
@@ -122,28 +191,27 @@ static int decode(char *name, CODE *codetab)
 
 static int pencode(char *s)
 {
-	char *save;
-	int fac, lev;
+	int facility, level;
+	char *separator;
 
-	for (save = s; *s && *s != '.'; ++s);
-	if (*s) {
-		*s = '\0';
-		fac = decode(save, facilitynames);
-		if (fac < 0)
-			errx(EXIT_FAILURE, _("unknown facility name: %s"), save);
-		*s++ = '.';
-	}
-	else {
-		fac = LOG_USER;
-		s = save;
-	}
-	lev = decode(s, prioritynames);
-	if (lev < 0)
-		errx(EXIT_FAILURE, _("unknown priority name: %s"), save);
-	return ((lev & LOG_PRIMASK) | (fac & LOG_FACMASK));
+	separator = strchr(s, '.');
+	if (separator) {
+		*separator = '\0';
+		facility = decode(s, facilitynames);
+		if (facility < 0)
+			errx(EXIT_FAILURE, _("unknown facility name: %s"), s);
+		s = ++separator;
+	} else
+		facility = LOG_USER;
+	level = decode(s, prioritynames);
+	if (level < 0)
+		errx(EXIT_FAILURE, _("unknown priority name: %s"), s);
+	if (facility == LOG_KERN)
+		facility = LOG_USER;	/* kern is forbidden */
+	return ((level & LOG_PRIMASK) | (facility & LOG_FACMASK));
 }
 
-static int unix_socket(const char *path, const int socket_type)
+static int unix_socket(struct logger_ctl *ctl, const char *path, const int socket_type)
 {
 	int fd, i;
 	static struct sockaddr_un s_addr;	/* AF_UNIX address of local logger */
@@ -170,9 +238,14 @@ static int unix_socket(const char *path, const int socket_type)
 		break;
 	}
 
-	if (i == 0)
-		err(EXIT_FAILURE, _("socket %s"), path);
-
+	if (i == 0) {
+		if (ctl->unix_socket_errors)
+			err(EXIT_FAILURE, _("socket %s"), path);
+		else
+			/* See --socket-errors manual page entry for
+			 * explanation of this strange exit.  */
+			exit(EXIT_SUCCESS);
+	}
 	return fd;
 }
 
@@ -223,12 +296,12 @@ static int inet_socket(const char *servername, const char *port,
 }
 
 #ifdef HAVE_LIBSYSTEMD
-static int journald_entry(FILE *fp)
+static int journald_entry(struct logger_ctl *ctl, FILE *fp)
 {
 	struct iovec *iovec;
 	char *buf = NULL;
 	ssize_t sz;
-	int n, lines, vectors = 8, ret;
+	int n, lines, vectors = 8, ret = 0;
 	size_t dummy = 0;
 
 	iovec = xmalloc(vectors * sizeof(struct iovec));
@@ -250,7 +323,13 @@ static int journald_entry(FILE *fp)
 		iovec[lines].iov_base = buf;
 		iovec[lines].iov_len = sz;
 	}
-	ret = sd_journal_sendv(iovec, lines);
+
+	if (!ctl->noact)
+		ret = sd_journal_sendv(iovec, lines);
+	if (ctl->stderr_printout) {
+		for (n = 0; n < lines; n++)
+			fprintf(stderr, "%s\n", (char *) iovec[n].iov_base);
+	}
 	for (n = 0; n < lines; n++)
 		free(iovec[n].iov_base);
 	free(iovec);
@@ -258,32 +337,357 @@ static int journald_entry(FILE *fp)
 }
 #endif
 
-static void mysyslog(int fd, int logflags, int pri, char *tag, char *msg)
+static char *xgetlogin(void)
 {
-       char buf[1000], pid[30], *cp, *tp;
-       time_t now;
+	char *cp;
+	struct passwd *pw;
 
-       if (fd > -1) {
-               if (logflags & LOG_PID)
-                       snprintf (pid, sizeof(pid), "[%d]", getpid());
-	       else
-		       pid[0] = 0;
-               if (tag)
-		       cp = tag;
-	       else {
-		       cp = getlogin();
-		       if (!cp)
-			       cp = "<someone>";
-	       }
-	       time(&now);
-	       tp = ctime(&now)+4;
+	if (!(cp = getlogin()) || !*cp)
+		cp = (pw = getpwuid(geteuid()))? pw->pw_name : "<someone>";
+	return cp;
+}
 
-               snprintf(buf, sizeof(buf), "<%d>%.15s %.200s%s: %.400s",
-			pri, tp, cp, pid, msg);
+/* this creates a timestamp based on current time according to the
+ * fine rules of RFC3164, most importantly it ensures in a portable
+ * way that the month day is correctly written (with a SP instead
+ * of a leading 0). The function uses a static buffer which is
+ * overwritten on the next call (just like ctime() does).
+ */
+static const char *rfc3164_current_time(void)
+{
+	static char time[32];
+	struct timeval tv;
+	struct tm *tm;
+	static char *monthnames[] = {
+		"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug",
+		"Sep", "Oct", "Nov", "Dec"
+	};
 
-               if (write(fd, buf, strlen(buf)+1) < 0)
-                       return; /* error */
-       }
+	logger_gettimeofday(&tv, NULL);
+	tm = localtime(&tv.tv_sec);
+	snprintf(time, sizeof(time),"%s %2d %2.2d:%2.2d:%2.2d",
+		monthnames[tm->tm_mon], tm->tm_mday,
+		tm->tm_hour, tm->tm_min, tm->tm_sec);
+	return time;
+}
+
+/* writes generated buffer to desired destination. For TCP syslog,
+ * we use RFC6587 octet-stuffing. This is not great, but doing
+ * full blown RFC5425 (TLS) looks like it is too much for the
+ * logger utility.
+ */
+static void write_output(const struct logger_ctl *ctl, const char *const msg)
+{
+	char *buf;
+	const size_t len = xasprintf(&buf, "%s%s", ctl->hdr, msg);
+
+	if (!ctl->noact) {
+		if (write_all(ctl->fd, buf, len) < 0)
+			warn(_("write failed"));
+		else if (ctl->socket_type == TYPE_TCP) {
+			/* using an additional write seems like the best compromise:
+			 * - writev() is not yet supported by framework
+			 * - adding the \n to the buffer in formatters violates layers
+			 * - adding \n after the fact requires memory copy
+			 * - logger is not a high-performance app
+			 */
+			if (write_all(ctl->fd, "\n", 1) < 0)
+				warn(_("write failed"));
+		}
+	}
+	if (ctl->stderr_printout)
+		fprintf(stderr, "%s\n", buf);
+	free(buf);
+}
+
+#define NILVALUE "-"
+static void syslog_rfc3164_header(struct logger_ctl *const ctl)
+{
+	char pid[30], *hostname;
+
+	*pid = '\0';
+	if (ctl->fd < 0)
+		return;
+	if (ctl->pid)
+		snprintf(pid, sizeof(pid), "[%d]", ctl->pid);
+
+	if ((hostname = logger_xgethostname())) {
+		char *dot = strchr(hostname, '.');
+		if (dot)
+			*dot = '\0';
+	} else
+		hostname = xstrdup(NILVALUE);
+
+	xasprintf(&ctl->hdr, "<%d>%.15s %s %.200s%s: ",
+		 ctl->pri, rfc3164_current_time(), hostname, ctl->tag, pid);
+
+	free(hostname);
+}
+
+/* Some field mappings may be controversal, thus I give the reason
+ * why this specific mapping was used:
+ * APP-NAME <-- tag
+ *    Some may argue that "logger" is a better fit, but we think
+ *    this is better inline of what other implementations do. In
+ *    rsyslog, for example, the TAG value is populated from APP-NAME.
+ * PROCID <-- pid
+ *    This is a relatively straightforward interpretation from
+ *    RFC5424, sect. 6.2.6.
+ * MSGID <-- msgid (from --msgid)
+ *    One may argue that the string "logger" would be better suited
+ *    here so that a receiver can identify the sender process.
+ *    However, this does not sound like a good match to RFC5424,
+ *    sect. 6.2.7.
+ * Note that appendix A.1 of RFC5424 does not provide clear guidance
+ * of how these fields should be used. This is the case because the
+ * IETF working group couldn't arrive at a clear agreement when we
+ * specified RFC5424. The rest of the field mappings should be
+ * pretty clear from RFC5424. -- Rainer Gerhards, 2015-03-10
+ */
+static void syslog_rfc5424_header(struct logger_ctl *const ctl)
+{
+	char *time;
+	char *hostname;
+	char *const app_name = ctl->tag;
+	char *procid;
+	char *const msgid = xstrdup(ctl->msgid ? ctl->msgid : NILVALUE);
+	char *structured_data;
+
+	if (ctl->fd < 0)
+		return;
+
+	if (ctl->rfc5424_time) {
+		struct timeval tv;
+		struct tm *tm;
+
+		logger_gettimeofday(&tv, NULL);
+		if ((tm = localtime(&tv.tv_sec)) != NULL) {
+			char fmt[64];
+			const size_t i = strftime(fmt, sizeof(fmt),
+						  "%Y-%m-%dT%H:%M:%S.%%06u%z ", tm);
+			/* patch TZ info to comply with RFC3339 (we left SP at end) */
+			fmt[i - 1] = fmt[i - 2];
+			fmt[i - 2] = fmt[i - 3];
+			fmt[i - 3] = ':';
+			xasprintf(&time, fmt, tv.tv_usec);
+		} else
+			err(EXIT_FAILURE, _("localtime() failed"));
+	} else
+		time = xstrdup(NILVALUE);
+
+	if (ctl->rfc5424_host) {
+		if (!(hostname = logger_xgethostname()))
+			hostname = xstrdup(NILVALUE);
+		/* Arbitrary looking 'if (var < strlen()) checks originate from
+		 * RFC 5424 - 6 Syslog Message Format definition.  */
+		if (255 < strlen(hostname))
+			errx(EXIT_FAILURE, _("hostname '%s' is too long"),
+			     hostname);
+	} else
+		hostname = xstrdup(NILVALUE);
+
+	if (48 < strlen(ctl->tag))
+		errx(EXIT_FAILURE, _("tag '%s' is too long"), ctl->tag);
+
+	if (ctl->pid)
+		xasprintf(&procid, "%d", ctl->pid);
+	else
+		procid = xstrdup(NILVALUE);
+
+	if (ctl->rfc5424_tq) {
+#ifdef HAVE_NTP_GETTIME
+		struct ntptimeval ntptv;
+
+		if (ntp_gettime(&ntptv) == TIME_OK)
+			xasprintf(&structured_data,
+				 "[timeQuality tzKnown=\"1\" isSynced=\"1\" syncAccuracy=\"%ld\"]",
+				 ntptv.maxerror);
+		else
+#endif
+			xasprintf(&structured_data,
+				 "[timeQuality tzKnown=\"1\" isSynced=\"0\"]");
+	} else
+		structured_data = xstrdup(NILVALUE);
+
+	xasprintf(&ctl->hdr, "<%d>1 %s %s %s %s %s %s ",
+		ctl->pri,
+		time,
+		hostname,
+		app_name,
+		procid,
+		msgid,
+		structured_data);
+
+	free(time);
+	free(hostname);
+	/* app_name points to ctl->tag, do NOT free! */
+	free(procid);
+	free(msgid);
+	free(structured_data);
+}
+
+static void parse_rfc5424_flags(struct logger_ctl *ctl, char *optarg)
+{
+	char *in, *tok;
+
+	in = optarg;
+	while ((tok = strtok(in, ","))) {
+		in = NULL;
+		if (!strcmp(tok, "notime")) {
+			ctl->rfc5424_time = 0;
+			ctl->rfc5424_tq = 0;
+		} else if (!strcmp(tok, "notq"))
+			ctl->rfc5424_tq = 0;
+		else if (!strcmp(tok, "nohost"))
+			ctl->rfc5424_host = 0;
+		else
+			warnx(_("ignoring unknown option argument: %s"), tok);
+	}
+}
+
+static int parse_unix_socket_errors_flags(char *optarg)
+{
+	if (!strcmp(optarg, "off"))
+		return AF_UNIX_ERRORS_OFF;
+	if (!strcmp(optarg, "on"))
+		return AF_UNIX_ERRORS_ON;
+	if (!strcmp(optarg, "auto"))
+		return AF_UNIX_ERRORS_AUTO;
+	warnx(_("invalid argument: %s: using automatic errors"), optarg);
+	return AF_UNIX_ERRORS_AUTO;
+}
+
+static void syslog_local_header(struct logger_ctl *const ctl)
+{
+	char pid[32];
+
+	if (ctl->pid)
+		snprintf(pid, sizeof(pid), "[%d]", ctl->pid);
+	else
+		pid[0] = '\0';
+
+	xasprintf(&ctl->hdr, "<%d>%s %s%s: ", ctl->pri, rfc3164_current_time(),
+		ctl->tag, pid);
+}
+
+static void generate_syslog_header(struct logger_ctl *const ctl)
+{
+	free(ctl->hdr);
+	ctl->syslogfp(ctl);
+}
+
+static void logger_open(struct logger_ctl *ctl)
+{
+	if (ctl->server) {
+		ctl->fd = inet_socket(ctl->server, ctl->port, ctl->socket_type);
+		if (!ctl->syslogfp)
+			ctl->syslogfp = syslog_rfc5424_header;
+	} else {
+		if (!ctl->unix_socket)
+			ctl->unix_socket = _PATH_DEVLOG;
+
+		ctl->fd = unix_socket(ctl, ctl->unix_socket, ctl->socket_type);
+		if (!ctl->syslogfp)
+			ctl->syslogfp = syslog_local_header;
+	}
+	if (!ctl->tag)
+		ctl->tag = xgetlogin();
+	generate_syslog_header(ctl);
+}
+
+static void logger_command_line(const struct logger_ctl *ctl, char **argv)
+{
+	/* note: we never re-generate the syslog header here, even if we
+	 * generate multiple messages. If so, we think it is the right thing
+	 * to do to report them with the same timestamp, as the user actually
+	 * intended to send a single message.
+	 */
+	char *const buf = xmalloc(ctl->max_message_size + 1);
+	char *p = buf;
+	const char *endp = buf + ctl->max_message_size - 1;
+	size_t len;
+
+	while (*argv) {
+		len = strlen(*argv);
+		if (endp < p + len && p != buf) {
+			write_output(ctl, buf);
+			p = buf;
+		}
+		if (ctl->max_message_size < len) {
+			(*argv)[ctl->max_message_size] = '\0'; /* truncate */
+			write_output(ctl, *argv++);
+			continue;
+		}
+		if (p != buf)
+			*p++ = ' ';
+		memmove(p, *argv++, len);
+		*(p += len) = '\0';
+	}
+	if (p != buf)
+		write_output(ctl, buf);
+	free(buf);
+}
+
+static void logger_stdin(struct logger_ctl *ctl)
+{
+	int default_priority = ctl->pri;
+	int last_pri = default_priority;
+	size_t max_usrmsg_size = ctl->max_message_size - strlen(ctl->hdr);
+	char *const buf = xmalloc(max_usrmsg_size + 2 + 2);
+	int pri;
+	int c;
+	size_t i;
+
+	c = getchar();
+	while (c != EOF) {
+		i = 0;
+		if (ctl->prio_prefix) {
+			if (c == '<') {
+				pri = 0;
+				buf[i++] = c;
+				while (isdigit(c = getchar()) && pri <= 191) {
+					buf[i++] = c;
+					pri = pri * 10 + c - '0';
+				}
+				if (c != EOF && c != '\n')
+					buf[i++] = c;
+				if (c == '>' && 0 <= pri && pri <= 191) { /* valid RFC PRI values */
+					i = 0;
+					if (pri < 8)
+						pri |= 8; /* kern facility is forbidden */
+					ctl->pri = pri;
+				} else
+					ctl->pri = default_priority;
+
+				if (ctl->pri != last_pri) {
+					generate_syslog_header(ctl);
+					max_usrmsg_size = ctl->max_message_size - strlen(ctl->hdr);
+					last_pri = ctl->pri;
+				}
+				if (c != EOF && c != '\n')
+					c = getchar();
+			}
+		}
+
+		while (c != EOF && c != '\n' && i < max_usrmsg_size) {
+			buf[i++] = c;
+			c = getchar();
+		}
+		buf[i] = '\0';
+
+		if (i > 0 || !ctl->skip_empty_lines)
+			write_output(ctl, buf);
+
+		if (c == '\n')	/* discard line terminator */
+			c = getchar();
+	}
+}
+
+static void logger_close(const struct logger_ctl *ctl)
+{
+	if (close(ctl->fd) != 0)
+		err(EXIT_FAILURE, _("close failed"));
+	free(ctl->hdr);
 }
 
 static void __attribute__ ((__noreturn__)) usage(FILE *out)
@@ -291,18 +695,31 @@ static void __attribute__ ((__noreturn__)) usage(FILE *out)
 	fputs(USAGE_HEADER, out);
 	fprintf(out, _(" %s [options] [<message>]\n"), program_invocation_short_name);
 
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Enter messages into the system log.\n"), out);
+
 	fputs(USAGE_OPTIONS, out);
-	fputs(_(" -T, --tcp             use TCP only\n"), out);
-	fputs(_(" -d, --udp             use UDP only\n"), out);
-	fputs(_(" -i, --id              log the process ID too\n"), out);
-	fputs(_(" -f, --file <file>     log the contents of this file\n"), out);
-	fputs(_(" -n, --server <name>   write to this remote syslog server\n"), out);
-	fputs(_(" -P, --port <number>   use this UDP port\n"), out);
-	fputs(_(" -p, --priority <prio> mark given message with this priority\n"), out);
-	fputs(_("     --prio-prefix     look for a prefix on every line read from stdin\n"), out);
-	fputs(_(" -s, --stderr          output message to standard error as well\n"), out);
-	fputs(_(" -t, --tag <tag>       mark every line with this tag\n"), out);
-	fputs(_(" -u, --socket <socket> write to this Unix socket\n"), out);
+	fputs(_(" -i                       log the logger command's PID\n"), out);
+	fputs(_("     --id[=<id>]          log the given <id>, or otherwise the PID\n"), out);
+	fputs(_(" -f, --file <file>        log the contents of this file\n"), out);
+	fputs(_(" -e, --skip-empty         do not log empty lines when processing files\n"), out);
+	fputs(_("     --no-act             do everything except the write the log\n"), out);
+	fputs(_(" -p, --priority <prio>    mark given message with this priority\n"), out);
+	fputs(_("     --prio-prefix        look for a prefix on every line read from stdin\n"), out);
+	fputs(_(" -s, --stderr             output message to standard error as well\n"), out);
+	fputs(_(" -S, --size <size>        maximum size for a single message\n"), out);
+	fputs(_(" -t, --tag <tag>          mark every line with this tag\n"), out);
+	fputs(_(" -n, --server <name>      write to this remote syslog server\n"), out);
+	fputs(_(" -P, --port <number>      use this UDP port\n"), out);
+	fputs(_(" -T, --tcp                use TCP only\n"), out);
+	fputs(_(" -d, --udp                use UDP only\n"), out);
+	fputs(_("     --rfc3164            use the obsolete BSD syslog protocol\n"), out);
+	fputs(_("     --rfc5424[=<snip>]   use the syslog protocol (the default for remote);\n"
+		"                            <snip> can be notime, or notq, and/or nohost\n"), out);
+	fputs(_("     --msgid <msgid>      set rfc5424 message id field\n"), out);
+	fputs(_(" -u, --socket <socket>    write to this Unix socket\n"), out);
+	fputs(_("     --socket-errors[=<on|off|auto>]\n"
+		"                          print connection errors when using Unix sockets\n"), out);
 #ifdef HAVE_LIBSYSTEMD
 	fputs(_("     --journald[=<file>]  write journald entry\n"), out);
 #endif
@@ -323,33 +740,56 @@ static void __attribute__ ((__noreturn__)) usage(FILE *out)
  */
 int main(int argc, char **argv)
 {
-	int ch, logflags, pri, prio_prefix;
-	char *tag, buf[1024];
-	char *usock = NULL;
-	char *server = NULL;
-	char *port = NULL;
-	int LogSock = -1, socket_type = ALL_TYPES;
+	struct logger_ctl ctl = {
+		.fd = -1,
+		.pid = 0,
+		.pri = LOG_USER | LOG_NOTICE,
+		.prio_prefix = 0,
+		.tag = NULL,
+		.unix_socket = NULL,
+		.unix_socket_errors = 0,
+		.server = NULL,
+		.port = NULL,
+		.hdr = NULL,
+		.msgid = NULL,
+		.socket_type = ALL_TYPES,
+		.max_message_size = 1024,
+		.rfc5424_time = 1,
+		.rfc5424_tq = 1,
+		.rfc5424_host = 1,
+		.skip_empty_lines = 0
+	};
+	int ch;
+	int stdout_reopened = 0;
+	int unix_socket_errors_mode = AF_UNIX_ERRORS_AUTO;
 #ifdef HAVE_LIBSYSTEMD
 	FILE *jfd = NULL;
 #endif
 	static const struct option longopts[] = {
-		{ "id",		no_argument,	    0, 'i' },
-		{ "stderr",	no_argument,	    0, 's' },
-		{ "file",	required_argument,  0, 'f' },
-		{ "priority",	required_argument,  0, 'p' },
-		{ "tag",	required_argument,  0, 't' },
-		{ "socket",	required_argument,  0, 'u' },
-		{ "udp",	no_argument,	    0, 'd' },
-		{ "tcp",	no_argument,	    0, 'T' },
-		{ "server",	required_argument,  0, 'n' },
-		{ "port",	required_argument,  0, 'P' },
-		{ "version",	no_argument,	    0, 'V' },
-		{ "help",	no_argument,	    0, 'h' },
-		{ "prio-prefix", no_argument, 0, OPT_PRIO_PREFIX },
+		{ "id",		   optional_argument, 0, OPT_ID		   },
+		{ "stderr",	   no_argument,	      0, 's'		   },
+		{ "file",	   required_argument, 0, 'f'		   },
+		{ "no-act",        no_argument,       0, OPT_NOACT,	   },
+		{ "priority",	   required_argument, 0, 'p'		   },
+		{ "tag",	   required_argument, 0, 't'		   },
+		{ "socket",	   required_argument, 0, 'u'		   },
+		{ "socket-errors", required_argument, 0, OPT_SOCKET_ERRORS },
+		{ "udp",	   no_argument,	      0, 'd'		   },
+		{ "tcp",	   no_argument,	      0, 'T'		   },
+		{ "server",	   required_argument, 0, 'n'		   },
+		{ "port",	   required_argument, 0, 'P'		   },
+		{ "version",	   no_argument,	      0, 'V'		   },
+		{ "help",	   no_argument,	      0, 'h'		   },
+		{ "prio-prefix",   no_argument,	      0, OPT_PRIO_PREFIX   },
+		{ "rfc3164",	   no_argument,	      0, OPT_RFC3164	   },
+		{ "rfc5424",	   optional_argument, 0, OPT_RFC5424	   },
+		{ "size",	   required_argument, 0, 'S'		   },
+		{ "msgid",	   required_argument, 0, OPT_MSGID	   },
+		{ "skip-empty",	   no_argument,	      0, 'e'		   },
 #ifdef HAVE_LIBSYSTEMD
-		{ "journald",   optional_argument,  0, OPT_JOURNALD },
+		{ "journald",	   optional_argument, 0, OPT_JOURNALD	   },
 #endif
-		{ NULL,		0, 0, 0 }
+		{ NULL,		   0,		      0, 0		   }
 	};
 
 	setlocale(LC_ALL, "");
@@ -357,44 +797,57 @@ int main(int argc, char **argv)
 	textdomain(PACKAGE);
 	atexit(close_stdout);
 
-	tag = NULL;
-	pri = LOG_NOTICE;
-	logflags = 0;
-	prio_prefix = 0;
-	while ((ch = getopt_long(argc, argv, "f:ip:st:u:dTn:P:Vh",
+	while ((ch = getopt_long(argc, argv, "ef:ip:S:st:u:dTn:P:Vh",
 					    longopts, NULL)) != -1) {
 		switch (ch) {
 		case 'f':		/* file to log */
 			if (freopen(optarg, "r", stdin) == NULL)
-				err(EXIT_FAILURE, _("file %s"),
-				    optarg);
+				err(EXIT_FAILURE, _("file %s"), optarg);
+			stdout_reopened = 1;
+			break;
+		case 'e':
+			ctl.skip_empty_lines = 1;
 			break;
 		case 'i':		/* log process id also */
-			logflags |= LOG_PID;
+			ctl.pid = logger_getpid();
+			break;
+		case OPT_ID:
+			if (optarg) {
+				const char *p = optarg;
+
+				if (*p == '=')
+					p++;
+				ctl.pid = strtoul_or_err(optarg, _("failed to parse id"));
+			} else
+				ctl.pid = logger_getpid();
 			break;
 		case 'p':		/* priority */
-			pri = pencode(optarg);
+			ctl.pri = pencode(optarg);
 			break;
 		case 's':		/* log to standard error */
-			logflags |= LOG_PERROR;
+			ctl.stderr_printout = 1;
 			break;
 		case 't':		/* tag */
-			tag = optarg;
+			ctl.tag = optarg;
 			break;
 		case 'u':		/* unix socket */
-			usock = optarg;
+			ctl.unix_socket = optarg;
+			break;
+		case 'S':		/* max message size */
+			ctl.max_message_size = strtosize_or_err(optarg,
+				_("failed to parse message size"));
 			break;
 		case 'd':
-			socket_type = TYPE_UDP;
+			ctl.socket_type = TYPE_UDP;
 			break;
 		case 'T':
-			socket_type = TYPE_TCP;
+			ctl.socket_type = TYPE_TCP;
 			break;
 		case 'n':
-			server = optarg;
+			ctl.server = optarg;
 			break;
 		case 'P':
-			port = optarg;
+			ctl.port = optarg;
 			break;
 		case 'V':
 			printf(UTIL_LINUX_VERSION);
@@ -402,7 +855,20 @@ int main(int argc, char **argv)
 		case 'h':
 			usage(stdout);
 		case OPT_PRIO_PREFIX:
-			prio_prefix = 1;
+			ctl.prio_prefix = 1;
+			break;
+		case OPT_RFC3164:
+			ctl.syslogfp = syslog_rfc3164_header;
+			break;
+		case OPT_RFC5424:
+			ctl.syslogfp = syslog_rfc5424_header;
+			if (optarg)
+				parse_rfc5424_flags(&ctl, optarg);
+			break;
+		case OPT_MSGID:
+			if (strchr(optarg, ' '))
+				errx(EXIT_FAILURE, _("--msgid cannot contain space"));
+			ctl.msgid = optarg;
 			break;
 #ifdef HAVE_LIBSYSTEMD
 		case OPT_JOURNALD:
@@ -415,6 +881,12 @@ int main(int argc, char **argv)
 				jfd = stdin;
 			break;
 #endif
+		case OPT_SOCKET_ERRORS:
+			unix_socket_errors_mode = parse_unix_socket_errors_flags(optarg);
+			break;
+		case OPT_NOACT:
+			ctl.noact = 1;
+			break;
 		case '?':
 		default:
 			usage(stderr);
@@ -422,83 +894,41 @@ int main(int argc, char **argv)
 	}
 	argc -= optind;
 	argv += optind;
-
-	/* setup for logging */
+	if (stdout_reopened && argc)
+		warnx(_("--file <file> and <message> are mutually exclusive, message is ignored"));
 #ifdef HAVE_LIBSYSTEMD
 	if (jfd) {
-		int ret = journald_entry(jfd);
+		int ret = journald_entry(&ctl, jfd);
 		if (stdin != jfd)
 			fclose(jfd);
 		if (ret)
-			errx(EXIT_FAILURE, "journald entry could not be wrote");
+			errx(EXIT_FAILURE, _("journald entry could not be written"));
 		return EXIT_SUCCESS;
 	}
 #endif
-	if (server)
-		LogSock = inet_socket(server, port, socket_type);
-	else if (usock)
-		LogSock = unix_socket(usock, socket_type);
-	else
-		openlog(tag ? tag : getlogin(), logflags, 0);
-
-	/* log input line if appropriate */
-	if (argc > 0) {
-		register char *p, *endp;
-		size_t len;
-
-		for (p = buf, endp = buf + sizeof(buf) - 2; *argv;) {
-			len = strlen(*argv);
-			if (p + len > endp && p > buf) {
-			    if (!usock && !server)
-				syslog(pri, "%s", buf);
-			    else
-				mysyslog(LogSock, logflags, pri, tag, buf);
-				p = buf;
-			}
-			if (len > sizeof(buf) - 1) {
-			    if (!usock && !server)
-				syslog(pri, "%s", *argv++);
-			    else
-				mysyslog(LogSock, logflags, pri, tag, *argv++);
-			} else {
-				if (p != buf)
-					*p++ = ' ';
-				memmove(p, *argv++, len);
-				*(p += len) = '\0';
-			}
-		}
-		if (p != buf) {
-		    if (!usock && !server)
-			syslog(pri, "%s", buf);
-		    else
-			mysyslog(LogSock, logflags, pri, tag, buf);
-		}
-	} else {
-		char *msg;
-		int default_priority = pri;
-		while (fgets(buf, sizeof(buf), stdin) != NULL) {
-		    /* glibc is buggy and adds an additional newline,
-		       so we have to remove it here until glibc is fixed */
-		    int len = strlen(buf);
-
-		    if (len > 0 && buf[len - 1] == '\n')
-			    buf[len - 1] = '\0';
-
-			msg = buf;
-			pri = default_priority;
-			if (prio_prefix && msg[0] == '<')
-				msg = get_prio_prefix(msg, &pri);
-
-		    if (!usock && !server)
-			syslog(pri, "%s", msg);
-		    else
-			mysyslog(LogSock, logflags, pri, tag, msg);
-		}
+	switch (unix_socket_errors_mode) {
+	case AF_UNIX_ERRORS_OFF:
+		ctl.unix_socket_errors = 0;
+		break;
+	case AF_UNIX_ERRORS_ON:
+		ctl.unix_socket_errors = 1;
+		break;
+	case AF_UNIX_ERRORS_AUTO:
+		ctl.unix_socket_errors = ctl.noact || ctl.stderr_printout;
+#ifdef HAVE_LIBSYSTEMD
+		ctl.unix_socket_errors |= !!sd_booted();
+#endif
+		break;
+	default:
+		abort();
 	}
-	if (!usock && !server)
-		closelog();
+	logger_open(&ctl);
+	if (0 < argc)
+		logger_command_line(&ctl, argv);
 	else
-		close(LogSock);
-
+		/* Note. --file <arg> reopens stdin making the below
+		 * function to be used for file inputs. */
+		logger_stdin(&ctl);
+	logger_close(&ctl);
 	return EXIT_SUCCESS;
 }

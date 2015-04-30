@@ -71,6 +71,9 @@ static void __attribute__((__noreturn__)) usage(FILE *out)
 	fprintf(out,
 	      _(" %s [options]\n"), program_invocation_short_name);
 
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Enter a system sleep state until a specified wakeup time.\n"), out);
+
 	fputs(USAGE_OPTIONS, out);
 	fputs(_(" -a, --auto               reads the clock mode from adjust file (default)\n"), out);
 	fprintf(out,
@@ -471,8 +474,7 @@ int main(int argc, char **argv)
 			break;
 
 		case 'V':
-			printf(_("%s from %s\n"),
-			       program_invocation_short_name, PACKAGE_STRING);
+			printf(UTIL_LINUX_VERSION);
 			exit(EXIT_SUCCESS);
 
 		case 'h':
@@ -490,7 +492,7 @@ int main(int argc, char **argv)
 		}
 	}
 	if (verbose)
-		printf(clock_mode == CM_UTC ? _("Using UTC time.\n") :
+		printf("%s", clock_mode == CM_UTC ? _("Using UTC time.\n") :
 				_("Using local time.\n"));
 
 	if (!alarm && !seconds && strcmp(suspend,"disable") &&

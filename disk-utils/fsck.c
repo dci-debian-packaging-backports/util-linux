@@ -54,6 +54,7 @@
 #include "c.h"
 #include "closestream.h"
 #include "fileutils.h"
+#include "monotonic.h"
 
 #define XALLOC_EXIT_CODE	FSCK_EX_ERROR
 #include "xalloc.h"
@@ -450,10 +451,14 @@ static void fs_interpret_type(struct libmnt_fs *fs)
 	device = fs_get_device(fs);
 	if (device) {
 		int ambi = 0;
+		char *tp;
+		struct libmnt_cache *cache = mnt_table_get_cache(fstab);
 
-		type = mnt_get_fstype(device, &ambi, mnt_table_get_cache(fstab));
+		tp = mnt_get_fstype(device, &ambi, cache);
 		if (!ambi)
-			mnt_fs_set_fstype(fs, type);
+			mnt_fs_set_fstype(fs, tp);
+		if (!cache)
+			free(tp);
 	}
 }
 
@@ -573,20 +578,19 @@ static int progress_active(void)
  */
 static void print_stats(struct fsck_instance *inst)
 {
-	double time_diff;
+	struct timeval delta;
 
 	if (!inst || !report_stats || noexecute)
 		return;
 
-	time_diff = (inst->end_time.tv_sec  - inst->start_time.tv_sec)
-		  + (inst->end_time.tv_usec - inst->start_time.tv_usec) / 1E6;
+	timersub(&inst->end_time, &inst->start_time, &delta);
 
 	fprintf(stdout, "%s: status %d, rss %ld, "
-			"real %f, user %d.%06d, sys %d.%06d\n",
+			"real %ld.%06ld, user %d.%06d, sys %d.%06d\n",
 		fs_get_device(inst->fs),
 		inst->exit_status,
 		inst->rusage.ru_maxrss,
-		time_diff,
+		delta.tv_sec, delta.tv_usec,
 		(int)inst->rusage.ru_utime.tv_sec,
 		(int)inst->rusage.ru_utime.tv_usec,
 		(int)inst->rusage.ru_stime.tv_sec,
@@ -672,7 +676,7 @@ static int execute(const char *progname, const char *progpath,
 	inst->pid = pid;
 	inst->prog = xstrdup(progname);
 	inst->type = xstrdup(type);
-	gettimeofday(&inst->start_time, NULL);
+	gettime_monotonic(&inst->start_time);
 	inst->next = NULL;
 
 	/*
@@ -785,7 +789,7 @@ static struct fsck_instance *wait_one(int flags)
 
 	inst->exit_status = status;
 	inst->flags |= FLAG_DONE;
-	gettimeofday(&inst->end_time, NULL);
+	gettime_monotonic(&inst->end_time);
 	memcpy(&inst->rusage, &rusage, sizeof(struct rusage));
 
 	if (progress && (inst->flags & FLAG_PROGRESS) &&
@@ -1355,6 +1359,9 @@ static void __attribute__((__noreturn__)) usage(FILE *out)
 	fprintf(out, _(" %s [options] -- [fs-options] [<filesystem> ...]\n"),
 			 program_invocation_short_name);
 
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Check and repair a Linux filesystem.\n"), out);
+
 	fputs(USAGE_OPTIONS, out);
 	fputs(_(" -A         check all filesystems\n"), out);
 	fputs(_(" -C [<fd>]  display progress bar; file descriptor is for GUIs\n"), out);
@@ -1457,15 +1464,14 @@ static void parse_argv(int argc, char *argv[])
 				break;
 			case 'C':
 				progress = 1;
-				if (arg[j+1]) {
+				if (arg[j+1]) {					/* -C<fd> */
 					progress_fd = string_to_int(arg+j+1);
 					if (progress_fd < 0)
 						progress_fd = 0;
 					else
 						goto next_arg;
-				} else if ((i+1) < argc &&
-					   !strncmp(argv[i+1], "-", 1) == 0) {
-					progress_fd = string_to_int(argv[i]);
+				} else if (i+1 < argc && *argv[i+1] != '-') {	/* -C <fd> */
+					progress_fd = string_to_int(argv[i+1]);
 					if (progress_fd < 0)
 						progress_fd = 0;
 					else {

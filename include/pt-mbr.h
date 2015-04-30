@@ -11,6 +11,7 @@ struct dos_partition {
 } __attribute__((packed));
 
 #define MBR_PT_OFFSET		0x1be
+#define MBR_PT_BOOTBITS_SIZE	440
 
 static inline struct dos_partition *mbr_get_partition(unsigned char *mbr, int i)
 {
@@ -148,6 +149,7 @@ enum {
 	MBR_BSDI_FS_PARTITION		= 0xb7,
 	MBR_BSDI_SWAP_PARTITION		= 0xb8,
 	MBR_BOOTWIZARD_HIDDEN_PARTITION	= 0xbb,
+	MBR_ACRONIS_FAT32LBA_PARTITION  = 0xbc, /* Acronis Secure Zone with ipl for loader F11.SYS */
 	MBR_SOLARIS_BOOT_PARTITION	= 0xbe,
 	MBR_SOLARIS_PARTITION		= 0xbf,
 	MBR_DRDOS_FAT12_PARTITION	= 0xc1,

@@ -1,14 +1,13 @@
 .\" Copyright 1998 Andries E. Brouwer (aeb@cwi.nl)
 .\"
 .\" May be distributed under the GNU General Public License
-.\" Rewritten for 2.1.117, aeb, 981010.
 .\"
 .TH MKSWAP 8 "March 2009" "util-linux" "System Administration"
 .SH NAME
 mkswap \- set up a Linux swap area
 .SH SYNOPSIS
 .B mkswap
-.RI [ options ]
+[options]
 .I device
 .RI [ size ]
 .SH DESCRIPTION
@@ -134,8 +133,8 @@ Note that a swap file must not contain any holes (so, using
 to create the file is not acceptable).
 
 .SH ENVIRONMENT
-.IP LIBBLKID_DEBUG=0xffff
-enables debug output.
+.IP LIBBLKID_DEBUG=all
+enables libblkid debug output.
 
 .SH "SEE ALSO"
 .BR fdisk (8),

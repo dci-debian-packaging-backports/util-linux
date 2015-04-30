@@ -73,6 +73,10 @@ static void __attribute__ ((__noreturn__)) usage(FILE * out)
 	 * which means they can be translated.  */
 	fprintf(out,
 	      _(" %s [options] [y | n]\n"), program_invocation_short_name);
+
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Control write access of other users to your terminal.\n"), out);
+
 	fputs(USAGE_OPTIONS, out);
 	fputs(_(" -v, --verbose  explain what is being done\n"), out);
 	fputs(USAGE_HELP, out);
@@ -121,7 +125,7 @@ int main(int argc, char *argv[])
 		err(MESG_EXIT_FAILURE, _("ttyname failed"));
 
 	if (stat(tty, &sb) < 0)
-		err(MESG_EXIT_FAILURE, _("stat failed %s"), tty);
+		err(MESG_EXIT_FAILURE, _("stat of %s failed"), tty);
 
 	if (!*argv) {
 		if (sb.st_mode & (S_IWGRP | S_IWOTH)) {

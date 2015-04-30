@@ -1,20 +1,19 @@
-.\" -*- nroff -*-
 .TH FINDMNT 8 "June 2014" "util-linux" "System Administration"
 .SH NAME
 findmnt \- find a filesystem
 .SH SYNOPSIS
 .B findmnt
-.RB [ options ]
+[options]
 .sp
 .B findmnt
-.RB [ options ]
+[options]
 .IR device | mountpoint
 .sp
 .B findmnt
-.RB [ options ]
-.RB [ \--source ]
+[options]
+.RB [ \-\-source ]
 .IR device
-.RB [ \--target ]
+.RB [ \-\-target ]
 .IR mountpoint
 .SH DESCRIPTION
 .B findmnt
@@ -148,7 +147,7 @@ umount, remount and move.  More than one action may be specified in a
 comma-separated list.  All actions are monitored by default.
 
 The time for which \fB--poll\fR will block can be restricted with the \fB\-\-timeout\fP
-or \fB\-\-first-only\fP options.
+or \fB\-\-first\-only\fP options.
 
 The standard columns always use the new version of the information from the
 mountinfo file, except the umount action which is based on the original
@@ -186,8 +185,12 @@ Search in
 .IR /etc/fstab .
 The output is in the list format (see \fB--list\fR).
 .TP
-.BR \-T , " \-\-target \fIdir\fP"
-Explicitly define the mount target (mountpoint directory).
+.BR \-T , " \-\-target \fIpath\fP"
+Explicitly define the mount target (mountpoint directory). If the \fIpath\fR
+is not a mountpoint file or directory than
+.B findmnt
+checks \fIpath\fR elements in reverse order for get the mountpoint (this feature is 
+supported only if search in kernel files and unsupported for \fB\-\-fstab\fP).
 .TP
 .BR \-t , " \-\-types \fIlist\fP"
 Limit the set of printed filesystems.  More than one type may be
@@ -197,6 +200,10 @@ prefixed with
 to specify the filesystem types on which no action should be taken.  For
 more details see
 .BR mount (8).
+.TP
+.BR \-U , " \-\-uniq"
+Ignore filesystems with duplicate mount targets, thus effectively skipping
+over-mounted mount points.
 .TP
 .BR \-u , " \-\-notruncate"
 Do not truncate text in columns.  The default is to not truncate the
@@ -243,8 +250,10 @@ Monitors remounts to read-only mode on all ext3 filesystems.
 overrides the default location of the fstab file
 .IP LIBMOUNT_MTAB=<path>
 overrides the default location of the mtab file
-.IP LIBMOUNT_DEBUG=0xffff
-enables debug output
+.IP LIBMOUNT_DEBUG=all
+enables libmount debug output
+.IP LIBSMARTCOLS_DEBUG=all
+enables libsmartcols debug output
 .SH AUTHORS
 .nf
 Karel Zak <kzak@redhat.com>

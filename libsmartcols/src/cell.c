@@ -11,7 +11,7 @@
 /**
  * SECTION: cell
  * @title: Cell
- * @short_description: cell API
+ * @short_description: container for your data
  *
  * An API to access and modify per-cell data and information. Note that cell is
  * always part of the line. If you destroy (un-reference) a line than it
@@ -41,8 +41,6 @@
  */
 int scols_reset_cell(struct libscols_cell *ce)
 {
-	assert(ce);
-
 	if (!ce)
 		return -EINVAL;
 
@@ -56,7 +54,7 @@ int scols_reset_cell(struct libscols_cell *ce)
 /**
  * scols_cell_set_data:
  * @ce: a pointer to a struct libscols_cell instance
- * @str: data (used for scols_printtable())
+ * @str: data (used for scols_print_table())
  *
  * Stores a copy of the @str in @ce.
  *
@@ -65,8 +63,6 @@ int scols_reset_cell(struct libscols_cell *ce)
 int scols_cell_set_data(struct libscols_cell *ce, const char *str)
 {
 	char *p = NULL;
-
-	assert(ce);
 
 	if (!ce)
 		return -EINVAL;
@@ -83,7 +79,7 @@ int scols_cell_set_data(struct libscols_cell *ce, const char *str)
 /**
  * scols_cell_refer_data:
  * @ce: a pointer to a struct libscols_cell instance
- * @str: data (used for scols_printtable())
+ * @str: data (used for scols_print_table())
  *
  * Adds a reference to @str to @ce. The pointer is deallocated by
  * scols_reset_cell() or scols_unref_line(). This function is mostly designed
@@ -94,8 +90,6 @@ int scols_cell_set_data(struct libscols_cell *ce, const char *str)
  */
 int scols_cell_refer_data(struct libscols_cell *ce, char *str)
 {
-	assert(ce);
-
 	if (!ce)
 		return -EINVAL;
 	free(ce->data);
@@ -111,7 +105,6 @@ int scols_cell_refer_data(struct libscols_cell *ce, char *str)
  */
 const char *scols_cell_get_data(const struct libscols_cell *ce)
 {
-	assert(ce);
 	return ce ? ce->data : NULL;
 }
 
@@ -124,8 +117,6 @@ const char *scols_cell_get_data(const struct libscols_cell *ce)
  */
 int scols_cell_set_userdata(struct libscols_cell *ce, void *data)
 {
-	assert(ce);
-
 	if (!ce)
 		return -EINVAL;
 	ce->userdata = data;
@@ -188,8 +179,6 @@ int scols_cell_set_color(struct libscols_cell *ce, const char *color)
 {
 	char *p = NULL;
 
-	assert(ce);
-
 	if (!ce)
 		return -EINVAL;
 	if (color) {
@@ -216,7 +205,6 @@ int scols_cell_set_color(struct libscols_cell *ce, const char *color)
  */
 const char *scols_cell_get_color(const struct libscols_cell *ce)
 {
-	assert(ce);
 	return ce ? ce->color : NULL;
 }
 
@@ -233,9 +221,6 @@ int scols_cell_copy_content(struct libscols_cell *dest,
 			    const struct libscols_cell *src)
 {
 	int rc;
-
-	assert(dest);
-	assert(src);
 
 	rc = scols_cell_set_data(dest, scols_cell_get_data(src));
 	if (!rc)

@@ -84,30 +84,30 @@ static void xcleanse(char *s, int len)
 			*s = '?';
 }
 
-static void print_utline(struct utmp ut, FILE *out)
+static void print_utline(struct utmp *ut, FILE *out)
 {
 	const char *addr_string, *time_string;
 	char buffer[INET6_ADDRSTRLEN];
 
-	if (ut.ut_addr_v6[1] || ut.ut_addr_v6[2] || ut.ut_addr_v6[3])
-		addr_string = inet_ntop(AF_INET6, &(ut.ut_addr_v6), buffer, sizeof(buffer));
+	if (ut->ut_addr_v6[1] || ut->ut_addr_v6[2] || ut->ut_addr_v6[3])
+		addr_string = inet_ntop(AF_INET6, &(ut->ut_addr_v6), buffer, sizeof(buffer));
 	else
-		addr_string = inet_ntop(AF_INET, &(ut.ut_addr_v6), buffer, sizeof(buffer));
+		addr_string = inet_ntop(AF_INET, &(ut->ut_addr_v6), buffer, sizeof(buffer));
 
 #if defined(_HAVE_UT_TV)
-	time_string = timetostr(ut.ut_tv.tv_sec);
+	time_string = timetostr(ut->ut_tv.tv_sec);
 #else
-	time_string = timetostr((time_t)ut.ut_time);	/* ut_time is not always a time_t */
+	time_string = timetostr((time_t)ut->ut_time);	/* ut_time is not always a time_t */
 #endif
-	cleanse(ut.ut_id);
-	cleanse(ut.ut_user);
-	cleanse(ut.ut_line);
-	cleanse(ut.ut_host);
+	cleanse(ut->ut_id);
+	cleanse(ut->ut_user);
+	cleanse(ut->ut_line);
+	cleanse(ut->ut_host);
 
 	/*            pid    id       user     line     host     addr       time */
 	fprintf(out, "[%d] [%05d] [%-4.4s] [%-*.*s] [%-*.*s] [%-*.*s] [%-15s] [%-28.28s]\n",
-	       ut.ut_type, ut.ut_pid, ut.ut_id, 8, UT_NAMESIZE, ut.ut_user,
-	       12, UT_LINESIZE, ut.ut_line, 20, UT_HOSTSIZE, ut.ut_host,
+	       ut->ut_type, ut->ut_pid, ut->ut_id, 8, UT_NAMESIZE, ut->ut_user,
+	       12, UT_LINESIZE, ut->ut_line, 20, UT_HOSTSIZE, ut->ut_host,
 	       addr_string, time_string);
 }
 
@@ -126,14 +126,14 @@ static void roll_file(const char *filename, off_t *size, FILE *out)
 		err(EXIT_FAILURE, _("cannot open %s"), filename);
 
 	if (fstat(fileno(in), &st) == -1)
-		err(EXIT_FAILURE, _("%s: stat failed"), filename);
+		err(EXIT_FAILURE, _("stat of %s failed"), filename);
 
 	if (st.st_size == *size)
 		goto done;
 
 	if (fseek(in, *size, SEEK_SET) != (off_t) -1) {
 		while (fread(&ut, sizeof(ut), 1, in) == 1)
-			print_utline(ut, out);
+			print_utline(&ut, out);
 	}
 
 	pos = ftello(in);
@@ -203,7 +203,7 @@ static FILE *dump(FILE *in, const char *filename, int follow, FILE *out)
 		ignore_result( fseek(in, -10 * sizeof(ut), SEEK_END) );
 
 	while (fread(&ut, sizeof(ut), 1, in) == 1)
-		print_utline(ut, out);
+		print_utline(&ut, out);
 
 	if (!follow)
 		return in;
@@ -217,7 +217,7 @@ static FILE *dump(FILE *in, const char *filename, int follow, FILE *out)
 		 * inotify instances */
 		for (;;) {
 			while (fread(&ut, sizeof(ut), 1, in) == 1)
-				print_utline(ut, out);
+				print_utline(&ut, out);
 			sleep(1);
 		}
 
@@ -296,6 +296,9 @@ static void __attribute__((__noreturn__)) usage(FILE *out)
 
 	fprintf(out,
 		_(" %s [options] [filename]\n"), program_invocation_short_name);
+
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Dump UTMP and WTMP files in raw format.\n"), out);
 
 	fputs(USAGE_OPTIONS, out);
 	fputs(_(" -f, --follow         output appended data as the file grows\n"), out);

@@ -11,8 +11,6 @@ Sector size (logical/physical): 512 bytes / 512 bytes
 I/O size (minimum/optimal): 512 bytes / 512 bytes
 Disklabel type: dos
 Disk identifier: <removed>
-
-
 -------------------
 
 Create primary partition
@@ -29,7 +27,6 @@ Disk identifier: <removed>
 
 Device     Boot Start End Cylinders  Size Id Type
 <removed>1          1   1         1  7.8M 83 Linux
-
 -------------------
 
 Set partition type
@@ -46,7 +43,6 @@ Disk identifier: <removed>
 
 Device     Boot Start End Cylinders  Size Id Type
 <removed>1          1   1         1  7.8M bf Solaris
-
 -------------------
 
 Set primary partition active
@@ -63,7 +59,6 @@ Disk identifier: <removed>
 
 Device     Boot Start End Cylinders  Size Id Type
 <removed>1 *        1   1         1  7.8M bf Solaris
-
 -------------------
 
 Re-create primary partition
@@ -80,7 +75,6 @@ Disk identifier: <removed>
 
 Device     Boot Start End Cylinders  Size Id Type
 <removed>1          1   1         1  7.8M 83 Linux
-
 -------------------
 
 Create extended partition
@@ -98,7 +92,6 @@ Disk identifier: <removed>
 Device     Boot Start End Cylinders  Size Id Type
 <removed>1          1   1         1  7.8M 83 Linux
 <removed>2          2  12        12 86.3M  5 Extended
-
 -------------------
 
 Create logical partitions
@@ -120,7 +113,6 @@ Device     Boot Start End Cylinders  Size Id Type
 <removed>6          4   5         2 15.7M 83 Linux
 <removed>7          6   7         2 15.7M 83 Linux
 <removed>8          8   9         2 15.7M 83 Linux
-
 -------------------
 
 Delete logical partitions
@@ -139,7 +131,6 @@ Device     Boot Start End Cylinders  Size Id Type
 <removed>1          1   1         1  7.8M 83 Linux
 <removed>2          2  12        12 86.3M  5 Extended
 <removed>5          6   7         2 15.7M 83 Linux
-
 -------------------
 
 Create another logical partition
@@ -194,7 +185,5 @@ Sector size (logical/physical): 512 bytes / 512 bytes
 I/O size (minimum/optimal): 512 bytes / 512 bytes
 Disklabel type: dos
 Disk identifier: <removed>
-
-
 -------------------
 

@@ -103,6 +103,7 @@
 #include <inttypes.h>
 #include <stdint.h>
 #include <stdarg.h>
+#include <limits.h>
 
 #ifdef HAVE_LIBUUID
 # include <uuid.h>
@@ -111,6 +112,7 @@
 #include "blkidP.h"
 #include "all-io.h"
 #include "sysfs.h"
+#include "strutils.h"
 
 /* chains */
 extern const struct blkid_chaindrv superblocks_drv;
@@ -574,6 +576,12 @@ unsigned char *blkid_probe_get_buffer(blkid_probe pr,
 
 		if (blkid_llseek(pr->fd, pr->off + off, SEEK_SET) < 0) {
 			errno = 0;
+			return NULL;
+		}
+
+		/* someone trying to overflow some buffers? */
+		if (len > ULONG_MAX - sizeof(struct blkid_bufinfo)) {
+			errno = ENOMEM;
 			return NULL;
 		}
 
@@ -1720,14 +1728,7 @@ int blkid_uuid_is_empty(const unsigned char *buf, size_t len)
  */
 size_t blkid_rtrim_whitespace(unsigned char *str)
 {
-	size_t i = strlen((char *) str);
-
-	while (i--) {
-		if (!isspace(str[i]))
-			break;
-	}
-	str[++i] = '\0';
-	return i;
+	return rtrim_whitespace(str);
 }
 
 /* Removes whitespace from the left-hand side of a string.
@@ -1736,18 +1737,9 @@ size_t blkid_rtrim_whitespace(unsigned char *str)
  */
 size_t blkid_ltrim_whitespace(unsigned char *str)
 {
-	size_t len;
-	unsigned char *p;
-
-	for (p = str; p && isspace(*p); p++);
-
-	len = strlen((char *) p);
-
-	if (len && p > str)
-		memmove(str, p, len + 1);
-
-	return len;
+	return ltrim_whitespace(str);
 }
+
 /*
  * Some mkfs-like utils wipe some parts (usually begin) of the device.
  * For example LVM (pvcreate) or mkswap(8). This information could be used

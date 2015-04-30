@@ -55,7 +55,11 @@
 #include <netdb.h>
 #include <lastlog.h>
 #include <security/pam_appl.h>
-#include <security/pam_misc.h>
+#ifdef HAVE_SECURITY_PAM_MISC_H
+# include <security/pam_misc.h>
+#elif defined(HAVE_SECURITY_OPENPAM_H)
+# include <security/openpam.h>
+#endif
 #include <sys/sendfile.h>
 
 #ifdef HAVE_LIBAUDIT
@@ -425,7 +429,9 @@ static void init_tty(struct login_context *cxt)
 static void log_btmp(struct login_context *cxt)
 {
 	struct utmp ut;
+#if defined(_HAVE_UT_TV)        /* in <utmpbits.h> included by <utmp.h> */
 	struct timeval tv;
+#endif
 
 	memset(&ut, 0, sizeof(ut));
 
@@ -495,6 +501,7 @@ static void log_audit(struct login_context *cxt, int status)
 
 static void log_lastlog(struct login_context *cxt)
 {
+	struct sigaction sa, oldsa_xfsz;
 	struct lastlog ll;
 	time_t t;
 	int fd;
@@ -502,9 +509,14 @@ static void log_lastlog(struct login_context *cxt)
 	if (!cxt->pwd)
 		return;
 
+	/* lastlog is huge on systems with large UIDs, ignore SIGXFSZ */
+	memset(&sa, 0, sizeof(sa));
+	sa.sa_handler = SIG_IGN;
+	sigaction(SIGXFSZ, &sa, &oldsa_xfsz);
+
 	fd = open(_PATH_LASTLOG, O_RDWR, 0);
 	if (fd < 0)
-		return;
+		goto done;
 
 	if (lseek(fd, (off_t) cxt->pwd->pw_uid * sizeof(ll), SEEK_SET) == -1)
 		goto done;
@@ -542,7 +554,10 @@ static void log_lastlog(struct login_context *cxt)
 	if (write_all(fd, (char *)&ll, sizeof(ll)))
 		warn(_("write lastlog failed"));
 done:
-	close(fd);
+	if (fd >= 0)
+		close(fd);
+
+	sigaction(SIGXFSZ, &oldsa_xfsz, NULL);		/* restore original setting */
 }
 
 /*
@@ -1023,12 +1038,13 @@ static void fork_session(struct login_context *cxt)
 static void init_environ(struct login_context *cxt)
 {
 	struct passwd *pwd = cxt->pwd;
-	char *termenv = NULL, **env;
+	char *termenv, **env;
 	char tmp[PATH_MAX];
 	int len, i;
 
 	termenv = getenv("TERM");
-	termenv = termenv ? xstrdup(termenv) : "dumb";
+	if (termenv)
+		termenv = xstrdup(termenv);
 
 	/* destroy environment unless user has requested preservation (-p) */
 	if (!cxt->keep_env) {
@@ -1039,7 +1055,8 @@ static void init_environ(struct login_context *cxt)
 	setenv("HOME", pwd->pw_dir, 0);	/* legal to override */
 	setenv("USER", pwd->pw_name, 1);
 	setenv("SHELL", pwd->pw_shell, 1);
-	setenv("TERM", termenv, 1);
+	setenv("TERM", termenv ? termenv : "dumb", 1);
+	free(termenv);
 
 	if (pwd->pw_uid)
 		logindefs_setenv("PATH", "ENV_PATH", _PATH_DEFPATH);
@@ -1115,9 +1132,14 @@ int main(int argc, char **argv)
 	struct passwd *pwd = NULL, _pwd;
 
 	struct login_context cxt = {
-		.tty_mode = TTY_MODE,		/* tty chmod() */
-		.pid = getpid(),		/* PID */
-		.conv = { misc_conv, NULL }	/* PAM conversation function */
+		.tty_mode = TTY_MODE,		  /* tty chmod() */
+		.pid = getpid(),		  /* PID */
+#ifdef HAVE_SECURITY_PAM_MISC_H
+		.conv = { misc_conv, NULL }	  /* Linux-PAM conversation function */
+#elif defined(HAVE_SECURITY_OPENPAM_H)
+		.conv = { openpam_ttyconv, NULL } /* OpenPAM conversation function */
+#endif
+
 	};
 
 	timeout = (unsigned int)getlogindefs_num("LOGIN_TIMEOUT", LOGIN_TIMEOUT);
@@ -1170,6 +1192,8 @@ int main(int argc, char **argv)
 		case '?':
 		default:
 			fprintf(stderr, _("Usage: login [-p] [-h <host>] [-H] [[-f] <username>]\n"));
+			fputs(USAGE_SEPARATOR, stderr);
+			fputs(_("Begin a session on the system.\n"), stderr);
 			exit(EXIT_FAILURE);
 		}
 	argc -= optind;

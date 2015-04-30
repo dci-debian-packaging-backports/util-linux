@@ -19,6 +19,9 @@
 TS_TOPDIR="${0%/*}/../.."
 TS_DESC="race conditions"
 
+# Don't execute this test by default, --force required
+TS_OPTIONAL="yes"
+
 . $TS_TOPDIR/functions.sh
 ts_init "$*"
 
@@ -29,8 +32,6 @@ ts_check_test_command "$TS_CMD_SCRIPT"
 TS_KNOWN_FAIL="yes"
 
 bingofile="$TS_OUTDIR/${TS_TESTNAME}-bingo"
-
-set -o pipefail
 
 count=1000
 for i in `seq 1 $count`; do

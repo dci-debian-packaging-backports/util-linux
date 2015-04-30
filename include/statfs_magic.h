@@ -1,6 +1,17 @@
 #ifndef UTIL_LINUX_STATFS_MAGIC_H
 #define UTIL_LINUX_STATFS_MAGIC_H
 
+#include <sys/statfs.h>
+
+/*
+ * If possible then don't depend on internal libc __SWORD_TYPE type.
+ */
+#ifdef __GNUC__
+#define F_TYPE_EQUAL(a, b) (a == (__typeof__(a)) b)
+#else
+#define F_TYPE_EQUAL(a, b) (a == (__SWORD_TYPE) b)
+#endif
+
 /*
  *  Unfortunately, Linux kernel hedeader file <linux/magic.h> is incomplete
  *  mess and kernel returns by statfs f_type many numbers that are nowhere

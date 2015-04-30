@@ -153,9 +153,6 @@ main(int argc, char *argv[])
 	if ((fd = open(file, O_RDONLY, 0)) < 0 || fstat(fd, &sb))
 		err(EXIT_FAILURE, "%s", file);
 	front = mmap(NULL, (size_t) sb.st_size, PROT_READ,
-#ifdef MAP_FILE
-		     MAP_FILE |
-#endif
 		     MAP_SHARED, fd, (off_t) 0);
 	if
 #ifdef MAP_FAILED
@@ -164,13 +161,6 @@ main(int argc, char *argv[])
 		((void *)(front) <= (void *)0)
 #endif
 			err(EXIT_FAILURE, "%s", file);
-
-#if 0
-	/* workaround for mmap problem (rmiller@duskglow.com) */
-	if (front == (void *)0)
-		return 1;
-#endif
-
 	back = front + sb.st_size;
 	return look(front, back);
 }
@@ -363,17 +353,22 @@ compare(char *s2, char *s2end) {
 
 static void __attribute__ ((__noreturn__)) usage(FILE * out)
 {
-	fputs(_("\nUsage:\n"), out),
-	fprintf(out,
-	      _(" %s [options] string [file]\n"), program_invocation_short_name);
+	fputs(USAGE_HEADER, out);
+	fprintf(out, _(" %s [options] <string> [<file>...]\n"), program_invocation_short_name);
 
-	fputs(_("\nOptions:\n"), out);
-	fputs(_(" -a, --alternative      use alternative dictionary\n"
-		" -d, --alphanum         compare only alphanumeric characters\n"
-		" -f, --ignore-case      ignore case differences when comparing\n"
-		" -t, --terminate <char> define string termination character\n"
-		" -V, --version          output version information and exit\n"
-		" -h, --help             display this help and exit\n\n"), out);
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Display lines beginning with a specified string.\n"), out);
+
+	fputs(USAGE_OPTIONS, out);
+	fputs(_(" -a, --alternative        use the alternative dictionary\n"), out);
+	fputs(_(" -d, --alphanum           compare only alphanumeric characters\n"), out);
+	fputs(_(" -f, --ignore-case        ignore case differences when comparing\n"), out);
+	fputs(_(" -t, --terminate <char>   define the string-termination character\n"), out);
+
+	fputs(USAGE_SEPARATOR, out);
+	fputs(USAGE_HELP, out);
+	fputs(USAGE_VERSION, out);
+	fprintf(out, USAGE_MAN_TAIL("look(1)"));
 
 	exit(out == stderr ? EXIT_FAILURE : EXIT_SUCCESS);
 }

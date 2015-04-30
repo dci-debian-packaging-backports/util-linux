@@ -271,6 +271,7 @@ int mnt_fstype_is_pseudofs(const char *type)
 		"mqueue",
 		"nfsd",
 		"none",
+		"overlay",
 		"pipefs",
 		"proc",
 		"pstore",
@@ -298,8 +299,6 @@ int mnt_fstype_is_pseudofs(const char *type)
  */
 int mnt_fstype_is_netfs(const char *type)
 {
-	assert(type);
-
 	if (strcmp(type, "cifs")   == 0 ||
 	    strcmp(type, "smbfs")  == 0 ||
 	    strncmp(type,"nfs", 3) == 0 ||
@@ -565,7 +564,7 @@ static int get_filesystems(const char *filename, char ***filesystems, const char
 {
 	int rc = 0;
 	FILE *f;
-	char line[128];
+	char line[129];
 
 	f = fopen(filename, "r" UL_CLOEXECSTR);
 	if (!f)
@@ -962,6 +961,10 @@ int mnt_open_uniq_filename(const char *filename, char **name)
  * This function finds the mountpoint that a given path resides in. @path
  * should be canonicalized. The returned pointer should be freed by the caller.
  *
+ * WARNING: the function compares st_dev of the @path elements. This traditional
+ * way maybe be insufficient on filesystems like Linux "overlay". See also
+ * mnt_table_find_target().
+ *
  * Returns: allocated string with the target of the mounted device or NULL on error
  */
 char *mnt_get_mountpoint(const char *path)
@@ -970,7 +973,8 @@ char *mnt_get_mountpoint(const char *path)
 	struct stat st;
 	dev_t dir, base;
 
-	assert(path);
+	if (!path)
+		return NULL;
 
 	mnt = strdup(path);
 	if (!mnt)
@@ -1007,51 +1011,33 @@ err:
 	return NULL;
 }
 
-char *mnt_get_fs_root(const char *path, const char *mnt)
-{
-	char *m = (char *) mnt, *res;
-	const char *p;
-	size_t sz;
-
-	if (!m)
-		m = mnt_get_mountpoint(path);
-	if (!m)
-		return NULL;
-
-	sz = strlen(m);
-	p = sz > 1 ? path + sz : path;
-
-	if (m != mnt)
-		free(m);
-
-	res = *p ? strdup(p) : strdup("/");
-	DBG(UTILS, ul_debug("%s fs-root is %s", path, res));
-	return res;
-}
-
 /*
  * Search for @name kernel command parametr.
  *
  * Returns newly allocated string with a parameter argument if the @name is
  * specified as "name=" or returns pointer to @name or returns NULL if not
- * found.
+ * found.  If it is specified more than once, we grab the last copy.
  *
  * For example cmdline: "aaa bbb=BBB ccc"
  *
  *	@name is "aaa"	--returns--> "aaa" (pointer to @name)
  *	@name is "bbb=" --returns--> "BBB" (allocated)
  *	@name is "foo"  --returns--> NULL
+ *
+ * Note: It is not really feasible to parse the command line exactly the same
+ * as the kernel does since we don't know which options are valid.  We can use
+ * the -- marker though and not walk past that.
  */
 char *mnt_get_kernel_cmdline_option(const char *name)
 {
 	FILE *f;
 	size_t len;
 	int val = 0;
-	char *p, *res = NULL;
+	char *p, *res = NULL, *mem = NULL;
 	char buf[BUFSIZ];	/* see kernel include/asm-generic/setup.h: COMMAND_LINE_SIZE */
 	const char *path = _PATH_PROC_CMDLINE;
 
-	if (!name)
+	if (!name || !name[0])
 		return NULL;
 
 #ifdef TEST_PROGRAM
@@ -1069,14 +1055,20 @@ char *mnt_get_kernel_cmdline_option(const char *name)
 	if (!p || !*p || *p == '\n')
 		return NULL;
 
-	len = strlen(buf);
-	*(buf + len - 1) = '\0';	/* remove last '\n' */
+	p = strstr(p, " -- ");
+	if (p) {
+		/* no more kernel args after this */
+		*p = '\0';
+	} else {
+		len = strlen(buf);
+		buf[len - 1] = '\0';	/* remove last '\n' */
+	}
 
 	len = strlen(name);
-	if (len && *(name + len - 1) == '=')
+	if (name[len - 1] == '=')
 		val = 1;
 
-	for ( ; p && *p; p++) {
+	for (p = buf; p && *p; p++) {
 		if (!(p = strstr(p, name)))
 			break;			/* not found the option */
 		if (p != buf && !isblank(*(p - 1)))
@@ -1085,15 +1077,19 @@ char *mnt_get_kernel_cmdline_option(const char *name)
 			continue;		/* no space after the option */
 		if (val) {
 			char *v = p + len;
+			int end;
 
 			while (*p && !isblank(*p))	/* jump to the end of the argument */
 				p++;
+			end = (*p == '\0');
 			*p = '\0';
-			res = strdup(v);
-			break;
+			free(mem);
+			res = mem = strdup(v);
+			if (end)
+				break;
 		} else
 			res = (char *) name;	/* option without '=' */
-		break;
+		/* don't break -- keep scanning for more options */
 	}
 
 	return res;
@@ -1152,17 +1148,6 @@ int test_mountpoint(struct libmnt_test *ts, int argc, char *argv[])
 {
 	char *path = canonicalize_path(argv[1]),
 	     *mnt = path ? mnt_get_mountpoint(path) :  NULL;
-
-	printf("%s: %s\n", argv[1], mnt ? : "unknown");
-	free(mnt);
-	free(path);
-	return 0;
-}
-
-int test_fsroot(struct libmnt_test *ts, int argc, char *argv[])
-{
-	char *path = canonicalize_path(argv[1]),
-	     *mnt = path ? mnt_get_fs_root(path, NULL) : NULL;
 
 	printf("%s: %s\n", argv[1], mnt ? : "unknown");
 	free(mnt);
@@ -1260,7 +1245,6 @@ int main(int argc, char *argv[])
 	{ "--ends-with",     test_endswith,        "<string> <prefix>" },
 	{ "--append-string", test_appendstr,       "<string> <appendix>" },
 	{ "--mountpoint",    test_mountpoint,      "<path>" },
-	{ "--fs-root",       test_fsroot,          "<path>" },
 	{ "--cd-parent",     test_chdir,           "<path>" },
 	{ "--kernel-cmdline",test_kernel_cmdline,  "<option> | <option>=" },
 	{ "--mkdir",         test_mkdir,           "<path>" },

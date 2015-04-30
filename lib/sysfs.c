@@ -11,6 +11,7 @@
 #include "pathnames.h"
 #include "sysfs.h"
 #include "fileutils.h"
+#include "all-io.h"
 
 char *sysfs_devno_attribute_path(dev_t devno, char *buf,
 				 size_t bufsiz, const char *attr)
@@ -204,9 +205,9 @@ int sysfs_has_attribute(struct sysfs_cxt *cxt, const char *attr)
 	return sysfs_stat(cxt, attr, &st) == 0;
 }
 
-static int sysfs_open(struct sysfs_cxt *cxt, const char *attr)
+static int sysfs_open(struct sysfs_cxt *cxt, const char *attr, int flags)
 {
-	int fd = open_at(cxt->dir_fd, cxt->dir_path, attr, O_RDONLY|O_CLOEXEC);
+	int fd = open_at(cxt->dir_fd, cxt->dir_path, attr, flags);
 
 	if (fd == -1 && errno == ENOENT &&
 	    strncmp(attr, "queue/", 6) == 0 && cxt->parent) {
@@ -214,8 +215,7 @@ static int sysfs_open(struct sysfs_cxt *cxt, const char *attr)
 		/* Exception for "queue/<attr>". These attributes are available
 		 * for parental devices only
 		 */
-		fd = open_at(cxt->parent->dir_fd, cxt->dir_path, attr,
-				O_RDONLY|O_CLOEXEC);
+		fd = open_at(cxt->parent->dir_fd, cxt->dir_path, attr, flags);
 	}
 	return fd;
 }
@@ -239,14 +239,14 @@ DIR *sysfs_opendir(struct sysfs_cxt *cxt, const char *attr)
 	int fd = -1;
 
 	if (attr)
-		fd = sysfs_open(cxt, attr);
+		fd = sysfs_open(cxt, attr, O_RDONLY|O_CLOEXEC);
 
 	else if (cxt->dir_fd >= 0)
 		/* request to open root of device in sysfs (/sys/block/<dev>)
 		 * -- we cannot use cxt->sysfs_fd directly, because closedir()
 		 * will close this our persistent file descriptor.
 		 */
-		fd = dup(cxt->dir_fd);
+		fd = fcntl(cxt->dir_fd, F_DUPFD_CLOEXEC, STDERR_FILENO + 1);
 
 	if (fd < 0)
 		return NULL;
@@ -264,7 +264,7 @@ DIR *sysfs_opendir(struct sysfs_cxt *cxt, const char *attr)
 
 static FILE *sysfs_fopen(struct sysfs_cxt *cxt, const char *attr)
 {
-	int fd = sysfs_open(cxt, attr);
+	int fd = sysfs_open(cxt, attr, O_RDONLY|O_CLOEXEC);
 
 	return fd < 0 ? NULL : fdopen(fd, "r" UL_CLOEXECSTR);
 }
@@ -419,6 +419,42 @@ int sysfs_read_int(struct sysfs_cxt *cxt, const char *attr, int *res)
 	return -1;
 }
 
+int sysfs_write_string(struct sysfs_cxt *cxt, const char *attr, const char *str)
+{
+	int fd = sysfs_open(cxt, attr, O_WRONLY|O_CLOEXEC);
+	int rc, errsv;
+
+	if (fd < 0)
+		return -errno;
+	rc = write_all(fd, str, strlen(str));
+
+	errsv = errno;
+	close(fd);
+	errno = errsv;
+	return rc;
+}
+
+int sysfs_write_u64(struct sysfs_cxt *cxt, const char *attr, uint64_t num)
+{
+	char buf[sizeof(stringify_value(ULLONG_MAX))];
+	int fd, rc = 0, len, errsv;
+
+	fd = sysfs_open(cxt, attr, O_WRONLY|O_CLOEXEC);
+	if (fd < 0)
+		return -errno;
+
+	len = snprintf(buf, sizeof(buf), "%ju", num);
+	if (len < 0 || (size_t) len + 1 > sizeof(buf))
+		rc = -errno;
+	else
+		rc = write_all(fd, buf, len);
+
+	errsv = errno;
+	close(fd);
+	errno = errsv;
+	return rc;
+}
+
 char *sysfs_strdup(struct sysfs_cxt *cxt, const char *attr)
 {
 	char buf[1024];
@@ -511,6 +547,146 @@ char *sysfs_get_devname(struct sysfs_cxt *cxt, char *buf, size_t bufsiz)
 	return buf;
 }
 
+#define SUBSYSTEM_LINKNAME	"/subsystem"
+
+/*
+ * For example:
+ *
+ * chain: /sys/dev/block/../../devices/pci0000:00/0000:00:1a.0/usb1/1-1/1-1.2/ \
+ *                           1-1.2:1.0/host65/target65:0:0/65:0:0:0/block/sdb
+ *
+ * The function check if <chain>/subsystem symlink exists, if yes then returns
+ * basename of the readlink result, and remove the last subdirectory from the
+ * <chain> path.
+ */
+static char *get_subsystem(char *chain, char *buf, size_t bufsz)
+{
+	size_t len;
+	char *p;
+
+	if (!chain || !*chain)
+		return NULL;
+
+	len = strlen(chain);
+	if (len + sizeof(SUBSYSTEM_LINKNAME) > PATH_MAX)
+		return NULL;
+
+	do {
+		ssize_t sz;
+
+		/* append "/subsystem" to the path */
+		memcpy(chain + len, SUBSYSTEM_LINKNAME, sizeof(SUBSYSTEM_LINKNAME));
+
+		/* try if subsystem symlink exists */
+		sz = readlink(chain, buf, bufsz - 1);
+
+		/* remove last subsystem from chain */
+		chain[len] = '\0';
+		p = strrchr(chain, '/');
+		if (p) {
+			*p = '\0';
+			len = p - chain;
+		}
+
+		if (sz > 0) {
+			/* we found symlink to subsystem, return basename */
+			buf[sz] = '\0';
+			return basename(buf);
+		}
+
+	} while (p);
+
+	return NULL;
+}
+
+/*
+ * Returns complete path to the device, the patch contains all all sybsystems
+ * used for the device.
+ */
+char *sysfs_get_devchain(struct sysfs_cxt *cxt, char *buf, size_t bufsz)
+{
+	/* read /sys/dev/block/<maj>:<min> symlink */
+	ssize_t sz = sysfs_readlink(cxt, NULL, buf, bufsz);
+	if (sz <= 0 || sz + sizeof(_PATH_SYS_DEVBLOCK "/") > bufsz)
+		return NULL;
+
+	buf[sz++] = '\0';
+
+	/* create absolute patch from the link */
+	memmove(buf + sizeof(_PATH_SYS_DEVBLOCK "/") - 1, buf, sz);
+	memcpy(buf, _PATH_SYS_DEVBLOCK "/", sizeof(_PATH_SYS_DEVBLOCK "/") - 1);
+
+	return buf;
+}
+
+/*
+ * The @subsys returns the next subsystem in the chain. Function modifies
+ * @devchain string.
+ *
+ * Returns: 0 in success, <0 on error, 1 on end of chain
+ */
+int sysfs_next_subsystem(struct sysfs_cxt *cxt __attribute__((unused)),
+			 char *devchain, char **subsys)
+{
+	char subbuf[PATH_MAX];
+	char *sub;
+
+	if (!subsys || !devchain)
+		return -EINVAL;
+
+	while ((sub = get_subsystem(devchain, subbuf, sizeof(subbuf)))) {
+		*subsys = strdup(sub);
+		if (!*subsys)
+			return -ENOMEM;
+		return 0;
+	}
+
+	return 1;
+}
+
+
+static int is_hotpluggable_subsystem(const char *name)
+{
+	static const char * const hotplug_subsystems[] = {
+		"usb",
+		"ieee1394",
+		"pcmcia",
+		"mmc",
+		"ccw"
+	};
+	size_t i;
+
+	for (i = 0; i < ARRAY_SIZE(hotplug_subsystems); i++)
+		if (strcmp(name, hotplug_subsystems[i]) == 0)
+			return 1;
+
+	return 0;
+}
+
+int sysfs_is_hotpluggable(struct sysfs_cxt *cxt)
+{
+	char buf[PATH_MAX], *chain, *sub;
+	int rc = 0;
+
+
+	/* check /sys/dev/block/<maj>:<min>/removable attribute */
+	if (sysfs_read_int(cxt, "removable", &rc) == 0 && rc == 1)
+		return 1;
+
+	chain = sysfs_get_devchain(cxt, buf, sizeof(buf));
+
+	while (chain && sysfs_next_subsystem(cxt, chain, &sub) == 0) {
+		rc = is_hotpluggable_subsystem(sub);
+		if (rc) {
+			free(sub);
+			break;
+		}
+		free(sub);
+	}
+
+	return rc;
+}
+
 static int get_dm_wholedisk(struct sysfs_cxt *cxt, char *diskname,
                 size_t len, dev_t *diskdevno)
 {
@@ -600,10 +776,9 @@ int sysfs_devno_to_wholedisk(dev_t dev, char *diskname,
          */
         char linkpath[PATH_MAX];
         char *name;
-        int linklen;
+	ssize_t	linklen;
 
-        linklen = sysfs_readlink(&cxt, NULL,
-                linkpath, sizeof(linkpath) - 1);
+	linklen = sysfs_readlink(&cxt, NULL, linkpath, sizeof(linkpath) - 1);
         if (linklen < 0)
             goto err;
         linkpath[linklen] = '\0';
@@ -674,6 +849,7 @@ int sysfs_devno_is_wholedisk(dev_t devno)
 
 	return devno == disk;
 }
+
 
 int sysfs_scsi_get_hctl(struct sysfs_cxt *cxt, int *h, int *c, int *t, int *l)
 {
@@ -822,7 +998,7 @@ int main(int argc, char *argv[])
 	struct sysfs_cxt cxt = UL_SYSFSCXT_EMPTY;
 	char *devname;
 	dev_t devno;
-	char path[PATH_MAX];
+	char path[PATH_MAX], *sub, *chain;
 	int i, is_part;
 	uint64_t u64;
 	ssize_t len;
@@ -875,6 +1051,16 @@ int main(int argc, char *argv[])
 		printf("SECTOR: %d\n", i);
 
 	printf("DEVNAME: %s\n", sysfs_get_devname(&cxt, path, sizeof(path)));
+	printf("HOTPLUG: %s\n", sysfs_is_hotpluggable(&cxt) ? "yes" : "no");
+
+	chain = sysfs_get_devchain(&cxt, path, sizeof(path));
+	printf("SUBSUSTEMS:\n");
+
+	while (chain && sysfs_next_subsystem(&cxt, chain, &sub) == 0) {
+		printf("\t%s\n", sub);
+		free(sub);
+	}
+
 
 	sysfs_deinit(&cxt);
 	return EXIT_SUCCESS;

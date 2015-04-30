@@ -18,14 +18,15 @@ LDADD = $(LTLIBINTL)
 dist_noinst_DATA = $(dist_man_MANS)
 
 # Paths to in-tree libraries (use ul_ prefix to avoid possible collisions) Note
-# that blkid.h, libmount.h and libsmartcols.h are generated and stored in build
-# dirs.
+# that blkid.h, libmount.h, libfdisk.h and libsmartcols.h are generated and
+# stored in build dirs.
 #
 ul_libblkid_incdir = $(top_builddir)/libblkid/src
 ul_libmount_incdir = $(top_builddir)/libmount/src
 ul_libsmartcols_incdir = $(top_builddir)/libsmartcols/src
+ul_libfdisk_incdir  = $(top_builddir)/libfdisk/src
+
 ul_libuuid_incdir  = $(top_srcdir)/libuuid/src
-ul_libfdisk_incdir  = $(top_srcdir)/libfdisk/src
 
 pkgconfigdir = $(usrlib_execdir)/pkgconfig
 
@@ -120,7 +121,15 @@ edit_cmd = sed \
 	 -e 's|@ADJTIME_PATH[@]|$(ADJTIME_PATH)|g' \
 	 -e 's|@LIBUUID_VERSION[@]|$(LIBUUID_VERSION)|g' \
 	 -e 's|@LIBMOUNT_VERSION[@]|$(LIBMOUNT_VERSION)|g' \
+	 -e 's|@LIBMOUNT_MAJOR_VERSION[@]|$(LIBMOUNT_MAJOR_VERSION)|g' \
+	 -e 's|@LIBMOUNT_MINOR_VERSION[@]|$(LIBMOUNT_MINOR_VERSION)|g' \
+	 -e 's|@LIBMOUNT_PATCH_VERSION[@]|$(LIBMOUNT_PATCH_VERSION)|g' \
 	 -e 's|@LIBSMARTCOLS_VERSION[@]|$(LIBSMARTCOLS_VERSION)|g' \
+	 -e 's|@LIBFDISK_PC_REQUIRES[@]|$(LIBFDISK_PC_REQUIRES)|g' \
+	 -e 's|@LIBFDISK_VERSION[@]|$(LIBFDISK_VERSION)|g' \
+	 -e 's|@LIBFDISK_MAJOR_VERSION[@]|$(LIBFDISK_MAJOR_VERSION)|g' \
+	 -e 's|@LIBFDISK_MINOR_VERSION[@]|$(LIBFDISK_MINOR_VERSION)|g' \
+	 -e 's|@LIBFDISK_PATCH_VERSION[@]|$(LIBFDISK_PATCH_VERSION)|g' \
 	 -e 's|@LIBBLKID_VERSION[@]|$(LIBBLKID_VERSION)|g'
 
 CLEANFILES += $(PATHFILES)

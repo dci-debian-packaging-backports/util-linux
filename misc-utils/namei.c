@@ -228,7 +228,7 @@ dotdot_stat(const char *dirname, struct stat *st)
 	memcpy(path + len, DOTDOTDIR, sizeof(DOTDOTDIR));
 
 	if (stat(path, st))
-		err(EXIT_FAILURE, _("stat failed %s"), path);
+		err(EXIT_FAILURE, _("stat of %s failed"), path);
 	free(path);
 	return st;
 }
@@ -424,11 +424,14 @@ static void usage(int rc)
 	if (!*p)
 		p = "namei";
 
-	fputs(_("\nUsage:\n"), out);
+	fputs(USAGE_HEADER, out);
 	fprintf(out,
 	      _(" %s [options] <pathname>...\n"), p);
 
-	fputs(_("\nOptions:\n"), out);
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Follow a pathname until a terminal point is found.\n"), out);
+
+	fputs(USAGE_OPTIONS, out);
 	fputs(_(" -h, --help          displays this help text\n"
 		" -V, --version       output version information and exit\n"
 		" -x, --mountpoints   show mount point directories with a 'D'\n"
@@ -438,7 +441,7 @@ static void usage(int rc)
 		" -n, --nosymlinks    don't follow symlinks\n"
 		" -v, --vertical      vertical align of modes and owners\n"), out);
 
-	fputs(_("\nFor more information see namei(1).\n"), out);
+	fprintf(out, USAGE_MAN_TAIL("namei(1)"));
 	exit(rc);
 }
 

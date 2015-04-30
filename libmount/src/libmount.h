@@ -29,7 +29,10 @@ extern "C" {
 #include <mntent.h>
 #include <sys/types.h>
 
-#define LIBMOUNT_VERSION   "2.25.0"
+#define LIBMOUNT_VERSION   "2.26.0"
+#define LIBMOUNT_MAJOR_VERSION   2
+#define LIBMOUNT_MINOR_VERSION   26
+#define LIBMOUNT_PATCH_VERSION   0
 
 /**
  * libmnt_cache:
@@ -54,14 +57,17 @@ struct libmnt_iter;
 
 /**
  * libmnt_optmap:
+ * @name: option name[=type] where type is printf-like type specifier")
+ * @id: option ID or MS_* flags (e.g MS_RDONLY)
+ * @mask: MNT_{NOMTAB,INVERT,...} mask
  *
  * Mount options description (map)
  */
 struct libmnt_optmap
 {
-	const char	*name;	 /* option name[=%<type>] (e.g. "loop[=%s]") */
-	int		id;	 /* option ID or MS_* flags (e.g MS_RDONLY) */
-	int		mask;	 /* MNT_{NOMTAB,INVERT,...} mask */
+	const char	*name;
+	int		id;
+	int		mask;
 };
 
 /*
@@ -99,6 +105,13 @@ struct libmnt_update;
  * Mount/umount status
  */
 struct libmnt_context;
+
+/**
+ * libmnt_monitor
+ *
+ * Mount tables monitor
+ */
+struct libmnt_monitor;
 
 /**
  * libmnt_tabdiff:
@@ -526,6 +539,29 @@ extern int mnt_tabdiff_next_change(struct libmnt_tabdiff *df,
 				   struct libmnt_fs **new_fs,
 				   int *oper);
 
+/* monitor.c */
+enum {
+	MNT_MONITOR_TYPE_USERSPACE = 1,	/* userspace mount options */
+	MNT_MONITOR_TYPE_KERNEL		/* kernel mount table */
+};
+
+extern struct libmnt_monitor *mnt_new_monitor(void);
+extern void mnt_ref_monitor(struct libmnt_monitor *mn);
+extern void mnt_unref_monitor(struct libmnt_monitor *mn);
+
+extern int mnt_monitor_enable_kernel(struct libmnt_monitor *mn, int enable);
+extern int mnt_monitor_enable_userspace(struct libmnt_monitor *mn,
+				int enable, const char *filename);
+
+extern int mnt_monitor_get_fd(struct libmnt_monitor *mn);
+extern int mnt_monitor_close_fd(struct libmnt_monitor *mn);
+extern int mnt_monitor_wait(struct libmnt_monitor *mn, int timeout);
+
+extern int mnt_monitor_next_change(struct libmnt_monitor *mn,
+			     const char **filename, int *type);
+extern int mnt_monitor_event_cleanup(struct libmnt_monitor *mn);
+
+
 /* context.c */
 
 /*
@@ -796,6 +832,10 @@ extern int mnt_context_set_syscall_status(struct libmnt_context *cxt, int status
 #ifndef MS_STRICTATIME
 #define MS_STRICTATIME	(1<<24) /* Always perform atime updates */
 #endif
+#ifndef MS_LAZYTIME
+#define MS_LAZYTIME     (1<<25) /* Update the on-disk [acm]times lazily */
+#endif
+
 
 /*
  * Magic mount flag number. Had to be or-ed to the flag values.

@@ -107,6 +107,7 @@ const char *hv_vendors[] = {
 	[HYPER_VBOX]	= "Oracle",
 	[HYPER_OS400]	= "OS/400",
 	[HYPER_PHYP]	= "pHyp",
+	[HYPER_SPAR]	= "Unisys s-Par"
 };
 
 const int hv_vendor_pci[] = {
@@ -585,6 +586,8 @@ read_hypervisor_cpuid(struct lscpu_desc *desc)
 		desc->hyper = HYPER_MSHV;
 	else if (!strncmp("VMwareVMware", hyper_vendor_id, 12))
 		desc->hyper = HYPER_VMWARE;
+	else if (!strncmp("UnisysSpar64", hyper_vendor_id, 12))
+		desc->hyper = HYPER_SPAR;
 }
 
 #else /* ! (__x86_64__ || __i386__) */
@@ -594,24 +597,48 @@ read_hypervisor_cpuid(struct lscpu_desc *desc __attribute__((__unused__)))
 }
 #endif
 
+static int is_compatible(const char *path, const char *str)
+{
+	FILE *fd;
+
+	fd = path_fopen("r", 0, "%s", path);
+	if (fd) {
+		char buf[256];
+		size_t i, len;
+
+		memset(buf, 0, sizeof(buf));
+		len = fread(buf, 1, sizeof(buf) - 1, fd);
+		fclose(fd);
+
+		for (i = 0; i < len;) {
+			if (!strcmp(&buf[i], str))
+				return 1;
+			i += strlen(&buf[i]);
+			i++;
+		}
+	}
+
+	return 0;
+}
+
 static int
 read_hypervisor_powerpc(struct lscpu_desc *desc)
 {
 	assert(!desc->hyper);
 
-	/* powerpc:
-	 * IBM iSeries: legacy, if /proc/iSeries exists, its para-virtualized on top of OS/400
-	 * IBM pSeries: always has a hypervisor
-	 *              if partition-name is "full", its kind of "bare-metal": full-system-partition
-	 *              otherwise its some partition created by Hardware Management Console
-	 *              in any case, its always some sort of HVM
-	 *              Note that pSeries could also be emulated by qemu/KVM.
-	 * KVM: "linux,kvm" in /hypervisor/compatible indicates a KVM guest
-	 * Xen: not in use, not detected
-	 */
+	 /* IBM iSeries: legacy, para-virtualized on top of OS/400 */
 	if (path_exist("/proc/iSeries")) {
 		desc->hyper = HYPER_OS400;
 		desc->virtype = VIRT_PARA;
+
+	/* PowerNV (POWER Non-Virtualized, bare-metal) */
+	} else if (path_exist(_PATH_PROC_DEVICETREE "/compatible")) {
+		if (is_compatible(_PATH_PROC_DEVICETREE "/compatible", "ibm,powernv")) {
+			desc->hyper = HYPER_NONE;
+			desc->virtype = VIRT_NONE;
+		}
+
+	/* PowerVM (IBM's proprietary hypervisor, aka pHyp) */
 	} else if (path_exist(_PATH_PROC_DEVICETREE "/ibm,partition-name")
 		   && path_exist(_PATH_PROC_DEVICETREE "/hmc-managed?")
 		   && !path_exist(_PATH_PROC_DEVICETREE "/chosen/qemu,graphic-width")) {
@@ -621,31 +648,18 @@ read_hypervisor_powerpc(struct lscpu_desc *desc)
 		fd = path_fopen("r", 0, _PATH_PROC_DEVICETREE "/ibm,partition-name");
 		if (fd) {
 			char buf[256];
-			if (fscanf(fd, "%s", buf) == 1 && !strcmp(buf, "full"))
+			if (fscanf(fd, "%255s", buf) == 1 && !strcmp(buf, "full"))
 				desc->virtype = VIRT_NONE;
 			fclose(fd);
 		}
-	} else if (path_exist(_PATH_PROC_DEVICETREE "/hypervisor/compatible")) {
-		FILE *fd;
-		fd = path_fopen("r", 0, _PATH_PROC_DEVICETREE "/hypervisor/compatible");
-		if (fd) {
-			char buf[256];
-			size_t i, len;
-			memset(buf, 0, sizeof(buf));
-			len = fread(buf, 1, sizeof(buf) - 1, fd);
-			fclose(fd);
-			for (i = 0; i < len;) {
-				if (!strcmp(&buf[i], "linux,kvm")) {
-					desc->hyper = HYPER_KVM;
-					desc->virtype = VIRT_FULL;
-					break;
-				}
-				i += strlen(&buf[i]);
-				i++;
-			}
+
+	/* Qemu */
+	} else if (path_exist(_PATH_PROC_DEVICETREE "/compatible")) {
+		if (is_compatible(_PATH_PROC_DEVICETREE "/compatible", "qemu,pseries")) {
+			desc->hyper = HYPER_KVM;
+			desc->virtype = VIRT_PARA;
 		}
 	}
-
 	return desc->hyper;
 }
 
@@ -655,7 +669,7 @@ read_hypervisor_powerpc(struct lscpu_desc *desc)
 #define VMWARE_BDOOR_PORT           0x5658
 #define VMWARE_BDOOR_CMD_GETVERSION 10
 
-static inline
+static UL_ASAN_BLACKLIST
 void vmware_bdoor(uint32_t *eax, uint32_t *ebx, uint32_t *ecx, uint32_t *edx)
 {
 	__asm__(
@@ -757,7 +771,7 @@ read_hypervisor(struct lscpu_desc *desc, struct lscpu_modifier *mod)
 		if (fd) {
 			char buf[256];
 
-			if (fscanf(fd, "%s", buf) == 1 &&
+			if (fscanf(fd, "%255s", buf) == 1 &&
 			    !strcmp(buf, "control_d"))
 				dom0 = 1;
 			fclose(fd);
@@ -1242,20 +1256,20 @@ get_cell_data(struct lscpu_desc *desc, int idx, int col,
 		if (!desc->configured)
 			break;
 		if (mod->mode == OUTPUT_PARSABLE)
-			snprintf(buf, bufsz,
+			snprintf(buf, bufsz, "%s",
 				 desc->configured[idx] ? _("Y") : _("N"));
 		else
-			snprintf(buf, bufsz,
+			snprintf(buf, bufsz, "%s",
 				 desc->configured[idx] ? _("yes") : _("no"));
 		break;
 	case COL_ONLINE:
 		if (!desc->online)
 			break;
 		if (mod->mode == OUTPUT_PARSABLE)
-			snprintf(buf, bufsz,
+			snprintf(buf, bufsz, "%s",
 				 is_cpu_online(desc, cpu) ? _("Y") : _("N"));
 		else
-			snprintf(buf, bufsz,
+			snprintf(buf, bufsz, "%s",
 				 is_cpu_online(desc, cpu) ? _("yes") : _("no"));
 		break;
 	case COL_MAXMHZ:
@@ -1629,6 +1643,9 @@ static void __attribute__((__noreturn__)) usage(FILE *out)
 	fputs(USAGE_HEADER, out);
 	fprintf(out, _(" %s [options]\n"), program_invocation_short_name);
 
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Display information about the CPU architecture.\n"), out);
+
 	fputs(USAGE_OPTIONS, out);
 	fputs(_(" -a, --all               print both online and offline CPUs (default for -e)\n"), out);
 	fputs(_(" -b, --online            print online CPUs only (default for -p)\n"), out);
@@ -1646,7 +1663,7 @@ static void __attribute__((__noreturn__)) usage(FILE *out)
 	for (i = 0; i < ARRAY_SIZE(coldescs); i++)
 		fprintf(out, " %13s  %s\n", coldescs[i].name, _(coldescs[i].help));
 
-	fprintf(out, _("\nFor more details see lscpu(1).\n"));
+	fprintf(out, USAGE_MAN_TAIL("lscpu(1)"));
 
 	exit(out == stderr ? EXIT_FAILURE : EXIT_SUCCESS);
 }
@@ -1724,8 +1741,7 @@ int main(int argc, char *argv[])
 			mod->hex = 1;
 			break;
 		case 'V':
-			printf(_("%s from %s\n"), program_invocation_short_name,
-			       PACKAGE_STRING);
+			printf(UTIL_LINUX_VERSION);
 			return EXIT_SUCCESS;
 		default:
 			usage(stderr);

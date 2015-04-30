@@ -49,19 +49,23 @@ static void __attribute__((__noreturn__)) usage(int ex)
 {
 	fprintf(stderr, USAGE_HEADER);
 	fprintf(stderr,
-		_(" %1$s [options] <file|directory> <command> [<arguments>...]\n"
-		  " %1$s [options] <file|directory> -c <command>\n"
+		_(" %1$s [options] <file>|<directory> <command> [<argument>...]\n"
+		  " %1$s [options] <file>|<directory> -c <command>\n"
 		  " %1$s [options] <file descriptor number>\n"),
 		program_invocation_short_name);
+
+	fputs(USAGE_SEPARATOR, stderr);
+	fputs(_("Manage file locks from shell scripts.\n"), stderr);
+
 	fputs(USAGE_OPTIONS, stderr);
-	fputs(_(  " -s  --shared             get a shared lock\n"), stderr);
-	fputs(_(  " -x  --exclusive          get an exclusive lock (default)\n"), stderr);
-	fputs(_(  " -u  --unlock             remove a lock\n"), stderr);
-	fputs(_(  " -n  --nonblock           fail rather than wait\n"), stderr);
-	fputs(_(  " -w  --timeout <secs>     wait for a limited amount of time\n"), stderr);
-	fputs(_(  " -E  --conflict-exit-code <number>  exit code after conflict or timeout\n"), stderr);
-	fputs(_(  " -o  --close              close file descriptor before running command\n"), stderr);
-	fputs(_(  " -c  --command <command>  run a single command string through the shell\n"), stderr);
+	fputs(_(  " -s, --shared             get a shared lock\n"), stderr);
+	fputs(_(  " -x, --exclusive          get an exclusive lock (default)\n"), stderr);
+	fputs(_(  " -u, --unlock             remove a lock\n"), stderr);
+	fputs(_(  " -n, --nonblock           fail rather than wait\n"), stderr);
+	fputs(_(  " -w, --timeout <secs>     wait for a limited amount of time\n"), stderr);
+	fputs(_(  " -E, --conflict-exit-code <number>  exit code after conflict or timeout\n"), stderr);
+	fputs(_(  " -o, --close              close file descriptor before running command\n"), stderr);
+	fputs(_(  " -c, --command <command>  run a single command string through the shell\n"), stderr);
 	fprintf(stderr, USAGE_SEPARATOR);
 	fprintf(stderr, USAGE_HELP);
 	fprintf(stderr, USAGE_VERSION);
@@ -216,7 +220,7 @@ int main(int argc, char *argv[])
 
 	} else if (optind < argc) {
 		/* Use provided file descriptor */
-		fd = (int)strtol_or_err(argv[optind], "bad number");
+		fd = strtos32_or_err(argv[optind], _("bad file descriptor"));
 	} else {
 		/* Bad options */
 		errx(EX_USAGE, _("requires file descriptor, file or directory"));

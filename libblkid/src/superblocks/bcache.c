@@ -18,7 +18,7 @@
 #define SB_JOURNAL_BUCKETS 256U
 
 #define node(i, j)         ((i)->d + (j))
-#define end(i)             node(i, (i)->keys)
+#define end(i)             node(i, le16_to_cpu((i)->keys))
 
 static const char bcache_magic[] = {
 	0xc6, 0x85, 0x73, 0xf6, 0x4e, 0x1a, 0x45, 0xca,
@@ -108,6 +108,8 @@ static int probe_bcache (blkid_probe pr, const struct blkid_idmag *mag)
 
 	if (le64_to_cpu(bcs->offset) != BCACHE_SB_OFF / 512)
 		return BLKID_PROBE_NONE;
+	if (le16_to_cpu(bcs->keys) > SB_JOURNAL_BUCKETS)
+		return BLKID_PROBE_NONE;
 	if (!blkid_probe_verify_csum(pr, bcache_crc64(bcs), le64_to_cpu(bcs->csum)))
 		return BLKID_PROBE_NONE;
 
@@ -115,7 +117,7 @@ static int probe_bcache (blkid_probe pr, const struct blkid_idmag *mag)
 		return BLKID_PROBE_NONE;
 
 	return BLKID_PROBE_OK;
-};
+}
 
 const struct blkid_idinfo bcache_idinfo =
 {

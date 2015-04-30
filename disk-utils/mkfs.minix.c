@@ -665,7 +665,7 @@ int main(int argc, char ** argv) {
 
 	if (argc == 2 &&
 	    (!strcmp(argv[1], "-V") || !strcmp(argv[1], "--version"))) {
-		printf(_("%s (%s)\n"), program_name, PACKAGE_STRING);
+		printf(UTIL_LINUX_VERSION);
 		exit(MKFS_EX_OK);
 	}
 
@@ -747,7 +747,7 @@ int main(int argc, char ** argv) {
 		strcpy(tmp+2, ".badblocks");
 	}
 	if (stat(device_name, &statbuf) < 0)
-		err(MKFS_EX_ERROR, _("stat failed %s"), device_name);
+		err(MKFS_EX_ERROR, _("stat of %s failed"), device_name);
 	if (S_ISBLK(statbuf.st_mode))
 		DEV = open(device_name,O_RDWR | O_EXCL);
 	else

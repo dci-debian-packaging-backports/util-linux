@@ -10,7 +10,7 @@ fdisk \- manipulate disk partition table
 
 .SH SYNOPSIS
 .B fdisk
-.RB [ options ]
+[options]
 .I device
 .sp
 .B fdisk \-l
@@ -46,7 +46,7 @@ is not guaranteed.  The input (the commands) should always be backward compatibl
 
 .SH OPTIONS
 .TP
-\fB\-b\fR, \fB\-\-sector-size\fR \fIsectorsize\fP
+\fB\-b\fR, \fB\-\-sector\-size\fR \fIsectorsize\fP
 Specify the sector size of the disk.  Valid values are 512, 1024, 2048, and 4096.
 (Recent kernels know the sector size.  Use this option only on old kernels or
 to override the kernel's ideas.)  Since util-linux-2.17, \fBfdisk\fR differentiates
@@ -64,14 +64,24 @@ the correct form is for example '-c=dos'.
 Display a help text and exit.
 .TP
 \fB\-L\fR, \fB\-\-color\fR[\fI=when\fR]
-Colorize the output in interactive mode.  The optional argument \fIwhen\fP can
-be \fBauto\fR, \fBnever\fR or \fBalways\fR.  The default is \fBauto\fR.
+Colorize the output.  The optional argument \fIwhen\fP
+can be \fBauto\fR, \fBnever\fR or \fBalways\fR.  If the \fIwhen\fR argument is omitted,
+it defaults to \fBauto\fR.  The colors can be disabled, for the current built-in default 
+see \fB\-\-help\fR output. See also the COLORS section.
 .TP
 \fB\-l\fR, \fB\-\-list\fR
 List the partition tables for the specified devices and then exit.
 If no devices are given, those mentioned in
 .I /proc/partitions
 (if that file exists) are used.
+.TP
+.BR \-o , " \-\-output " \fIlist\fP
+Specify which output columns to print.  Use
+.B \-\-help
+to get a list of all supported columns.
+
+The default list of columns may be extended if \fIlist\fP is
+specified in the format \fI+list\fP (e.g. \fB-o +UUID\fP).
 .TP
 \fB\-s\fR, \fB\-\-getsz\fR
 Print the size in 512-byte sectors of each given block device.  This option is DEPRECATED
@@ -138,6 +148,19 @@ The relative sizes are always aligned according to device I/O limits.  The
 For backward compatibility fdisk also accepts the suffixes KB=1000,
 MB=1000*1000, and so on for GB, TB, PB, EB, ZB and YB. These 10^N suffixes
 are deprecated.
+
+.SH SCRIPT FILES
+.B fdisk
+allows to read (by 'I' command) sfdisk compatible script files. The script is
+applied to in-memory partition table, and then it is possible to modify the
+partition table before you write it to the device.
+.PP
+And vice-versa it is possible to write the current in-memory disk layout
+to the script file by command 'O'.
+.PP
+The script files are compatible between cfdisk, sfdisk, fdisk and another
+libfdisk applications. For more details see
+.BR sfdisk (8).
 
 .SH DISK LABELS
 .B GPT (GUID Partition Table)
@@ -296,7 +319,14 @@ The original version was written by
 Andries E. Brouwer, A. V. Le Blanc and others.
 
 .SH ENVIRONMENT
-.IP "Setting LIBFDISK_DEBUG=0xffff enables debug output."
+.IP FDISK_DEBUG=all
+enables fdisk debug output.
+.IP LIBFDISK_DEBUG=all
+enables libfdisk debug output.
+.IP LIBBLKID_DEBUG=all
+enables libblkid debug output.
+.IP LIBSMARTCOLS_DEBUG=all
+enables libsmartcols debug output.
 
 .SH "SEE ALSO"
 .BR cfdisk (8),
