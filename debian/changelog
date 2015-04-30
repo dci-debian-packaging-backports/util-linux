@@ -1,3 +1,11 @@
+util-linux (2.26.2-1) UNRELEASED; urgency=medium
+
+  * Update gbp.conf for 2.26 branches
+  * Imported Upstream version 2.26.2
+    - this version includes a complete rewrite of sfdisk
+
+ -- Andreas Henriksson <andreas@fatal.se>  Thu, 30 Apr 2015 14:05:27 +0200
+
 util-linux (2.25.2-6) unstable; urgency=medium
 
   * Add patch to fix `unshare -r` regression.
