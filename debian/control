@@ -108,7 +108,7 @@ Section: libs
 Pre-Depends: ${misc:Pre-Depends}
 Depends: ${misc:Depends}, ${shlibs:Depends}
 Multi-Arch: same
-Description: block device id library
+Description: fdisk partitioning library
  The blkid library which allows system programs like fsck and
  mount to quickly and easily find block devices by filesystem UUID and
  LABEL.  This allows system administrators to avoid specifying
@@ -148,6 +148,45 @@ Description: block device id library - headers and static libraries
  system instead.
  .
  This package contains the development environment for the blkid library.
+
+Package: libfdisk1
+Architecture: any
+Section: libs
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Multi-Arch: same
+Description: fdisk partitioning library
+ The libfdisk library is used for manipulating with partition tables.
+ The library is the core of the fdisk, cfdisk and sfdisk tools.
+
+Package: libfdisk1-udeb
+Architecture: any
+Section: debian-installer
+Priority: optional
+Depends: ${misc:Depends}, ${shlibs:Depends}
+XC-Package-Type: udeb
+Description: stripped down fdisk partitioning library, for debian-installer
+ The libfdisk library is used for manipulating with partition tables.
+ The library is the core of the fdisk, cfdisk and sfdisk tools.
+ .
+ This is a minimal package for debian-installer.
+
+Package: libfdisk-dev
+Architecture: any
+Section: libdevel
+Priority: optional
+Pre-Depends: ${misc:Pre-Depends}
+Depends: libfdisk1 (= ${binary:Version}),
+         libc6-dev | libc-dev,
+         libblkid-dev,
+         uuid-dev,
+         ${misc:Depends}
+Multi-Arch: same
+Description: fdisk partitioning library - headers and static libraries
+ The libfdisk library is used for manipulating with partition tables.
+ The library is the core of the fdisk, cfdisk and sfdisk tools.
+ .
+ This package contains the development environment for the fdisk library.
 
 Package: libmount1
 Architecture: any
