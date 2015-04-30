@@ -90,7 +90,7 @@ extern char *size_to_human_string(int options, uint64_t bytes);
 extern int string_to_idarray(const char *list, int ary[], size_t arysz,
 			   int (name2id)(const char *, size_t));
 extern int string_add_to_idarray(const char *list, int ary[],
-				 size_t arysz, int *ary_pos,
+				 size_t arysz, size_t *ary_pos,
 				 int (name2id)(const char *, size_t));
 
 extern int string_to_bitarray(const char *list, char *ary,
@@ -159,6 +159,46 @@ static inline const char *skip_blank(const char *p)
 	while (isblank(*p))
 		++p;
 	return p;
+}
+
+
+/* Removes whitespace from the right-hand side of a string (trailing
+ * whitespace).
+ *
+ * Returns size of the new string (without \0).
+ */
+static inline size_t rtrim_whitespace(unsigned char *str)
+{
+	size_t i = strlen((char *) str);
+
+	while (i) {
+		i--;
+		if (!isspace(str[i])) {
+			i++;
+			break;
+		}
+	}
+	str[i] = '\0';
+	return i;
+}
+
+/* Removes whitespace from the left-hand side of a string.
+ *
+ * Returns size of the new string (without \0).
+ */
+static inline size_t ltrim_whitespace(unsigned char *str)
+{
+	size_t len;
+	unsigned char *p;
+
+	for (p = str; p && isspace(*p); p++);
+
+	len = strlen((char *) p);
+
+	if (len && p > str)
+		memmove(str, p, len + 1);
+
+	return len;
 }
 
 #endif

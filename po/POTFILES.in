@@ -7,6 +7,8 @@ disk-utils/delpart.c
 disk-utils/fdformat.c
 disk-utils/fdisk.c
 disk-utils/fdisk.h
+disk-utils/fdisk-list.c
+disk-utils/fdisk-list.h
 disk-utils/fdisk-menu.c
 disk-utils/fsck.c
 disk-utils/fsck.cramfs.c
@@ -28,7 +30,6 @@ include/all-io.h
 include/at.h
 include/bitops.h
 include/blkdev.h
-include/boottime.h
 include/canonicalize.h
 include/carefulputc.h
 include/c.h
@@ -52,6 +53,7 @@ include/match.h
 include/mbsalign.h
 include/md5.h
 include/minix.h
+include/monotonic.h
 include/namespace.h
 include/nls.h
 include/optutils.h
@@ -72,13 +74,13 @@ include/setproctitle.h
 include/statfs_magic.h
 include/strutils.h
 include/swapheader.h
+include/swapprober.h
 include/sysfs.h
 include/timer.h
 include/timeutils.h
 include/ttyutils.h
 include/widechar.h
 include/xalloc.h
-include/xgetpass.h
 lib/at.c
 lib/blkdev.c
 libblkid/src/blkidP.h
@@ -171,7 +173,6 @@ libblkid/src/topology/topology.c
 libblkid/src/topology/topology.h
 libblkid/src/verify.c
 libblkid/src/version.c
-lib/boottime.c
 lib/canonicalize.c
 lib/colors.c
 lib/cpuset.c
@@ -189,14 +190,15 @@ libfdisk/src/gpt.c
 libfdisk/src/init.c
 libfdisk/src/iter.c
 libfdisk/src/label.c
-libfdisk/src/libfdisk.h
 libfdisk/src/partition.c
 libfdisk/src/parttype.c
+libfdisk/src/script.c
 libfdisk/src/sgi.c
 libfdisk/src/sun.c
 libfdisk/src/table.c
 libfdisk/src/test.c
 libfdisk/src/utils.c
+libfdisk/src/version.c
 lib/fileutils.c
 lib/ismounted.c
 lib/langinfo.c
@@ -206,6 +208,7 @@ lib/mangle.c
 lib/match.c
 lib/mbsalign.c
 lib/md5.c
+lib/monotonic.c
 libmount/python/context.c
 libmount/python/fs.c
 libmount/python/pylibmount.c
@@ -220,6 +223,7 @@ libmount/src/fs.c
 libmount/src/init.c
 libmount/src/iter.c
 libmount/src/lock.c
+libmount/src/monitor.c
 libmount/src/mountP.h
 libmount/src/optmap.c
 libmount/src/optstr.c
@@ -248,6 +252,7 @@ libsmartcols/src/table_print.c
 libsmartcols/src/test.c
 libsmartcols/src/version.c
 lib/strutils.c
+lib/swapprober.c
 lib/sysfs.c
 lib/timeutils.c
 lib/ttyutils.c
@@ -265,9 +270,10 @@ libuuid/src/uuidd.h
 libuuid/src/uuid.h
 libuuid/src/uuidP.h
 libuuid/src/uuid_time.c
-lib/xgetpass.c
 login-utils/auth.c
 login-utils/auth.h
+login-utils/ch-common.c
+login-utils/ch-common.h
 login-utils/chfn.c
 login-utils/chsh.c
 login-utils/islocal.c
@@ -327,7 +333,6 @@ sys-utils/fstrim.c
 sys-utils/hwclock.c
 sys-utils/hwclock-cmos.c
 sys-utils/hwclock.h
-sys-utils/hwclock-kd.c
 sys-utils/hwclock-rtc.c
 sys-utils/ipcmk.c
 sys-utils/ipcrm.c
@@ -360,6 +365,7 @@ sys-utils/tunelp.c
 sys-utils/umount.c
 sys-utils/unshare.c
 sys-utils/wdctl.c
+sys-utils/zramctl.c
 term-utils/agetty.c
 term-utils/mesg.c
 term-utils/script.c

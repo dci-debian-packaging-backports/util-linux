@@ -90,6 +90,10 @@ static void __attribute__((__noreturn__)) usage(int rc)
 
 	fputs(USAGE_HEADER, out);
 	fprintf(out, _(" %s [options] [<file>...]\n"), program_invocation_short_name);
+
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Columnate lists.\n"), out);
+
 	fputs(USAGE_OPTIONS, out);
 	fputs(_(" -c, --columns <width>    width of output in number of characters\n"), out);
 	fputs(_(" -t, --table              create a table\n"), out);
@@ -149,9 +153,8 @@ int main(int argc, char **argv)
 			usage(EXIT_SUCCESS);
 			break;
 		case 'V':
-			printf(_("%s from %s\n"), program_invocation_short_name,
-				 PACKAGE_STRING);
-				 return EXIT_SUCCESS;
+			printf(UTIL_LINUX_VERSION);
+			return EXIT_SUCCESS;
 		case 'c':
 			termwidth = strtou32_or_err(optarg, _("invalid columns argument"));
 			break;

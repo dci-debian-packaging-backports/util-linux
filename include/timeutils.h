@@ -3,6 +3,7 @@
   copied to util-linux at August 2013.
 
   Copyright 2010 Lennart Poettering
+  Copyright (C) 2014 Karel Zak <kzak@redhat.com>
 
   systemd is free software; you can redistribute it and/or modify it
   under the terms of the GNU Lesser General Public License as published by

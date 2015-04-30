@@ -1,4 +1,3 @@
-'\" t
 .\" Copyright (c) 1996-2004 Andries Brouwer
 .\" Copyright (C) 2006-2012 Karel Zak <kzak@redhat.com>
 .\"
@@ -28,32 +27,30 @@
 .\" with this program; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 .\"
-.\"
 .TH MOUNT 8 "July 2014" "util-linux" "System Administration"
 .SH NAME
 mount \- mount a filesystem
 .SH SYNOPSIS
 .B mount
-.RB [ \-lhV ]
+.RB [ \-l | \-h | \-V ]
 .LP
-.\" Quote used to include space between arguments
-.B "mount \-a
+.B mount \-a
 .RB [ \-fFnrsvw ]
 .RB [ \-t
-.IR vfstype ]
+.IR fstype ]
 .RB [ \-O
 .IR optlist ]
 .LP
 .B mount
 .RB [ \-fnrsvw ]
 .RB [ \-o
-.IR option [ \fB,\fIoption ]...]
+.IR options ]
 .IR device | dir
 .LP
 .B mount
 .RB [ \-fnrsvw ]
 .RB [ \-t
-.IB vfstype ]
+.IB fstype ]
 .RB [ \-o
 .IR options ]
 .I device dir
@@ -215,7 +212,7 @@ to be mounted as indicated, except for those whose line contains the
 .B noauto
 keyword.  Adding the
 .B \-F
-option will make mount fork, so that the
+option will make \fBmount\fR fork, so that the
 filesystems are mounted simultaneously.
 .LP
 When mounting a filesystem mentioned in
@@ -223,25 +220,23 @@ When mounting a filesystem mentioned in
 or
 .IR mtab ,
 it suffices to specify on the command line only the device, or only the mount point.
-
-
+.sp
 The programs
 .B mount
 and
 .B umount
-traditionally maintained list of currently mounted filesystems in the file
+traditionally maintained a list of currently mounted filesystems in the file
 .IR /etc/mtab .
-The mtab file is still supported, but it's recommended to use a symlink to 
-the file
+This real mtab file is still supported, but on current Linux systems it is
+better to make it a symlink to
 .I /proc/mounts
-rather than the regular mtab file on the current Linux systems.
-The mtab file maintained in userspace cannot reliably work with namespaces, containers
-and another advanced Linux features.
-
+instead, because a regular mtab file maintained in userspace cannot reliably
+work with namespaces, containers and other advanced Linux features.
+.sp
 If no arguments are given to
 .BR mount ,
-this list is printed.
-
+the list of mounted filesystems is printed.
+.sp
 If you want to override mount options from
 .I /etc/fstab
 you have to use the \fB\-o\fR option:
@@ -255,7 +250,7 @@ the list of options from
 .IR /etc/fstab .
 The usual behavior is that the last option wins if there are conflicting
 ones.
-
+.sp
 The
 .B mount
 program does not read the
@@ -452,10 +447,10 @@ Supported operations are:
 
 .RS
 .nf
-.BI "mount \-\-make-shared " mountpoint
-.BI "mount \-\-make-slave " mountpoint
-.BI "mount \-\-make-private " mountpoint
-.BI "mount \-\-make-unbindable " mountpoint
+.BI "mount \-\-make\-shared " mountpoint
+.BI "mount \-\-make\-slave " mountpoint
+.BI "mount \-\-make\-private " mountpoint
+.BI "mount \-\-make\-unbindable " mountpoint
 .fi
 .RE
 
@@ -464,10 +459,10 @@ mounts under a given mountpoint.
 
 .RS
 .nf
-.BI "mount \-\-make-rshared " mountpoint
-.BI "mount \-\-make-rslave " mountpoint
-.BI "mount \-\-make-rprivate " mountpoint
-.BI "mount \-\-make-runbindable " mountpoint
+.BI "mount \-\-make\-rshared " mountpoint
+.BI "mount \-\-make\-rslave " mountpoint
+.BI "mount \-\-make\-rprivate " mountpoint
+.BI "mount \-\-make\-runbindable " mountpoint
 .fi
 .RE
 
@@ -485,7 +480,7 @@ syscall, and the flags cannot be mixed with other mount options.
 Since util-linux 2.23 the \fBmount\fR command allows to use several propagation flags
 together and also together with other mount operations.  This feature is EXPERIMENTAL.
 The propagation flags are applied by additional \fBmount\fR(2) syscalls when the
-preceeding mount operations were successful.  Note that this use case is not
+preceding mount operations were successful.  Note that this use case is not
 atomic.  It is possible to specify the propagation flags in
 .BR fstab (5)
 as mount options
@@ -502,7 +497,7 @@ For example:
 
 .RS
 .nf
-.BI "mount \-\-make-private \-\-make-unbindable /dev/sda1 /foo"
+.BI "mount \-\-make\-private \-\-make\-unbindable /dev/sda1 /foo"
 .fi
 .RE
 
@@ -511,8 +506,8 @@ is the same as:
 .RS
 .nf
 .BI "mount /dev/sda1 /foo"
-.BI "mount \-\-make-private /foo"
-.BI "mount \-\-make-unbindable /foo"
+.BI "mount \-\-make\-private /foo"
+.BI "mount \-\-make\-unbindable /foo"
 .fi
 .RE
 .RE
@@ -532,24 +527,36 @@ option, when present.
 The command \fBmount\fR does not pass all command-line options to the
 \fB/sbin/mount.\fIsuffix\fR mount helpers.  The interface between \fBmount\fR
 and the mount helpers is described below in the section EXTERNAL HELPERS.
-
+.sp
 Command-line options available for the
 .B mount
 command are:
-.IP "\fB\-V, \-\-version\fP"
-Display version information and exit.
-.IP "\fB\-h, \-\-help\fP"
-Display help text and exit.
-.IP "\fB\-v, \-\-verbose\fP"
-Verbose mode.
-.IP "\fB\-a, \-\-all\fP"
+.TP
+.BR \-a , " \-\-all"
 Mount all filesystems (of the given types) mentioned in
 .I fstab
 (except for those whose line contains the
 .B noauto
 keyword).  The filesystems are mounted following their order in
 .IR fstab .
-.IP "\fB\-F, \-\-fork\fP"
+.TP
+.BR \-B , " \-\-bind"
+Remount a subtree somewhere else (so that its contents are available
+in both places).  See above.
+.TP
+.BR \-c , " \-\-no\-canonicalize"
+Don't canonicalize paths.  The mount command canonicalizes all paths
+(from command line or fstab) by default.  This option can be used
+together with the
+.B \-f
+flag for already canonicalized absolute paths.  The option is designed for mount
+helpers which call \fBmount -i\fR.  It is strongly recommended to not use this
+command-line option for normal mount operations.
+.sp
+Note that \fBmount\fR(8) does not pass this option to the
+\fB/sbin/mount.\fItype\fR helpers.
+.TP
+.BR \-F , " \-\-fork"
 (Used in conjunction with
 .BR \-a .)
 Fork off a new incarnation of \fBmount\fR for each device.
@@ -572,9 +579,14 @@ command is trying to do.  It can also be used to add entries for devices
 that were mounted earlier with the \fB\-n\fR option.  The \fB\-f\fR option
 checks for an existing record in /etc/mtab and fails when the record already
 exists (with a regular non-fake mount, this check is done by the kernel).
-.IP "\fB\-i, \-\-internal-only\fP"
+.IP "\fB\-i, \-\-internal\-only\fP"
 Don't call the \fB/sbin/mount.\fIfilesystem\fR helper even if it exists.
-.IP "\fB\-l, \-\-show-labels\fP"
+.TP
+.BR \-L , " \-\-label " \fIlabel
+Mount the partition that has the specified
+.IR label .
+.TP
+.BR \-l , " \-\-show\-labels"
 Add the labels in the mount output.  \fBmount\fR must have
 permission to read the disk device (e.g.\& be suid root) for this to work.
 One can set such a label for ext2, ext3 or ext4 using the
@@ -583,215 +595,18 @@ utility, or for XFS using
 .BR xfs_admin (8),
 or for reiserfs using
 .BR reiserfstune (8).
-.IP "\fB\-n, \-\-no-mtab\fP"
+.TP
+.BR \-M , " \-\-move"
+Move a subtree to some other place.  See above.
+.TP
+.BR \-n , " \-\-no\-mtab"
 Mount without writing in
 .IR /etc/mtab .
 This is necessary for example when
 .I /etc
 is on a read-only filesystem.
-.IP "\fB\-c, \-\-no-canonicalize\fP"
-Don't canonicalize paths.  The mount command canonicalizes all paths
-(from command line or fstab) by default.  This option can be used
-together with the
-.B \-f
-flag for already canonicalized absolute paths.  The option is designed for mount
-helpers which call \fBmount -i\fR.  It is strongly recommended to not use this
-command-line option for normal mount operations.
-
-Note that \fBmount\fR(8) does not pass this option to the
-\fB/sbin/mount.\fItype\fR helpers.
-.IP "\fB\-s\fP"
-Tolerate sloppy mount options rather than failing.  This will ignore mount
-options not supported by a filesystem type.  Not all filesystems support this
-option.  Currently it's supported by the \fBmount.nfs\fR mount helper only.
-.IP "\fB\-\-source \fIdev\fP"
-If only one argument for the mount command is given then the argument might be
-interpreted as target (mountpoint) or source (device).  This option allows to
-explicitly define that the argument is the mount source.
-.IP "\fB\-\-target \fIdir\fP"
-If only one argument for the mount command is given then the argument might be
-interpreted as target (mountpoint) or source (device).  This option allows to
-explicitly define that the argument is the mount target.
-.IP "\fB\-r, \-\-read-only\fP"
-Mount the filesystem read-only.  A synonym is
-.BR "\-o ro" .
-
-Note that, depending on the filesystem type, state and kernel behavior, the
-system may still write to the device.  For example, ext3 and ext4 will replay the
-journal if the filesystem is dirty.  To prevent this kind of write access, you
-may want to mount an ext3 or ext4 filesystem with the \fBro,noload\fR mount
-options or set the block device itself to read-only mode, see the
-.BR blockdev (8)
-command.
-.IP "\fB\-w, \-\-rw, \-\-read-write\fP"
-Mount the filesystem read/write.  This is the default.  A synonym is
-.BR "\-o rw" .
-.IP "\fB\-L, \-\-label \fIlabel\fP"
-Mount the partition that has the specified
-.IR label .
-.IP "\fB\-U, \-\-uuid \fIuuid\fP"
-Mount the partition that has the specified
-.IR uuid .
-These two options require the file
-.I /proc/partitions
-(present since Linux 2.1.116) to exist.
-.IP "\fB\-T, \-\-fstab \fIpath\fP"
-Specifies an alternative fstab file.  If \fIpath\fP is a directory then the files
-in the directory are sorted by
-.BR strverscmp (3);
-files that start with "."\& or without an \&.fstab extension are ignored.  The option
-can be specified more than once.  This option is mostly designed for initramfs
-or chroot scripts where additional configuration is specified beyond standard
-system configuration.
-
-Note that \fBmount\fR(8) does not pass the option \fB\-\-fstab\fP to the
-\fB/sbin/mount.\fItype\fR helpers, meaning that the alternative fstab files will be
-invisible for the helpers.  This is no problem for normal mounts, but user
-(non-root) mounts always require fstab to verify the user's rights.
-.IP "\fB\-t, \-\-types \fIvfstype\fP"
-The argument following the
-.B \-t
-is used to indicate the filesystem type.  The filesystem types which are
-currently supported include:
-.IR adfs ,
-.IR affs ,
-.IR autofs ,
-.IR btrfs ,
-.IR cifs ,
-.IR coda ,
-.IR coherent ,
-.IR cramfs ,
-.IR debugfs ,
-.IR devpts ,
-.IR efs ,
-.IR ext ,
-.IR ext2 ,
-.IR ext3 ,
-.IR ext4 ,
-.IR hfs ,
-.IR hfsplus ,
-.IR hpfs ,
-.IR iso9660 ,
-.IR jfs ,
-.IR minix ,
-.IR msdos ,
-.IR ncpfs ,
-.IR nfs ,
-.IR nfs4 ,
-.IR ntfs ,
-.IR proc ,
-.IR qnx4 ,
-.IR ramfs ,
-.IR reiserfs ,
-.IR romfs ,
-.IR squashfs ,
-.IR smbfs ,
-.IR sysv ,
-.IR tmpfs ,
-.IR ubifs ,
-.IR udf ,
-.IR ufs ,
-.IR umsdos ,
-.IR usbfs ,
-.IR vfat ,
-.IR xenix ,
-.IR xfs ,
-.IR xiafs .
-Note that coherent, sysv and xenix are equivalent and that
-.I xenix
-and
-.I coherent
-will be removed at some point in the future \(en use
-.I sysv
-instead.  Since kernel version 2.1.21 the types
-.I ext
-and
-.I xiafs
-do not exist anymore.  Earlier,
-.I usbfs
-was known as
-.IR usbdevfs .
-Note, the real list of all supported filesystems depends on your
-kernel.
-
-The programs
-.B mount
-and
-.B umount
-support filesystem subtypes.  The subtype is defined by a '.subtype' suffix.  For
-example  'fuse.sshfs'.  It's recommended to use subtype notation rather than add
-any prefix to the mount source (for example 'sshfs#example.com' is
-deprecated).
-
-For most types all the
-.B mount
-program has to do is issue a simple
-.IR mount (2)
-system call, and no detailed knowledge of the filesystem type is required.
-For a few types however (like nfs, nfs4, cifs, smbfs, ncpfs) an ad hoc code is
-necessary.  The nfs, nfs4, cifs, smbfs, and ncpfs filesystems
-have a separate mount program.  In order to make it possible to
-treat all types in a uniform way, \fBmount\fR will execute the program
-.BI /sbin/mount. type
-(if that exists) when called with type
-.IR type .
-Since different versions of the
-.B smbmount
-program have different calling conventions,
-.B /sbin/mount.smbfs
-may have to be a shell script that sets up the desired call.
-
-If no
-.B \-t
-option is given, or if the
-.B auto
-type is specified, mount will try to guess the desired type.
-Mount uses the blkid library for guessing the filesystem
-type; if that does not turn up anything that looks familiar,
-mount will try to read the file
-.IR /etc/filesystems ,
-or, if that does not exist,
-.IR /proc/filesystems .
-All of the filesystem types listed there will be tried,
-except for those that are labeled "nodev" (e.g.,
-.IR devpts ,
-.I proc
-and
-.IR nfs ).
-If
-.I /etc/filesystems
-ends in a line with a single *, mount will read
-.I /proc/filesystems
-afterwards.  While trying, all filesystem types will be
-mounted with the mount option \fBsilent\fR.
-
-The
-.B auto
-type may be useful for user-mounted floppies.
-Creating a file
-.I /etc/filesystems
-can be useful to change the probe order (e.g., to try vfat before msdos
-or ext3 before ext2) or if you use a kernel module autoloader.
-
-More than one type may be specified in a comma-separated
-list.  The list of filesystem types can be prefixed with
-.B no
-to specify the filesystem types on which no action should be taken.
-(This can be meaningful with the
-.B \-a
-option.)  For example, the command
-.RS
-.RS
-.sp
-.B "mount \-a \-t nomsdos,ext"
-.sp
-.RE
-mounts all filesystems except those of type
-.I msdos
-and
-.IR ext .
-.RE
-.IP "\fB\-O, \-\-test-opts \fIopts\fP"
+.TP
+.BR \-O , " \-\-test\-opts " \fIopts
 Limit the set of filesystems to which the
 .B \-a
 option applies.  In this regard it is like the
@@ -832,7 +647,8 @@ options are cumulative in effect; that is, the command
 mounts all ext2 filesystems with the _netdev option, not all filesystems
 that are either ext2 or have the _netdev option specified.
 .RE
-.IP "\fB\-o, \-\-options \fIopts\fP"
+.TP
+.BR \-o , " \-\-options " \fIopts
 Use the specified mount options.  The \fIopts\fR argument is
 a comma-separated list.  For example:
 .RS
@@ -848,14 +664,172 @@ and
 .B FILESYSTEM-SPECIFIC MOUNT OPTIONS
 sections.
 .RE
-.IP "\fB\-B, \-\-bind\fP"
-Remount a subtree somewhere else (so that its contents are available
-in both places).  See above.
-.IP "\fB\-R, \-\-rbind\fP"
+
+.TP
+.BR \-R , " \-\-rbind"
 Remount a subtree and all possible submounts somewhere else (so that its
 contents are available in both places).  See above.
-.IP "\fB\-M, \-\-move\fP"
-Move a subtree to some other place.  See above.
+.TP
+.BR \-r , " \-\-read\-only"
+Mount the filesystem read-only.  A synonym is
+.BR "\-o ro" .
+.sp
+Note that, depending on the filesystem type, state and kernel behavior, the
+system may still write to the device.  For example, ext3 and ext4 will replay the
+journal if the filesystem is dirty.  To prevent this kind of write access, you
+may want to mount an ext3 or ext4 filesystem with the \fBro,noload\fR mount
+options or set the block device itself to read-only mode, see the
+.BR blockdev (8)
+command.
+.TP
+.B \-s
+Tolerate sloppy mount options rather than failing.  This will ignore mount
+options not supported by a filesystem type.  Not all filesystems support this
+option.  Currently it's supported by the \fBmount.nfs\fR mount helper only.
+.TP
+.BI \-\-source " device"
+If only one argument for the mount command is given then the argument might be
+interpreted as target (mountpoint) or source (device).  This option allows to
+explicitly define that the argument is the mount source.
+.TP
+.BI \-\-target " directory"
+If only one argument for the mount command is given then the argument might be
+interpreted as target (mountpoint) or source (device).  This option allows to
+explicitly define that the argument is the mount target.
+.TP
+.BR \-T , " \-\-fstab " \fIpath
+Specifies an alternative fstab file.  If \fIpath\fP is a directory then the files
+in the directory are sorted by
+.BR strverscmp (3);
+files that start with "."\& or without an \&.fstab extension are ignored.  The option
+can be specified more than once.  This option is mostly designed for initramfs
+or chroot scripts where additional configuration is specified beyond standard
+system configuration.
+.sp
+Note that \fBmount\fR(8) does not pass the option \fB\-\-fstab\fP to the
+\fB/sbin/mount.\fItype\fR helpers, meaning that the alternative fstab files will be
+invisible for the helpers.  This is no problem for normal mounts, but user
+(non-root) mounts always require fstab to verify the user's rights.
+.TP
+.BR \-t , " \-\-types " \fIfstype
+The argument following the
+.B \-t
+is used to indicate the filesystem type.  The filesystem types which are
+currently supported depend on the running kernel.  See
+.I /proc/filesystems
+and
+.I /lib/modules/$(uname -r)/kernel/fs
+for a complete list of the filesystems.  The most common are ext2, ext3, ext4,
+xfs, btrfs, vfat, sysfs, proc, nfs and cifs.
+.sp
+The programs
+.B mount
+and
+.B umount
+support filesystem subtypes.  The subtype is defined by a '.subtype' suffix.  For
+example  'fuse.sshfs'.  It's recommended to use subtype notation rather than add
+any prefix to the mount source (for example 'sshfs#example.com' is
+deprecated).
+
+If no
+.B \-t
+option is given, or if the
+.B auto
+type is specified, mount will try to guess the desired type.
+Mount uses the blkid library for guessing the filesystem
+type; if that does not turn up anything that looks familiar,
+mount will try to read the file
+.IR /etc/filesystems ,
+or, if that does not exist,
+.IR /proc/filesystems .
+All of the filesystem types listed there will be tried,
+except for those that are labeled "nodev" (e.g.,
+.IR devpts ,
+.I proc
+and
+.IR nfs ).
+If
+.I /etc/filesystems
+ends in a line with a single *, mount will read
+.I /proc/filesystems
+afterwards.  While trying, all filesystem types will be
+mounted with the mount option \fBsilent\fR.
+.sp
+The
+.B auto
+type may be useful for user-mounted floppies.
+Creating a file
+.I /etc/filesystems
+can be useful to change the probe order (e.g., to try vfat before msdos
+or ext3 before ext2) or if you use a kernel module autoloader.
+.sp
+More than one type may be specified in a comma-separated
+list, for option
+.B \-t
+as well as in an
+.I /etc/fstab
+entry.  The list of filesystem types for option
+.B \-t
+can be prefixed with
+.B no
+to specify the filesystem types on which no action should be taken.
+The prefix
+.B no
+has no effect when specified in an
+.I /etc/fstab
+entry.
+.sp
+The prefix
+.B no
+can be meaningful with the
+.B \-a
+option.  For example, the command
+.RS
+.RS
+.sp
+.B "mount \-a \-t nomsdos,smbfs"
+.sp
+.RE
+mounts all filesystems except those of type
+.I msdos
+and
+.IR smbfs .
+.sp
+For most types all the
+.B mount
+program has to do is issue a simple
+.IR mount (2)
+system call, and no detailed knowledge of the filesystem type is required.
+For a few types however (like nfs, nfs4, cifs, smbfs, ncpfs) an ad hoc code is
+necessary.  The nfs, nfs4, cifs, smbfs, and ncpfs filesystems
+have a separate mount program.  In order to make it possible to
+treat all types in a uniform way, \fBmount\fR will execute the program
+.BI /sbin/mount. type
+(if that exists) when called with type
+.IR type .
+Since different versions of the
+.B smbmount
+program have different calling conventions,
+.B /sbin/mount.smbfs
+may have to be a shell script that sets up the desired call.
+.RE
+.TP
+.BR \-U , " \-\-uuid " \fIuuid
+Mount the partition that has the specified
+.IR uuid .
+.TP
+.BR \-v , " \-\-verbose"
+Verbose mode.
+.TP
+.BR \-w , " \-\-rw" , " \-\-read\-write"
+Mount the filesystem read/write.  This is the default.  A synonym is
+.BR "\-o rw" .
+.TP
+.BR \-V , " \-\-version"
+Display version information and exit.
+.TP
+.BR \-h , " \-\-help"
+Display help text and exit.
 
 .SH FILESYSTEM-INDEPENDENT MOUNT OPTIONS
 Some of these options are only useful when they appear in the
@@ -1006,8 +980,8 @@ Do not permit direct execution of any binaries on the mounted filesystem.
 /lib/ld*.so /mnt/binary.  This trick fails since Linux 2.4.25 / 2.6.0.)
 .TP
 .B group
-Allow an ordinary (i.e., non-root) user to mount the filesystem if one
-of his groups matches the group of the device.
+Allow an ordinary user to mount the filesystem if one
+of that user's groups matches the group of the device.
 This option implies the options
 .BR nosuid " and " nodev
 (unless overridden by subsequent options, as in the option line
@@ -1069,6 +1043,32 @@ system mount options see /proc/mounts.
 .B nostrictatime
 Use the kernel's default behavior for inode access time updates.
 .TP
+.B lazytime
+Only update times (atime, mtime, ctime) on the in-memory version of the file inode.
+
+This mount option significantly reduces writes to the inode table for
+workloads that perform frequent random writes to preallocated files.
+
+The on-disk timestamps are updated only when:
+.sp
+.RS
+- the inode needs to be updated for some change unrelated to file timestamps
+.sp
+- the application employs
+.BR fsync (2),
+.BR syncfs (2),
+or
+.BR sync (2)
+.sp
+- an undeleted inode is evicted from memory
+.sp
+- more than 24 hours have passed since the i-node was written to disk.
+.RE
+.sp
+.TP
+.B nolazytime
+Do not use the nolazytime feature.
+.TP
 .B suid
 Allow set-user-identifier or set-group-identifier bits to take
 effect.
@@ -1084,8 +1084,8 @@ Turn on the silent flag.
 Turn off the silent flag.
 .TP
 .B owner
-Allow an ordinary (i.e., non-root) user to mount the filesystem if he
-is the owner of the device.
+Allow an ordinary user to mount the filesystem if that
+user is the owner of the device.
 This option implies the options
 .BR nosuid " and " nodev
 (unless overridden by subsequent options, as in the option line
@@ -1107,15 +1107,16 @@ are specified.
 .B "mount \-o remount,rw /dev/foo /dir"
 
 After this call all old mount options are replaced and arbitrary stuff from
-fstab is ignored, except the loop= option which is internally generated and
-maintained by the mount command.
+fstab (or mtab) is ignored, except the loop= option which is internally
+generated and maintained by the mount command.
 
 .B "mount \-o remount,rw  /dir"
 
-After this call mount reads fstab (or mtab) and merges these options with
+After this call mount reads fstab and merges these options with
 the options from the command line (\c
 .B \-o\c
-).
+). If no mountpoint found in fstab than remount with unspecified source is
+allowed.
 .TP
 .B ro
 Mount the filesystem read-only.
@@ -1130,31 +1131,33 @@ media with a limited number of write cycles
 .TP
 .B user
 Allow an ordinary user to mount the filesystem.
-The name of the mounting user is written to mtab (or to the private libmount
-file in /run/mount on system without regular mtab) so that he can unmount the
-filesystem again.
+The name of the mounting user is written to the mtab file (or to the private
+libmount file in /run/mount on systems without a regular mtab) so that this
+same user can unmount the filesystem again.
 This option implies the options
 .BR noexec ", " nosuid ", and " nodev
 (unless overridden by subsequent options, as in the option line
 .BR user,exec,dev,suid ).
 .TP
 .B nouser
-Forbid an ordinary (i.e., non-root) user to mount the filesystem.
+Forbid an ordinary user to mount the filesystem.
 This is the default; it does not imply any other options.
 .TP
 .B users
-Allow every user to mount and unmount the filesystem.
+Allow any user to mount and to unmount the filesystem, even
+when some other ordinary user mounted it.
 This option implies the options
 .BR noexec ", " nosuid ", and " nodev
 (unless overridden by subsequent options, as in the option line
 .BR users,exec,dev,suid ).
 .TP
 .B x-*
-All options prefixed with "x-" are interpreted as comments or userspace
+All options prefixed with "x-" are interpreted as comments or as userspace
 application-specific options.  These options are not stored in the mtab file,
-nor sent to the mount.<type> helpers nor the
+nor sent to the mount.\fItype\fR helpers nor to the
 .BR mount (2)
-system call.  The suggested format is x-<appname>.<option> (e.g.\& x-systemd.automount).
+system call.  The suggested format is \fBx-\fIappname\fR.\fIoption\fR
+(e.g.\& \fBx-systemd.automount\fR).
 .TP
 .BR x-mount.mkdir [ = \fImode\fR ]
 Allow to make a target directory (mountpoint).  The optional argument
@@ -1169,7 +1172,7 @@ The following options apply only to certain filesystems.
 We sort them by filesystem.  They all follow the
 .B \-o
 flag.
-
+.sp
 What options are supported depends a bit on the running kernel.
 More info may be found in the kernel source subdirectory
 .IR Documentation/filesystems .
@@ -1521,15 +1524,8 @@ starting with 2.6.29.  Further, this option is valid only if
 CONFIG_DEVPTS_MULTIPLE_INSTANCES is enabled in the kernel
 configuration.
 
-.SH "Mount options for ext"
-None.
-Note that the `ext' filesystem is obsolete.  Don't use it.
-Since Linux version 2.1.21 extfs is no longer part of the kernel source.
-
 .SH "Mount options for ext2"
 The `ext2' filesystem is the standard Linux filesystem.
-.\" Due to a kernel bug, it may be mounted with random mount options
-.\" (fixed in Linux 2.0.4).
 Since Linux 2.5.46, for most mount options the default
 is determined by the filesystem superblock.  Set them with
 .BR tune2fs (8).
@@ -2019,7 +2015,16 @@ If set, causes discard/TRIM commands to be issued to the block device
 when blocks are freed.  This is useful for SSD devices and
 sparse/thinly-provisioned LUNs.
 .TP
-.BR fat= {12 | 16 | 32 }
+.B dos1xfloppy
+If set, use a fallback default BIOS Parameter Block configuration, determined
+by backing device size. These static parameters match defaults assumed by DOS
+1.x for 160 kiB, 180 kiB, 320 kiB, and 360 kiB floppies and floppy images.
+.TP
+.BR errors= { panic | continue | remount-ro }
+Specify FAT behavior on critical errors: panic, continue without doing
+anything, or remount the partition in read-only mode (default behavior).
+.TP
+.BR fat= { 12 | 16 | 32 }
 Specify a 12, 16 or 32 bit fat.  This overrides
 the automatic FAT type detection routine.  Use with caution!
 .TP
@@ -2028,10 +2033,32 @@ Character set to use for converting between 8 bit characters
 and 16 bit Unicode characters.  The default is iso8859-1.
 Long filenames are stored on disk in Unicode format.
 .TP
-.B nfs
-If set, enables in-memory indexing of directory inodes to reduce the
-frequency of ESTALE errors in NFS client operations.  Useful only when
-the filesystem is exported via NFS.
+.BR nfs= { stale_rw | nostale_ro }
+Enable this only if you want to export the FAT filesystem over NFS.
+
+.BR stale_rw :
+This option maintains an index (cache) of directory inodes which is used by the
+nfs-related code to improve look-ups. Full file operations (read/write) over
+NFS are supported but with cache eviction at NFS server, this could result in
+spurious
+.B ESTALE
+errors.
+
+.BR nostale_ro :
+This option bases the inode number and filehandle
+on the on-disk location of a file in the FAT directory entry.
+This ensures that
+.B ESTALE
+will not be returned after a file is
+evicted from the inode cache. However, it means that operations
+such as rename, create and unlink could cause filehandles that
+previously pointed at one file to point at a different file,
+potentially causing data corruption. For this reason, this
+option also mounts the filesystem readonly.
+
+To maintain backward compatibility, '-o nfs' is also accepted,
+defaulting to
+.BR stale_rw .
 .TP
 .BI tz=UTC
 This option disables the conversion of timestamps
@@ -2041,11 +2068,31 @@ useful when mounting devices (like digital cameras)
 that are set to UTC in order to avoid the pitfalls of
 local time.
 .TP
+.BI time_offset= minutes
+Set offset for conversion of timestamps from local time used by FAT to UTC.
+I.e.,
+.I minutes
+minutes will be subtracted from each timestamp to convert it to UTC used
+internally by Linux. This is useful when the time zone set in the kernel via
+.BR settimeofday (2)
+is not the time zone used by the filesystem. Note
+that this option still does not provide correct time stamps in all cases in
+presence of DST - time stamps in a different DST setting will be off by one
+hour.
+.TP
 .B quiet
 Turn on the
 .I quiet
 flag.  Attempts to chown or chmod files do not return errors,
 although they fail.  Use with caution!
+.TP
+.B rodir
+FAT has the ATTR_RO (read-only) attribute. On Windows, the ATTR_RO of the
+directory will just be ignored, and is used only by applications as a flag
+(e.g. it's set for the customized folder).
+
+If you want to use ATTR_RO as read-only flag even for the directory, set this
+option.
 .TP
 .B showexec
 If set, the execute permission bits of the file will be allowed only if
@@ -3147,11 +3194,15 @@ temporary file
 a list of filesystem types to try
 .SH ENVIRONMENT
 .IP LIBMOUNT_FSTAB=<path>
-overrides the default location of the fstab file
+overrides the default location of the fstab file (ignored for suid)
 .IP LIBMOUNT_MTAB=<path>
-overrides the default location of the mtab file
-.IP LIBMOUNT_DEBUG=0xffff
-enables debug output
+overrides the default location of the mtab file (ignored for suid)
+.IP LIBMOUNT_DEBUG=all
+enables libmount debug output
+.IP LIBBLKID_DEBUG=all
+enables libblkid debug output
+.IP LOOPDEV_DEBUG=all
+enables loop device setup debug output
 .SH "SEE ALSO"
 .BR mount (2),
 .BR umount (2),
@@ -3238,4 +3289,3 @@ Karel Zak <kzak@redhat.com>
 .SH AVAILABILITY
 The mount command is part of the util-linux package and is available from
 ftp://ftp.kernel.org/pub/linux/utils/util-linux/.
-

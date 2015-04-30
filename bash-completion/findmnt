@@ -38,7 +38,7 @@ _findmnt_module()
 				for I in ${TMP_ARR[@]}; do
 					MNT_OPTS[$I]='1'
 				done
-			done < <(findmnt -rno OPTIONS)
+			done < <($1 -rno OPTIONS)
 			COMPREPLY=( $(compgen -W "${!MNT_OPTS[@]}" -- $cur) )
 			return 0
 			;;
@@ -57,7 +57,7 @@ _findmnt_module()
 		'-t'|'--types')
 			local TYPES
 			TYPES="adfs affs autofs cifs coda coherent cramfs
-				debugfs devpts efs ext ext2 ext3 ext4 hfs
+				debugfs devpts efs ext2 ext3 ext4 hfs
 				hfsplus hpfs iso9660 jfs minix msdos
 				ncpfs nfs nfs4 ntfs proc qnx4 ramfs
 				reiserfs romfs squashfs smbfs sysv tmpfs
@@ -67,13 +67,13 @@ _findmnt_module()
 			;;
 		'-S'|'--source')
 			local DEV_MPOINT
-			DEV_MPOINT=$(findmnt -rno SOURCE | grep ^/dev)
+			DEV_MPOINT=$($1 -rno SOURCE | grep ^/dev)
 			COMPREPLY=( $(compgen -W "$DEV_MPOINT" -- $cur) )
 			return 0
 			;;
 		'-T'|'--target')
 			local DEV_MPOINT
-			DEV_MPOINT=$(findmnt -rno TARGET)
+			DEV_MPOINT=$($1 -rno TARGET)
 			COMPREPLY=( $(compgen -W "$DEV_MPOINT" -- $cur) )
 			return 0
 			;;
@@ -117,7 +117,7 @@ _findmnt_module()
 			;;
 	esac
 	local DEV_MPOINT
-	DEV_MPOINT=$(findmnt -rno TARGET,SOURCE)
+	DEV_MPOINT=$($1 -rno TARGET,SOURCE)
 	COMPREPLY=( $(compgen -W "$DEV_MPOINT" -- $cur) )
 	return 0
 }

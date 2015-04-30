@@ -37,12 +37,15 @@
 static void __attribute__((__noreturn__))
 usage(FILE *out)
 {
-	fputs(_("\nUsage:\n"), out);
+	fputs(USAGE_HEADER, out);
 	fprintf(out,
 	      _(" %s [-t] timingfile [typescript] [divisor]\n"),
 	      program_invocation_short_name);
 
-	fputs(_("\nOptions:\n"), out);
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Play back terminal typescripts, using timing information.\n"), out);
+
+	fputs(USAGE_OPTIONS, out);
 	fputs(_(" -t, --timing <file>     script timing output file\n"
 		" -s, --typescript <file> script terminal session output file\n"
 		" -d, --divisor <num>     speed up or slow down execution with time divisor\n"
@@ -50,6 +53,7 @@ usage(FILE *out)
 		" -V, --version           output version information and exit\n"
 		" -h, --help              display this help and exit\n\n"), out);
 
+	fprintf(out, USAGE_MAN_TAIL("scriptreplay(1)"));
 	exit(out == stderr ? EXIT_FAILURE : EXIT_SUCCESS);
 }
 
@@ -174,8 +178,7 @@ main(int argc, char *argv[])
 			maxdelay = getnum(optarg);
 			break;
 		case 'V':
-			printf(_("%s from %s\n"), program_invocation_short_name,
-						  PACKAGE_STRING);
+			printf(UTIL_LINUX_VERSION);
 			exit(EXIT_SUCCESS);
 		case 'h':
 			usage(stdout);

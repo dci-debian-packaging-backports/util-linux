@@ -1,10 +1,9 @@
-.\" -*- nroff -*-
 .TH LSBLK 8 "February 2013" "util-linux" "System Administration"
 .SH NAME
 lsblk \- list block devices
 .SH SYNOPSIS
 .B lsblk
-.RB [ options ]
+[options]
 .RI [ device ...]
 .SH DESCRIPTION
 .B lsblk
@@ -94,7 +93,7 @@ to get a list of all supported columns.
 The default list of columns may be extended if \fIlist\fP is
 specified in the format \fI+list\fP (e.g. \fBlsblk -o +UUID\fP).
 .TP
-.BR \-O , " \-\-output-all "
+.BR \-O , " \-\-output\-all "
 Output all available columns.
 .TP
 .BR \-P , " \-\-pairs"
@@ -136,13 +135,29 @@ which is done by using
 This sysfs block directory appeared in kernel 2.6.27 (October 2008).
 In case of problems with a new enough kernel, check that CONFIG_SYSFS
 was enabled at the time of the kernel build.
+
+.SH RETURN CODES
+.IP 0
+success
+.IP 1
+failure
+.IP 32
+not found all specified devices
+.IP 64
+some specified devices found, some not found
+
 .SH AUTHORS
 .nf
 Milan Broz <mbroz@redhat.com>
 Karel Zak <kzak@redhat.com>
 .fi
 .SH ENVIRONMENT
-.IP "Setting LIBMOUNT_DEBUG=0xffff enables debug output."
+.IP LIBBLKID_DEBUG=all
+enables libblkid debug output.
+.IP LIBMOUNT_DEBUG=all
+enables libmount debug output.
+.IP LIBSMARTCOLS_DEBUG=all
+enables libsmartcols debug output.
 .SH SEE ALSO
 .BR findmnt (8),
 .BR blkid (8),

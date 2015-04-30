@@ -139,11 +139,14 @@ die_if_link(char *fn) {
 static void __attribute__((__noreturn__))
 usage(FILE *out)
 {
-	fputs(_("\nUsage:\n"), out);
+	fputs(USAGE_HEADER, out);
 	fprintf(out,
 	      _(" %s [options] [file]\n"), program_invocation_short_name);
 
-	fputs(_("\nOptions:\n"), out);
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Make a typescript of a terminal session.\n"), out);
+
+	fputs(USAGE_OPTIONS, out);
 	fputs(_(" -a, --append            append the output\n"
 		" -c, --command <command> run command rather than interactive shell\n"
 		" -e, --return            return exit code of the child process\n"
@@ -154,6 +157,7 @@ usage(FILE *out)
 		" -V, --version           output version information and exit\n"
 		" -h, --help              display this help and exit\n\n"), out);
 
+	fprintf(out, USAGE_MAN_TAIL("script(1)"));
 	exit(out == stderr ? EXIT_FAILURE : EXIT_SUCCESS);
 }
 
@@ -218,8 +222,7 @@ main(int argc, char **argv) {
 			tflg = 1;
 			break;
 		case 'V':
-			printf(_("%s from %s\n"), program_invocation_short_name,
-						  PACKAGE_STRING);
+			printf(UTIL_LINUX_VERSION);
 			exit(EXIT_SUCCESS);
 			break;
 		case 'h':
@@ -266,6 +269,7 @@ main(int argc, char **argv) {
 	sigprocmask(SIG_SETMASK, NULL, &block_mask);
 	sigaddset(&block_mask, SIGCHLD);
 
+	fflush(stdout);
 	sigprocmask(SIG_SETMASK, &block_mask, &unblock_mask);
 	child = fork();
 	sigprocmask(SIG_SETMASK, &unblock_mask, NULL);

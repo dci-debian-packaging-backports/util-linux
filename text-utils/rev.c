@@ -77,11 +77,13 @@ static void __attribute__ ((__noreturn__)) usage(FILE * out)
 	fprintf(out, _("Usage: %s [options] [file ...]\n"),
 		program_invocation_short_name);
 
-	fprintf(out, _("\nOptions:\n"
-		       " -V, --version   output version information and exit\n"
-		       " -h, --help      display this help and exit\n"));
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Reverse lines characterwise.\n"), out);
 
-	fprintf(out, _("\nFor more information see rev(1).\n"));
+	fputs(USAGE_OPTIONS, out);
+	fputs(USAGE_HELP, out);
+	fputs(USAGE_VERSION, out);
+	fprintf(out, USAGE_MAN_TAIL("rev(1)"));
 
 	exit(out == stderr ? EXIT_FAILURE : EXIT_SUCCESS);
 }
@@ -121,8 +123,7 @@ int main(int argc, char *argv[])
 	while ((ch = getopt_long(argc, argv, "Vh", longopts, NULL)) != -1)
 		switch(ch) {
 		case 'V':
-			printf(_("%s from %s\n"), program_invocation_short_name,
-						  PACKAGE_STRING);
+			printf(UTIL_LINUX_VERSION);
 			exit(EXIT_SUCCESS);
 		case 'h':
 			usage(stdout);

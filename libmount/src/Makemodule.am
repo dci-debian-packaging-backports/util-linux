@@ -6,6 +6,7 @@ nodist_mountinc_HEADERS = $(top_builddir)/libmount/src/libmount.h
 usrlib_exec_LTLIBRARIES += libmount.la
 libmount_la_SOURCES = \
 	include/list.h \
+	lib/monotonic.c \
 	\
 	libmount/src/cache.c \
 	libmount/src/fs.c \
@@ -29,12 +30,17 @@ libmount_la_SOURCES += \
 	libmount/src/context.c \
 	libmount/src/context_loopdev.c \
 	libmount/src/context_mount.c \
-	libmount/src/context_umount.c
+	libmount/src/context_umount.c \
+	libmount/src/monitor.c
 endif
 
 nodist_libmount_la_SOURCES = libmount/src/mountP.h
 
-libmount_la_LIBADD = libcommon.la libblkid.la $(SELINUX_LIBS)
+libmount_la_LIBADD = \
+	libcommon.la \
+	libblkid.la \
+	$(SELINUX_LIBS) \
+	$(CLOCKGETTIME_LIBS)
 
 libmount_la_CFLAGS = \
 	$(SOLIB_CFLAGS) \
@@ -67,11 +73,13 @@ check_PROGRAMS += \
 	test_mount_tab_diff \
 	test_mount_tab_update \
 	test_mount_utils \
-	test_mount_version
+	test_mount_version \
+	test_mount_monitor \
+	test_mount_debug
 
 libmount_tests_cflags  = -DTEST_PROGRAM $(libmount_la_CFLAGS)
 libmount_tests_ldflags = libblkid.la -static
-libmount_tests_ldadd   = libmount.la $(UUID_LIBS)
+libmount_tests_ldadd   = libmount.la $(UUID_LIBS) $(CLOCKGETTIME_LIBS)
 
 if HAVE_SELINUX
 libmount_tests_ldadd += $(SELINUX_LIBS)
@@ -107,6 +115,11 @@ test_mount_tab_diff_CFLAGS = $(libmount_tests_cflags)
 test_mount_tab_diff_LDFLAGS = $(libmount_tests_ldflags)
 test_mount_tab_diff_LDADD = $(libmount_tests_ldadd)
 
+test_mount_monitor_SOURCES = libmount/src/monitor.c
+test_mount_monitor_CFLAGS = $(libmount_tests_cflags)
+test_mount_monitor_LDFLAGS = $(libmount_tests_ldflags)
+test_mount_monitor_LDADD = $(libmount_tests_ldadd)
+
 test_mount_tab_update_SOURCES = libmount/src/tab_update.c
 test_mount_tab_update_CFLAGS = $(libmount_tests_cflags)
 test_mount_tab_update_LDFLAGS = $(libmount_tests_ldflags)
@@ -121,6 +134,11 @@ test_mount_version_SOURCES = libmount/src/version.c
 test_mount_version_CFLAGS = $(libmount_tests_cflags)
 test_mount_version_LDFLAGS = $(libmount_tests_ldflags)
 test_mount_version_LDADD = $(libmount_tests_ldadd)
+
+test_mount_debug_SOURCES = libmount/src/init.c
+test_mount_debug_CFLAGS = $(libmount_tests_cflags)
+test_mount_debug_LDFLAGS = $(libmount_tests_ldflags)
+test_mount_debug_LDADD = $(libmount_tests_ldadd)
 
 endif # BUILD_LIBMOUNT_TESTS
 

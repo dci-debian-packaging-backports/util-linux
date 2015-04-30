@@ -82,7 +82,7 @@ static struct colinfo infos[] = {
 };
 
 static int columns[ARRAY_SIZE(infos) * 2];
-static int ncolumns;
+static size_t ncolumns;
 
 static pid_t pid = 0;
 
@@ -162,7 +162,7 @@ static char *get_fallback_filename(dev_t dev)
  * Return the absolute path of a file from
  * a given inode number (and its size)
  */
-static char *get_filename_sz(ino_t inode, pid_t pid, size_t *size)
+static char *get_filename_sz(ino_t inode, pid_t lock_pid, size_t *size)
 {
 	struct stat sb;
 	struct dirent *dp;
@@ -180,7 +180,7 @@ static char *get_filename_sz(ino_t inode, pid_t pid, size_t *size)
 	 * iterate the *entire* filesystem searching
 	 * for the damn file.
 	 */
-	sprintf(path, "/proc/%d/fd/", pid);
+	sprintf(path, "/proc/%d/fd/", lock_pid);
 	if (!(dirp = opendir(path)))
 		return NULL;
 
@@ -223,7 +223,7 @@ out:
  */
 static ino_t get_dev_inode(char *str, dev_t *dev)
 {
-	int maj = 0, min = 0;
+	unsigned int maj = 0, min = 0;
 	ino_t inum = 0;
 
 	sscanf(str, "%02x:%02x:%ju", &maj, &min, &inum);
@@ -343,7 +343,8 @@ static int column_name_to_id(const char *name, size_t namesz)
 
 static inline int get_column_id(int num)
 {
-	assert(num < ncolumns);
+	assert(num >= 0);
+	assert((size_t) num < ncolumns);
 	assert(columns[num] < (int) ARRAY_SIZE(infos));
 
 	return columns[num];
@@ -385,7 +386,7 @@ static pid_t get_blocker(int id, struct list_head *locks)
 
 static void add_scols_line(struct libscols_table *table, struct lock *l, struct list_head *locks)
 {
-	int i;
+	size_t i;
 	struct libscols_line *line;
 	/*
 	 * Whenever cmdname or filename is NULL it is most
@@ -452,7 +453,8 @@ static void add_scols_line(struct libscols_table *table, struct lock *l, struct 
 
 static int show_locks(struct list_head *locks)
 {
-	int i, rc = 0;
+	int rc = 0;
+	size_t i;
 	struct list_head *p, *pnext;
 	struct libscols_table *table;
 
@@ -505,6 +507,9 @@ static void __attribute__ ((__noreturn__)) usage(FILE * out)
 
 	fprintf(out,
 		_(" %s [options]\n"), program_invocation_short_name);
+
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("List local system locks.\n"), out);
 
 	fputs(USAGE_OPTIONS, out);
 	fputs(_(" -p, --pid <pid>        process id\n"

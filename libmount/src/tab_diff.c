@@ -7,8 +7,8 @@
 
 /**
  * SECTION: tabdiff
- * @title: Monitor mountinfo changes
- * @short_description: monitor changes in the list of the mounted filesystems
+ * @title: Compare changes in mount tables
+ * @short_description: compare changes in the list of the mounted filesystems
  */
 #include "mountP.h"
 
@@ -98,9 +98,6 @@ int mnt_tabdiff_next_change(struct libmnt_tabdiff *df, struct libmnt_iter *itr,
 {
 	int rc = 1;
 	struct tabdiff_entry *de = NULL;
-
-	assert(df);
-	assert(df);
 
 	if (!df || !itr)
 		return -EINVAL;

@@ -47,8 +47,9 @@
 #include "strutils.h"
 #include "loopdev.h"
 #include "fileutils.h"
+#include "canonicalize.h"
 
-static int is_mountinfo(struct libmnt_table *tb)
+int is_mountinfo(struct libmnt_table *tb)
 {
 	struct libmnt_fs *fs;
 
@@ -187,7 +188,6 @@ int mnt_table_get_nents(struct libmnt_table *tb)
  */
 int mnt_table_is_empty(struct libmnt_table *tb)
 {
-	assert(tb);
 	return tb == NULL || list_empty(&tb->ents) ? 1 : 0;
 }
 
@@ -202,7 +202,6 @@ int mnt_table_is_empty(struct libmnt_table *tb)
  */
 int mnt_table_set_userdata(struct libmnt_table *tb, void *data)
 {
-	assert(tb);
 	if (!tb)
 		return -EINVAL;
 
@@ -218,7 +217,6 @@ int mnt_table_set_userdata(struct libmnt_table *tb, void *data)
  */
 void *mnt_table_get_userdata(struct libmnt_table *tb)
 {
-	assert(tb);
 	return tb ? tb->userdata : NULL;
 }
 
@@ -244,14 +242,13 @@ void *mnt_table_get_userdata(struct libmnt_table *tb)
  *	# this comments belongs to the first fs
  *	LABEL=foo /mnt/foo auto defaults 1 2
  *	# this comments belongs to the second fs
- *	LABEL=bar /mnt/bar auto defaults 1 2 
+ *	LABEL=bar /mnt/bar auto defaults 1 2
  *	# tailing comment
  *  </programlisting>
  * </informalexample>
  */
 void mnt_table_enable_comments(struct libmnt_table *tb, int enable)
 {
-	assert(tb);
 	if (tb)
 		tb->comms = enable;
 }
@@ -276,7 +273,6 @@ int mnt_table_with_comments(struct libmnt_table *tb)
  */
 const char *mnt_table_get_intro_comment(struct libmnt_table *tb)
 {
-	assert(tb);
 	return tb ? tb->comm_intro : NULL;
 }
 
@@ -293,7 +289,6 @@ int mnt_table_set_intro_comment(struct libmnt_table *tb, const char *comm)
 {
 	char *p = NULL;
 
-	assert(tb);
 	if (!tb)
 		return -EINVAL;
 	if (comm) {
@@ -317,7 +312,6 @@ int mnt_table_set_intro_comment(struct libmnt_table *tb, const char *comm)
  */
 int mnt_table_append_intro_comment(struct libmnt_table *tb, const char *comm)
 {
-	assert(tb);
 	if (!tb)
 		return -EINVAL;
 	return append_string(&tb->comm_intro, comm);
@@ -331,7 +325,6 @@ int mnt_table_append_intro_comment(struct libmnt_table *tb, const char *comm)
  */
 const char *mnt_table_get_trailing_comment(struct libmnt_table *tb)
 {
-	assert(tb);
 	return tb ? tb->comm_tail : NULL;
 }
 
@@ -348,7 +341,6 @@ int mnt_table_set_trailing_comment(struct libmnt_table *tb, const char *comm)
 {
 	char *p = NULL;
 
-	assert(tb);
 	if (!tb)
 		return -EINVAL;
 	if (comm) {
@@ -372,7 +364,6 @@ int mnt_table_set_trailing_comment(struct libmnt_table *tb, const char *comm)
  */
 int mnt_table_append_trailing_comment(struct libmnt_table *tb, const char *comm)
 {
-	assert(tb);
 	if (!tb)
 		return -EINVAL;
 	return append_string(&tb->comm_tail, comm);
@@ -400,7 +391,6 @@ int mnt_table_append_trailing_comment(struct libmnt_table *tb, const char *comm)
  */
 int mnt_table_set_cache(struct libmnt_table *tb, struct libmnt_cache *mpc)
 {
-	assert(tb);
 	if (!tb)
 		return -EINVAL;
 
@@ -418,7 +408,6 @@ int mnt_table_set_cache(struct libmnt_table *tb, struct libmnt_cache *mpc)
  */
 struct libmnt_cache *mnt_table_get_cache(struct libmnt_table *tb)
 {
-	assert(tb);
 	return tb ? tb->cache : NULL;
 }
 
@@ -435,9 +424,6 @@ struct libmnt_cache *mnt_table_get_cache(struct libmnt_table *tb)
  */
 int mnt_table_add_fs(struct libmnt_table *tb, struct libmnt_fs *fs)
 {
-	assert(tb);
-	assert(fs);
-
 	if (!tb || !fs)
 		return -EINVAL;
 
@@ -463,9 +449,6 @@ int mnt_table_add_fs(struct libmnt_table *tb, struct libmnt_fs *fs)
  */
 int mnt_table_remove_fs(struct libmnt_table *tb, struct libmnt_fs *fs)
 {
-	assert(tb);
-	assert(fs);
-
 	if (!tb || !fs)
 		return -EINVAL;
 
@@ -500,9 +483,6 @@ int mnt_table_get_root_fs(struct libmnt_table *tb, struct libmnt_fs **root)
 	struct libmnt_iter itr;
 	struct libmnt_fs *fs;
 	int root_id = 0;
-
-	assert(tb);
-	assert(root);
 
 	if (!tb || !root || !is_mountinfo(tb))
 		return -EINVAL;
@@ -612,10 +592,6 @@ int mnt_table_next_fs(struct libmnt_table *tb, struct libmnt_iter *itr, struct l
 {
 	int rc = 1;
 
-	assert(tb);
-	assert(itr);
-	assert(fs);
-
 	if (!tb || !itr || !fs)
 		return -EINVAL;
 	*fs = NULL;
@@ -639,9 +615,6 @@ int mnt_table_next_fs(struct libmnt_table *tb, struct libmnt_iter *itr, struct l
  */
 int mnt_table_first_fs(struct libmnt_table *tb, struct libmnt_fs **fs)
 {
-	assert(tb);
-	assert(fs);
-
 	if (!tb || !fs)
 		return -EINVAL;
 	if (list_empty(&tb->ents))
@@ -659,9 +632,6 @@ int mnt_table_first_fs(struct libmnt_table *tb, struct libmnt_fs **fs)
  */
 int mnt_table_last_fs(struct libmnt_table *tb, struct libmnt_fs **fs)
 {
-	assert(tb);
-	assert(fs);
-
 	if (!tb || !fs)
 		return -EINVAL;
 	if (list_empty(&tb->ents))
@@ -713,8 +683,6 @@ static int mnt_table_move_parent(struct libmnt_table *tb, int oldid, int newid)
 	struct libmnt_iter itr;
 	struct libmnt_fs *fs;
 
-	assert(tb);
-
 	if (!tb)
 		return -EINVAL;
 	if (list_empty(&tb->ents))
@@ -756,9 +724,6 @@ int mnt_table_uniq_fs(struct libmnt_table *tb, int flags,
 	struct libmnt_iter itr;
 	struct libmnt_fs *fs;
 	int direction = MNT_ITER_BACKWARD;
-
-	assert(tb);
-	assert(cmp);
 
 	if (!tb || !cmp)
 		return -EINVAL;
@@ -812,10 +777,6 @@ int mnt_table_uniq_fs(struct libmnt_table *tb, int flags,
  */
 int mnt_table_set_iter(struct libmnt_table *tb, struct libmnt_iter *itr, struct libmnt_fs *fs)
 {
-	assert(tb);
-	assert(itr);
-	assert(fs);
-
 	if (!tb || !itr || !fs)
 		return -EINVAL;
 
@@ -893,9 +854,6 @@ struct libmnt_fs *mnt_table_find_target(struct libmnt_table *tb, const char *pat
 	struct libmnt_fs *fs = NULL;
 	char *cn;
 
-	assert(tb);
-	assert(path);
-
 	if (!tb || !path || !*path)
 		return NULL;
 	if (direction != MNT_ITER_FORWARD && direction != MNT_ITER_BACKWARD)
@@ -969,7 +927,6 @@ struct libmnt_fs *mnt_table_find_srcpath(struct libmnt_table *tb, const char *pa
 	char *cn;
 	const char *p;
 
-	assert(tb);
 	if (!tb || !path || !*path)
 		return NULL;
 	if (direction != MNT_ITER_FORWARD && direction != MNT_ITER_BACKWARD)
@@ -1076,10 +1033,6 @@ struct libmnt_fs *mnt_table_find_tag(struct libmnt_table *tb, const char *tag,
 	struct libmnt_iter itr;
 	struct libmnt_fs *fs = NULL;
 
-	assert(tb);
-	assert(tag);
-	assert(val);
-
 	if (!tb || !tag || !*tag || !val)
 		return NULL;
 	if (direction != MNT_ITER_FORWARD && direction != MNT_ITER_BACKWARD)
@@ -1123,8 +1076,6 @@ struct libmnt_fs *mnt_table_find_source(struct libmnt_table *tb,
 	struct libmnt_fs *fs;
 	char *t = NULL, *v = NULL;
 
-	assert(tb);
-
 	if (!tb)
 		return NULL;
 	if (direction != MNT_ITER_FORWARD && direction != MNT_ITER_BACKWARD)
@@ -1161,9 +1112,6 @@ struct libmnt_fs *mnt_table_find_pair(struct libmnt_table *tb, const char *sourc
 {
 	struct libmnt_fs *fs = NULL;
 	struct libmnt_iter itr;
-
-	assert(tb);
-	assert(target);
 
 	if (!tb || !target || !*target || !source || !*source)
 		return NULL;
@@ -1219,6 +1167,20 @@ struct libmnt_fs *mnt_table_find_devno(struct libmnt_table *tb,
 	return NULL;
 }
 
+static char *remove_mountpoint_from_path(const char *path, const char *mnt)
+{
+        char *res;
+	const char *p;
+	size_t sz;
+
+	sz = strlen(mnt);
+	p = sz > 1 ? path + sz : path;
+
+	res = *p ? strdup(p) : strdup("/");
+	DBG(UTILS, ul_debug("%s fs-root is %s", path, res));
+	return res;
+}
+
 /*
  * tb: /proc/self/mountinfo
  * fs: filesystem
@@ -1238,7 +1200,8 @@ struct libmnt_fs *mnt_table_get_fs_root(struct libmnt_table *tb,
 					unsigned long mountflags,
 					char **fsroot)
 {
-	char *root = NULL, *mnt = NULL;
+	char *root = NULL;
+	const char *mnt = NULL;
 	const char *fstype;
 	struct libmnt_fs *src_fs = NULL;
 
@@ -1256,10 +1219,15 @@ struct libmnt_fs *mnt_table_get_fs_root(struct libmnt_table *tb,
 		DBG(TAB, ul_debug("fs-root for bind"));
 
 		src = xsrc = mnt_resolve_spec(mnt_fs_get_source(fs), tb->cache);
-		if (src)
-			mnt = mnt_get_mountpoint(src);
+		if (src) {
+			struct libmnt_fs *fs = mnt_table_find_mountpoint(tb,
+							src, MNT_ITER_BACKWARD);
+			if (fs)
+				mnt = mnt_fs_get_target(fs);
+		}
+
 		if (mnt)
-			root = mnt_get_fs_root(src, mnt);
+			root = remove_mountpoint_from_path(src, mnt);
 
 		if (xsrc && !tb->cache) {
 			free(xsrc);
@@ -1326,16 +1294,14 @@ dflt:
 
 	DBG(TAB, ul_debug("FS root result: %s", root));
 
-	free(mnt);
 	return src_fs;
 err:
 	free(root);
-	free(mnt);
 	return NULL;
 }
 
 /**
- * mnt_table_is_fs__mounted:
+ * mnt_table_is_fs_mounted:
  * @tb: /proc/self/mountinfo file
  * @fstab_fs: /etc/fstab entry
  *
@@ -1364,9 +1330,6 @@ int mnt_table_is_fs_mounted(struct libmnt_table *tb, struct libmnt_fs *fstab_fs)
 	char *xtgt = NULL;
 	int rc = 0;
 	dev_t devno = 0;
-
-	assert(tb);
-	assert(fstab_fs);
 
 	DBG(FS, ul_debugobj(fstab_fs, "is FS mounted? [target=%s]",
 				mnt_fs_get_target(fstab_fs)));
@@ -1765,6 +1728,7 @@ done:
 	mnt_unref_table(tb);
 	return rc;
 }
+
 
 int main(int argc, char *argv[])
 {

@@ -44,15 +44,6 @@
  * - fixed strerr(errno) in gettext calls
  */
 
-/*
- * This command is deprecated.  The utility is in maintenance mode,
- * meaning we keep them in source tree for backward compatibility
- * only.  Do not waste time making this command better, unless the
- * fix is about security or other very critical issue.
- *
- * See Documentation/deprecated.txt for more information.
- */
-
 #include <errno.h>
 #include <fcntl.h>
 #include <paths.h>
@@ -306,6 +297,10 @@ static void __attribute__((__noreturn__)) usage(FILE *out)
 {
 	fputs(USAGE_HEADER, out);
 	fprintf(out, " %s\n", program_invocation_short_name);
+
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Edit the password or group file.\n"), out);
+
 	fputs(USAGE_OPTIONS, out);
 	fputs(USAGE_HELP, out);
 	fputs(USAGE_VERSION, out);

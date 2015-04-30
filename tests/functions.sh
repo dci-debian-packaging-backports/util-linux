@@ -31,6 +31,20 @@ function ts_canonicalize {
 	fi
 }
 
+function ts_cd {
+	if [ $# -eq 0 ]; then
+		ts_failed "ul_cd: not enough arguments"
+	fi
+	DEST=$(readlink -f "$1" 2>/dev/null)
+	if [ "x$DEST" = "x" ] || [ ! -d "$DEST" ]; then
+		ts_failed "ul_cd: $1: no such directory"
+	fi
+	cd "$DEST" 2>/dev/null || ts_failed "ul_cd: $1: cannot change directory"
+	if [ "$PWD" != "$DEST" ]; then
+		ts_failed "ul_cd: $PWD is not $DEST"
+	fi
+}
+
 function ts_report {
 	if [ "$TS_PARALLEL" == "yes" ]; then
 		echo "$TS_TITLE $1"
@@ -54,29 +68,32 @@ function ts_check_losetup {
 	local tmp
 	ts_check_test_command "$TS_CMD_LOSETUP"
 
+	if [ "$TS_SKIP_LOOPDEVS" = "yes" ]; then
+		ts_skip "loop-device tests disabled"
+	fi
+
 	# assuming that losetup -f works ... to be checked somewhere else
 	tmp=$($TS_CMD_LOSETUP -f 2>/dev/null)
 	if test -b "$tmp"; then
 		return 0
 	fi
-	ts_skip "no loop device support"
+	ts_skip "no loop-device support"
 }
 
 function ts_skip_subtest {
-	ts_report " IGNORE ($1)"
+	ts_report " SKIPPED ($1)"
 }
 
 function ts_skip {
 	ts_skip_subtest "$1"
-	if [ -n "$2" -a -b "$2" ]; then
-		ts_device_deinit "$2"
-	fi
+
+	ts_cleanup_on_exit
 	exit 0
 }
 
 function ts_skip_nonroot {
 	if [ $UID -ne 0 ]; then
-		ts_skip "not root permissions"
+		ts_skip "no root permissions"
 	fi
 }
 
@@ -223,6 +240,7 @@ function ts_init_env {
 	TS_VERBOSE=$(ts_has_option "verbose" "$*")
 	TS_PARALLEL=$(ts_has_option "parallel" "$*")
 	TS_KNOWN_FAIL=$(ts_has_option "known-fail" "$*")
+	TS_SKIP_LOOPDEVS=$(ts_has_option "skip-loopdevs" "$*")
 
 	tmp=$( ts_has_option "memcheck" "$*")
 	if [ "$tmp" == "yes" -a -f /usr/bin/valgrind ]; then
@@ -234,6 +252,7 @@ function ts_init_env {
 	declare -a TS_SUID_PROGS
 	declare -a TS_SUID_USER
 	declare -a TS_SUID_GROUP
+	declare -a TS_LOOP_DEVS
 
 	if [ -f $TS_TOPDIR/commands.sh ]; then
 		. $TS_TOPDIR/commands.sh
@@ -318,8 +337,8 @@ function ts_init_py {
 
 	[ -f "$top_builddir/py${LIBNAME}.la" ] || ts_skip "py${LIBNAME} not compiled"
 
-	export LD_LIBRARY_PATH="$top_builddir/.libs"
-	export PYTHONPATH="$top_builddir/$LIBNAME/python:$top_builddir/.libs"
+	export LD_LIBRARY_PATH="$top_builddir/.libs:$LD_LIBRARY_PATH"
+	export PYTHONPATH="$top_builddir/$LIBNAME/python:$top_builddir/.libs:$PYTHONPATH"
 
 	export PYTHON_VERSION=$(awk '/^PYTHON_VERSION/ { print $3 }' $top_builddir/Makefile)
 	export PYTHON_MAJOR_VERSION=$(echo $PYTHON_VERSION | sed 's/\..*//')
@@ -392,11 +411,7 @@ function ts_finalize_subtest {
 }
 
 function ts_finalize {
-	for idx in $(seq 0 $((${#TS_SUID_PROGS[*]} - 1))); do
-		PROG=${TS_SUID_PROGS[$idx]}
-		chmod a-s $PROG &> /dev/null
-		chown ${TS_SUID_USER[$idx]}.${TS_SUID_GROUP[$idx]} $PROG &> /dev/null
-	done
+	ts_cleanup_on_exit
 
 	if [ $TS_NSUBTESTS -ne 0 ]; then
 		printf "%11s..."
@@ -420,11 +435,21 @@ function ts_finalize {
 
 function ts_die {
 	ts_log "$1"
-	if [ -n "$2" ] && [ -b "$2" ]; then
-		ts_device_deinit "$2"
-		ts_fstab_clean		# for sure...
-	fi
 	ts_finalize
+}
+
+function ts_cleanup_on_exit {
+
+	for idx in $(seq 0 $((${#TS_SUID_PROGS[*]} - 1))); do
+		PROG=${TS_SUID_PROGS[$idx]}
+		chmod a-s $PROG &> /dev/null
+		chown ${TS_SUID_USER[$idx]}.${TS_SUID_GROUP[$idx]} $PROG &> /dev/null
+	done
+
+	for dev in "${TS_LOOP_DEVS[@]}"; do
+		ts_device_deinit "$dev"
+	done
+	unset TS_LOOP_DEVS
 }
 
 function ts_image_md5sum {
@@ -441,16 +466,26 @@ function ts_image_init {
 	return 0
 }
 
+function ts_register_loop_device {
+	local ct=${#TS_LOOP_DEVS[*]}
+	TS_LOOP_DEVS[$ct]=$1
+}
+
 function ts_device_init {
 	local img
 	local dev
 
 	img=$(ts_image_init $1 $2)
 	dev=$($TS_CMD_LOSETUP --show -f "$img")
+	if [ "$?" != "0" -o "$dev" = "" ]; then
+		ts_die "Cannot init device"
+	fi
 
-	echo $dev
+	ts_register_loop_device "$dev"
+	TS_LODEV=$dev
 }
 
+# call from ts_cleanup_on_exit() only because of TS_LOOP_DEVS maintenance
 function ts_device_deinit {
 	local DEV="$1"
 
@@ -526,7 +561,7 @@ function ts_is_mounted {
 	grep -q $DEV /proc/mounts && return 0
 
 	if [ "${DEV#/dev/loop/}" != "$DEV" ]; then
-		return grep -q "/dev/loop${DEV#/dev/loop/}" /proc/mounts
+		grep -q "/dev/loop${DEV#/dev/loop/}" /proc/mounts && return 0
 	fi
 	return 1
 }
@@ -587,7 +622,7 @@ function ts_scsi_debug_init {
 	local devname
 	TS_DEVICE="none"
 
-	# dry run is not realy reliable, real modprobe may still fail
+	# dry run is not really reliable, real modprobe may still fail
 	modprobe --dry-run --quiet scsi_debug &>/dev/null \
 		|| ts_skip "missing scsi_debug module (dry-run)"
 
@@ -595,18 +630,18 @@ function ts_scsi_debug_init {
 	modprobe -r scsi_debug &>/dev/null \
 		|| ts_skip "cannot remove scsi_debug module (rmmod)"
 
-	modprobe -b scsi_debug $* &>/dev/null \
+	modprobe -b scsi_debug "$@" &>/dev/null \
 		|| ts_skip "cannot load scsi_debug module (modprobe)"
 
 	# it might be still not loaded, modprobe.conf or whatever
 	lsmod | grep -q "^scsi_debug " \
 		|| ts_skip "scsi_debug module not loaded (lsmod)"
 
-	devname=$(grep --with-filename scsi_debug /sys/block/*/device/model | awk -F '/' '{print $4}')
-	[ "x${devname}" == "x" ] && ts_die "cannot find scsi_debug device"
-
 	sleep 1
 	udevadm settle
+
+	devname=$(grep --with-filename scsi_debug /sys/block/*/device/model | awk -F '/' '{print $4}')
+	[ "x${devname}" == "x" ] && ts_die "cannot find scsi_debug device"
 
 	TS_DEVICE="/dev/${devname}"
 }
@@ -632,4 +667,33 @@ function ts_resolve_host {
 	# we return 1 if tmp is empty
 	test -n "$tmp" || return 1
 	echo "$tmp" | sort -R | head -n 1
+}
+
+# listen to unix socket (background socat)
+function ts_init_socket_to_file {
+	local socket=$1
+	local outfile=$2
+	local pid="0"
+
+	ts_check_prog "socat"
+	rm -f "$socket" "$outfile"
+
+	socat -u UNIX-LISTEN:$socket,fork,max-children=1,backlog=128 \
+		STDOUT > "$outfile" &
+	pid=$!
+
+	# check for running background process
+	if [ "$pid" -le "0" ] || ! kill -s 0 "$pid"; then
+		ts_skip "unable to run socat"
+	fi
+	# wait for the socket listener
+	if ! socat -u /dev/null UNIX-CONNECT:$socket,retry=30,interval=0.1; then
+		kill -9 "$pid"
+		ts_skip "timeout waiting for socket"
+	fi
+	# check socket again
+	if ! socat -u /dev/null UNIX-CONNECT:$socket; then
+		kill -9 "$pid"
+		ts_skip "socket stopped listening"
+	fi
 }

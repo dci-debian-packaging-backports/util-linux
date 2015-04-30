@@ -10,7 +10,7 @@
 /**
  * SECTION: table_print
  * @title: Table print
- * @short_description: table print API
+ * @short_description: output functions
  *
  * Table output API.
  */
@@ -100,7 +100,7 @@ static int buffer_set_data(struct libscols_buffer *buf, const char *str)
 	return rc ? rc : buffer_append_data(buf, str);
 }
 
-/* save the current buffer possition to art_idx */
+/* save the current buffer position to art_idx */
 static void buffer_set_art_index(struct libscols_buffer *buf)
 {
 	if (buf) {
@@ -151,11 +151,102 @@ static size_t buffer_get_safe_art_size(struct libscols_buffer *buf)
 	return bytes;
 }
 
+/* returns pointer to the end of used data */
+static int line_ascii_art_to_buffer(struct libscols_table *tb,
+				    struct libscols_line *ln,
+				    struct libscols_buffer *buf)
+{
+	const char *art;
+	int rc;
+
+	assert(ln);
+	assert(buf);
+
+	if (!ln->parent)
+		return 0;
+
+	rc = line_ascii_art_to_buffer(tb, ln->parent, buf);
+	if (rc)
+		return rc;
+
+	if (list_entry_is_last(&ln->ln_children, &ln->parent->ln_branch))
+		art = "  ";
+	else
+		art = tb->symbols->vert;
+
+	return buffer_append_data(buf, art);
+}
+
 #define is_last_column(_tb, _cl) \
 		list_entry_is_last(&(_cl)->cl_columns, &(_tb)->tb_columns)
 
 #define colsep(tb) ((tb)->colsep ? (tb)->colsep : " ")
 #define linesep(tb) ((tb)->linesep ? (tb)->linesep : "\n")
+
+/* print padding or asci-art instead of data of @cl */
+static void print_empty_cell(struct libscols_table *tb,
+			  struct libscols_column *cl,
+			  struct libscols_line *ln,	/* optional */
+			  size_t bufsz)
+{
+	size_t len_pad = 0;		/* in screen cells as opposed to bytes */
+
+	/* generate tree asci-art rather than padding */
+	if (ln && scols_column_is_tree(cl)) {
+		if (!ln->parent) {
+			/* only print symbols->vert if followed by something */
+			if (!list_empty(&ln->ln_branch)) {
+				fputs(tb->symbols->vert, tb->out);
+				len_pad = mbs_safe_width(tb->symbols->vert);
+			}
+		} else {
+			/* use the same draw function as though we were intending to draw an L-shape */
+			struct libscols_buffer *art = new_buffer(bufsz);
+			char *data;
+
+			if (art) {
+				/* whatever the rc, len_pad will be sensible */
+				line_ascii_art_to_buffer(tb, ln, art);
+				data = buffer_get_safe_data(art, &len_pad);
+				if (data && len_pad)
+					fputs(data, tb->out);
+				free_buffer(art);
+			}
+		}
+	}
+	/* fill rest of cell with space */
+	for(; len_pad <= cl->width; ++len_pad)
+		fputc(' ', tb->out);
+}
+
+/* Fill the start of a line with padding (or with tree ascii-art).
+ *
+ * This is necessary after a long non-truncated column, as this requires the
+ * next column to be printed on the next line. For example (see 'DDD'):
+ *
+ * aaa bbb ccc ddd eee
+ * AAA BBB CCCCCCC
+ *             DDD EEE
+ * ^^^^^^^^^^^^
+ *  new line padding
+ */
+static void print_newline_padding(struct libscols_table *tb,
+				  struct libscols_column *cl,
+				  struct libscols_line *ln,	/* optional */
+				  size_t bufsz,
+				  size_t len)
+{
+	size_t i;
+
+	assert(tb);
+	assert(cl);
+
+	fputs(linesep(tb), tb->out);		/* line break */
+
+	/* fill cells after line break */
+	for (i = 0; i <= (size_t) cl->seqnum; i++)
+		print_empty_cell(tb, scols_table_get_column(tb, i), ln, bufsz);
+}
 
 static int print_data(struct libscols_table *tb,
 		      struct libscols_column *cl,
@@ -219,7 +310,7 @@ static int print_data(struct libscols_table *tb,
 		len = width;
 		bytes = mbs_truncate(data, &len);	/* updates 'len' */
 
-		if (!data || bytes == (size_t) -1) {
+		if (bytes == (size_t) -1) {
 			bytes = len = 0;
 			data = NULL;
 		}
@@ -252,46 +343,17 @@ static int print_data(struct libscols_table *tb,
 			fputs(data, tb->out);
 	}
 	for (i = len; i < width; i++)
-		fputs(" ", tb->out);		/* padding */
+		fputc(' ', tb->out);		/* padding */
 
-	if (!is_last_column(tb, cl)) {
-		if (len > width && !scols_column_is_trunc(cl)) {
-			fputs(linesep(tb), tb->out);
-			for (i = 0; i <= (size_t) cl->seqnum; i++) {
-				struct libscols_column *x = scols_table_get_column(tb, i);
-				fprintf(tb->out, "%*s ", -((int)x->width), " ");
-			}
-		} else
-			fputs(colsep(tb), tb->out);	/* columns separator */
-	}
-
-	return 0;
-}
-
-/* returns pointer to the end of used data */
-static int line_ascii_art_to_buffer(struct libscols_table *tb,
-				    struct libscols_line *ln,
-				    struct libscols_buffer *buf)
-{
-	const char *art;
-	int rc;
-
-	assert(ln);
-	assert(buf);
-
-	if (!ln->parent)
+	if (is_last_column(tb, cl))
 		return 0;
 
-	rc = line_ascii_art_to_buffer(tb, ln->parent, buf);
-	if (rc)
-		return rc;
-
-	if (list_entry_is_last(&ln->ln_children, &ln->parent->ln_branch))
-		art = "  ";
+	if (len > width && !scols_column_is_trunc(cl))
+		print_newline_padding(tb, cl, ln, buf->bufsz, len);	/* next column starts on next line */
 	else
-		art = tb->symbols->vert;
+		fputs(colsep(tb), tb->out);		/* columns separator */
 
-	return buffer_append_data(buf, art);
+	return 0;
 }
 
 static int cell_to_buffer(struct libscols_table *tb,
@@ -339,8 +401,8 @@ static int cell_to_buffer(struct libscols_table *tb,
 }
 
 /*
- * Prints data, data maybe be printed in more formats (raw, NAME=xxx pairs) and
- * control and non-printable chars maybe encoded in \x?? hex encoding.
+ * Prints data. Data can be printed in more formats (raw, NAME=xxx pairs), and
+ * control and non-printable characters can be encoded in the \x?? encoding.
  */
 static int print_line(struct libscols_table *tb,
 		      struct libscols_line *ln,
@@ -383,8 +445,7 @@ static int print_header(struct libscols_table *tb, struct libscols_buffer *buf)
 
 	DBG(TAB, ul_debugobj(tb, "printing header"));
 
-	/* set width according to the size of data
-	 */
+	/* set the width according to the size of the data */
 	scols_reset_iter(&itr, SCOLS_ITER_FORWARD);
 	while (rc == 0 && scols_table_next_column(tb, &itr, &cl) == 0) {
 		rc = buffer_set_data(buf, scols_cell_get_data(&cl->header));
@@ -489,11 +550,11 @@ static void dbg_columns(struct libscols_table *tb)
 /*
  * This function counts column width.
  *
- * For the SCOLS_FL_NOEXTREMES columns is possible to call this function two
- * times.  The first pass counts width and average width. If the column
- * contains too large fields (width greater than 2 * average) then the column
- * is marked as "extreme". In the second pass all extreme fields are ignored
- * and column width is counted from non-extreme fields only.
+ * For the SCOLS_FL_NOEXTREMES columns it is possible to call this function
+ * two times. The first pass counts the width and average width. If the column
+ * contains fields that are too large (a width greater than 2 * average) then
+ * the column is marked as "extreme". In the second pass all extreme fields
+ * are ignored and the column width is counted from non-extreme fields only.
  */
 static int count_column_width(struct libscols_table *tb,
 			      struct libscols_column *cl,
@@ -591,8 +652,7 @@ static int recount_widths(struct libscols_table *tb, struct libscols_buffer *buf
 	if (!tb->is_term)
 		return 0;
 
-	/* reduce columns with extreme fields
-	 */
+	/* reduce columns with extreme fields */
 	if (width > tb->termwidth && extremes) {
 		DBG(TAB, ul_debugobj(tb, "   reduce width (extreme columns)"));
 
@@ -648,7 +708,7 @@ static int recount_widths(struct libscols_table *tb, struct libscols_buffer *buf
 		if (width < tb->termwidth && scols_table_is_maxout(tb)) {
 			DBG(TAB, ul_debugobj(tb, "   enlarge width (max-out)"));
 
-			/* try enlarge all columns */
+			/* try enlarging all columns */
 			while (width < tb->termwidth) {
 				scols_reset_iter(&itr, SCOLS_ITER_FORWARD);
 				while (scols_table_next_column(tb, &itr, &cl) == 0) {
@@ -660,20 +720,20 @@ static int recount_widths(struct libscols_table *tb, struct libscols_buffer *buf
 			}
 		} else if (width < tb->termwidth) {
 			/* enlarge the last column */
-			struct libscols_column *cl = list_entry(
+			struct libscols_column *col = list_entry(
 				tb->tb_columns.prev, struct libscols_column, cl_columns);
 
 			DBG(TAB, ul_debugobj(tb, "   enlarge width (last column)"));
 
-			if (!scols_column_is_right(cl) && tb->termwidth - width > 0) {
-				cl->width += tb->termwidth - width;
+			if (!scols_column_is_right(col) && tb->termwidth - width > 0) {
+				col->width += tb->termwidth - width;
 				width = tb->termwidth;
 			}
 		}
 	}
 
 	/* bad, we have to reduce output width, this is done in two steps:
-	 * 1/ reduce columns with a relative width and with truncate flag
+	 * 1) reduce columns with a relative width and with truncate flag
 	 * 2) reduce columns with a relative width without truncate flag
 	 */
 	trunc_only = 1;
@@ -760,9 +820,8 @@ int scols_print_table(struct libscols_table *tb)
 	struct libscols_iter itr;
 	struct libscols_buffer *buf;
 
-	assert(tb);
 	if (!tb)
-		return -1;
+		return -EINVAL;
 
 	DBG(TAB, ul_debugobj(tb, "printing"));
 	if (!tb->symbols)

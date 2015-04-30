@@ -73,7 +73,7 @@ static int fstrim_filesystem(const char *path, struct fstrim_range *rangetpl,
 		return -1;
 	}
 	if (fstat(fd, &sb) == -1) {
-		warn(_("stat failed %s"), path);
+		warn(_("stat of %s failed"), path);
 		return -1;
 	}
 	if (!S_ISDIR(sb.st_mode)) {
@@ -228,6 +228,10 @@ static void __attribute__((__noreturn__)) usage(FILE *out)
 	fputs(USAGE_HEADER, out);
 	fprintf(out,
 	      _(" %s [options] <mount point>\n"), program_invocation_short_name);
+
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Discard unused blocks on a mounted filesystem.\n"), out);
+
 	fputs(USAGE_OPTIONS, out);
 	fputs(_(" -a, --all           trim all mounted filesystems that are supported\n"), out);
 	fputs(_(" -o, --offset <num>  the offset in bytes to start discarding from\n"), out);
@@ -244,7 +248,7 @@ static void __attribute__((__noreturn__)) usage(FILE *out)
 
 int main(int argc, char **argv)
 {
-	char *path;
+	char *path = NULL;
 	int c, rc, verbose = 0, all = 0;
 	struct fstrim_range range;
 

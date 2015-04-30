@@ -240,7 +240,7 @@ new_probe(const char *devname, int mode)
 			goto error;
 
 		pr = blkid_new_probe();
-		if (pr && blkid_probe_set_device(pr, fd, 0, 0)) {
+		if (!pr || blkid_probe_set_device(pr, fd, 0, 0) != 0) {
 			close(fd);
 			goto error;
 		}
@@ -266,7 +266,6 @@ new_probe(const char *devname, int mode)
 error:
 	blkid_free_probe(pr);
 	err(EXIT_FAILURE, _("error: %s: probing initialization failed"), devname);
-	return NULL;
 }
 
 static struct wipe_desc *
@@ -448,11 +447,14 @@ do_wipe(struct wipe_desc *wp, const char *devname, int flags)
 static void __attribute__((__noreturn__))
 usage(FILE *out)
 {
-	fputs(_("\nUsage:\n"), out);
+	fputs(USAGE_HEADER, out);
 	fprintf(out,
 	      _(" %s [options] <device>\n"), program_invocation_short_name);
 
-	fputs(_("\nOptions:\n"), out);
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Wipe signatures from a device.\n"), out);
+
+	fputs(USAGE_OPTIONS, out);
 	fputs(_(" -a, --all           wipe all magic strings (BE CAREFUL!)\n"
 		" -b, --backup        create a signature backup in $HOME\n"
 		" -f, --force         force erasure\n"
@@ -464,7 +466,7 @@ usage(FILE *out)
 		" -t, --types <list>  limit the set of filesystem, RAIDs or partition tables\n"
 		" -V, --version       output version information and exit\n"), out);
 
-	fprintf(out, _("\nFor more information see wipefs(8).\n"));
+	fprintf(out, USAGE_MAN_TAIL("wipefs(8)"));
 
 	exit(out == stderr ? EXIT_FAILURE : EXIT_SUCCESS);
 }

@@ -99,7 +99,8 @@ struct colinfo infos[] = {
 #define NCOLS ARRAY_SIZE(infos)
 
 /* array with IDs of enabled columns */
-static int columns[NCOLS], ncolumns;
+static int columns[NCOLS];
+size_t ncolumns;
 
 static int verbose;
 static int partx_flags;
@@ -309,7 +310,7 @@ static int del_parts(int fd, const char *device, dev_t devno,
 			continue;
 		} else if (errno == ENXIO) {
 			if (verbose)
-				printf(_("%s: partition #%d already doesn't exist\n"), device, i);
+				printf(_("%s: partition #%d doesn't exist\n"), device, i);
 			continue;
 		}
 		rc = -1;
@@ -713,6 +714,9 @@ static void __attribute__((__noreturn__)) usage(FILE *out)
 	      _(" %s [-a|-d|-s|-u] [--nr <n:m> | <partition>] <disk>\n"),
 		program_invocation_short_name);
 
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Tell the kernel about the presence and numbering of partitions.\n"), out);
+
 	fputs(USAGE_OPTIONS, out);
 	fputs(_(" -a, --add            add specified partitions or all of them\n"), out);
 	fputs(_(" -d, --delete         delete specified partitions or all of them\n"), out);
@@ -771,7 +775,7 @@ int main(int argc, char **argv)
 	};
 
 	static const ul_excl_t excl[] = {	/* rows and cols in in ASCII order */
-		{ 'P','a','d','l','r','s' },
+		{ 'P','a','d','l','r','s','u' },
 		{ 0 }
 	};
 	int excl_st[ARRAY_SIZE(excl)] = UL_EXCL_STATUS_INIT;
@@ -885,7 +889,7 @@ int main(int argc, char **argv)
 		device = argv[optind];
 
 		if (stat(device, &sb))
-			err(EXIT_FAILURE, _("stat failed %s"), device);
+			err(EXIT_FAILURE, _("stat of %s failed"), device);
 
 		part_devno = sb.st_rdev;
 

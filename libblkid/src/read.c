@@ -32,13 +32,6 @@
 # include <stdlib.h>
 #endif
 
-#ifdef HAVE_STRTOULL
-#define STRTOULL strtoull /* defined in stdlib.h if you try hard enough */
-#else
-/* FIXME: need to support real strtoull here */
-#define STRTOULL strtoul
-#endif
-
 #ifdef TEST_PROGRAM
 #define blkid_debug_dump_dev(dev)	(debug_dump_dev(dev))
 static void debug_dump_dev(blkid_dev dev);
@@ -252,15 +245,30 @@ static int parse_token(char **name, char **value, char **cp)
 	*value = skip_over_blank(*value + 1);
 
 	if (**value == '"') {
-		end = strchr(*value + 1, '"');
-		if (!end) {
+		char *p = end = *value + 1;
+
+		/* convert 'foo\"bar'  to 'foo"bar' */
+		while (*p) {
+			if (*p == '\\') {
+				p++;
+				*end = *p;
+			} else {
+				*end = *p;
+				if (*p == '"')
+					break;
+			}
+			p++;
+			end++;
+		}
+
+		if (*end != '"') {
 			DBG(READ, ul_debug("unbalanced quotes at: %s", *value));
 			*cp = *value;
 			return -BLKID_ERR_CACHE;
 		}
 		(*value)++;
 		*end = '\0';
-		end++;
+		end = ++p;
 	} else {
 		end = skip_over_word(*value);
 		if (*end) {
@@ -315,14 +323,14 @@ static int parse_tag(blkid_cache cache, blkid_dev dev, char **cp)
 
 	/* Some tags are stored directly in the device struct */
 	if (!strcmp(name, "DEVNO"))
-		dev->bid_devno = STRTOULL(value, 0, 0);
+		dev->bid_devno = strtoull(value, 0, 0);
 	else if (!strcmp(name, "PRI"))
 		dev->bid_pri = strtol(value, 0, 0);
 	else if (!strcmp(name, "TIME")) {
 		char *end = NULL;
-		dev->bid_time = STRTOULL(value, &end, 0);
+		dev->bid_time = strtoull(value, &end, 0);
 		if (end && *end == '.')
-			dev->bid_utime = STRTOULL(end + 1, 0, 0);
+			dev->bid_utime = strtoull(end + 1, 0, 0);
 	} else
 		ret = blkid_set_tag(dev, name, value, strlen(value));
 

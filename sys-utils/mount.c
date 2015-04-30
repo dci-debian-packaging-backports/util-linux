@@ -572,7 +572,10 @@ try_readonly:
 		break;
 
 	case ENODEV:
-		warnx(_("unknown filesystem type '%s'"), mnt_context_get_fstype(cxt));
+		if (mnt_context_get_fstype(cxt))
+			warnx(_("unknown filesystem type '%s'"), mnt_context_get_fstype(cxt));
+		else
+			warnx(_("unknown filesystem type"));
 		break;
 
 	case ENOTBLK:
@@ -607,6 +610,9 @@ try_readonly:
 
 		else if (mflags & MS_REMOUNT)
 			warnx(_("cannot remount %s read-write, is write-protected"), src);
+
+		else if (mflags & MS_BIND)
+			warn(_("mount %s on %s failed"), src, tgt);
 
 		else {
 			warnx(_("%s is write-protected, mounting read-only"), src);
@@ -714,6 +720,9 @@ static void __attribute__((__noreturn__)) usage(FILE *out)
 		" %1$s [options] <source> <directory>\n"
 		" %1$s <operation> <mountpoint> [<target>]\n"),
 		program_invocation_short_name);
+
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Mount a filesystem.\n"), out);
 
 	fputs(USAGE_OPTIONS, out);
 	fprintf(out, _(

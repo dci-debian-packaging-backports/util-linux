@@ -38,21 +38,6 @@
 # define UMOUNT_UNUSED    0x80000000	/* Flag guaranteed to be unused */
 #endif
 
-/*
- * Called by mtab parser to filter out entries, non-zero means that
- * an entry has to be filtered out.
- */
-static int mtab_filter(struct libmnt_fs *fs, void *data)
-{
-	if (!fs || !data)
-		return 0;
-	if (mnt_fs_streq_target(fs, data))
-		return 0;
-	if (mnt_fs_streq_srcpath(fs, data))
-		return 0;
-	return 1;
-}
-
 /**
  * mnt_context_find_umount_fs:
  * @cxt: mount context
@@ -68,8 +53,7 @@ int mnt_context_find_umount_fs(struct libmnt_context *cxt,
 	int rc;
 	struct libmnt_table *mtab = NULL;
 	struct libmnt_fs *fs;
-	struct libmnt_cache *cache = NULL;
-	char *cn_tgt = NULL, *loopdev = NULL;
+	char *loopdev = NULL;
 
 	if (pfs)
 		*pfs = NULL;
@@ -93,24 +77,10 @@ int mnt_context_find_umount_fs(struct libmnt_context *cxt,
 	 * it's usable only for canonicalized stuff (e.g. kernel mountinfo).
 	 */
 	if (!mnt_context_mtab_writable(cxt) && *tgt == '/' &&
-	    !mnt_context_is_force(cxt) && !mnt_context_is_lazy(cxt)) {
-
-		struct stat st;
-
-		if (stat(tgt, &st) == 0 && S_ISDIR(st.st_mode)) {
-			cache = mnt_context_get_cache(cxt);
-			cn_tgt = mnt_resolve_path(tgt, cache);
-			if (cn_tgt)
-				mnt_context_set_tabfilter(cxt, mtab_filter, cn_tgt);
-		}
-	}
-	rc = mnt_context_get_mtab(cxt, &mtab);
-
-	if (cn_tgt) {
-		mnt_context_set_tabfilter(cxt, NULL, NULL);
-		if (!cache)
-			free(cn_tgt);
-	}
+	    !mnt_context_is_force(cxt) && !mnt_context_is_lazy(cxt))
+		rc = mnt_context_get_mtab_for_target(cxt, &mtab, tgt);
+	else
+		rc = mnt_context_get_mtab(cxt, &mtab);
 
 	if (rc) {
 		DBG(CXT, ul_debugobj(cxt, "umount: failed to read mtab"));
@@ -161,6 +131,7 @@ try_loopdev:
 
 		if (stat(tgt, &st) == 0 && S_ISREG(st.st_mode)) {
 			int count;
+			struct libmnt_cache *cache = mnt_context_get_cache(cxt);
 			const char *bf = cache ? mnt_resolve_path(tgt, cache) : tgt;
 
 			count = loopdev_count_by_backing_file(bf, &loopdev);
@@ -198,6 +169,7 @@ static int has_utab_entry(struct libmnt_context *cxt, const char *target)
 	struct libmnt_fs *fs;
 	struct libmnt_iter itr;
 	char *cn = NULL;
+	int rc = 0;
 
 	assert(cxt);
 
@@ -220,10 +192,16 @@ static int has_utab_entry(struct libmnt_context *cxt, const char *target)
 	mnt_reset_iter(&itr, MNT_ITER_BACKWARD);
 
 	while (mnt_table_next_fs(cxt->utab, &itr, &fs) == 0) {
-		if (mnt_fs_streq_target(fs, cn))
-			return 1;
+		if (mnt_fs_streq_target(fs, cn)) {
+			rc = 1;
+			break;
+		}
 	}
-	return 0;
+
+	if (!cache)
+		free(cn);
+
+	return rc;
 }
 
 /* this is umount replacement to mnt_context_apply_fstab(), use

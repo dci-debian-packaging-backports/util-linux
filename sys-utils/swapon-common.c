@@ -1,8 +1,9 @@
 
 #include "c.h"
 #include "nls.h"
-#include "swapon-common.h"
 #include "xalloc.h"
+
+#include "swapon-common.h"
 
 /*
  * content of /proc/swaps and /etc/fstab

@@ -58,6 +58,9 @@ extern int sysfs_read_s64(struct sysfs_cxt *cxt, const char *attr, int64_t *res)
 extern int sysfs_read_u64(struct sysfs_cxt *cxt, const char *attr, uint64_t *res);
 extern int sysfs_read_int(struct sysfs_cxt *cxt, const char *attr, int *res);
 
+extern int sysfs_write_string(struct sysfs_cxt *cxt, const char *attr, const char *str);
+extern int sysfs_write_u64(struct sysfs_cxt *cxt, const char *attr, uint64_t num);
+
 extern char *sysfs_get_devname(struct sysfs_cxt *cxt, char *buf, size_t bufsiz);
 
 extern char *sysfs_strdup(struct sysfs_cxt *cxt, const char *attr);
@@ -66,6 +69,10 @@ extern int sysfs_count_dirents(struct sysfs_cxt *cxt, const char *attr);
 extern int sysfs_count_partitions(struct sysfs_cxt *cxt, const char *devname);
 extern dev_t sysfs_partno_to_devno(struct sysfs_cxt *cxt, int partno);
 extern char *sysfs_get_slave(struct sysfs_cxt *cxt);
+
+extern char *sysfs_get_devchain(struct sysfs_cxt *cxt, char *buf, size_t bufsz);
+extern int sysfs_next_subsystem(struct sysfs_cxt *cxt, char *devchain, char **subsys);
+extern int sysfs_is_hotpluggable(struct sysfs_cxt *cxt);
 
 extern int sysfs_is_partition_dirent(DIR *dir, struct dirent *d,
 			const char *parent_name);

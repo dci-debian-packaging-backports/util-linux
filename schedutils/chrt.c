@@ -1,13 +1,11 @@
 /*
- * chrt.c - chrt
- * Command-line utility for manipulating a task's real-time attributes 
+ * chrt.c - manipulate a task's real-time attributes
  *
- * Robert Love <rml@tech9.net>
- * 27-Apr-2002: initial version
- * 04-May-2011: make thread aware - Davidlohr Bueso <dave@gnu.org>
+ * 27-Apr-2002: initial version - Robert Love <rml@tech9.net>
+ * 04-May-2011: make it thread-aware - Davidlohr Bueso <dave@gnu.org>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License, v2, as
+ * it under the terms of the GNU General Public License, version 2, as
  * published by the Free Software Foundation
  *
  * This program is distributed in the hope that it will be useful,
@@ -59,8 +57,8 @@ static void __attribute__((__noreturn__)) show_usage(int rc)
 {
 	FILE *out = rc == EXIT_SUCCESS ? stdout : stderr;
 
+	fputs(_("Show or change the real-time scheduling attributes of a process.\n"), out);
 	fprintf(out, _(
-	"\nchrt - manipulate real-time attributes of a process\n"
 	"\nSet policy:\n"
 	"  chrt [options] [<policy>] <priority> [-p <pid> | <command> [<arg>...]]\n"
 	"\nGet policy:\n"
@@ -88,6 +86,7 @@ static void __attribute__((__noreturn__)) show_usage(int rc)
 	"  -v | --verbose       display status information\n"
 	"  -V | --version       output version information\n\n"));
 
+	fprintf(out, USAGE_MAN_TAIL("chrt(1)"));
 	exit(rc);
 }
 
@@ -263,8 +262,7 @@ int main(int argc, char **argv)
 			verbose = 1;
 			break;
 		case 'V':
-			printf(_("%s from %s\n"), program_invocation_short_name,
-			       PACKAGE_STRING);
+			printf(UTIL_LINUX_VERSION);
 			return EXIT_SUCCESS;
 		case 'h':
 			ret = EXIT_SUCCESS;

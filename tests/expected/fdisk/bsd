@@ -10,8 +10,6 @@ Sector size (logical/physical): 512 bytes / 512 bytes
 I/O size (minimum/optimal): 512 bytes / 512 bytes
 Disklabel type: dos
 Disk identifier: <removed>
-
-
 -------------------
 
 Create 1st primary partition
@@ -27,7 +25,6 @@ Disk identifier: <removed>
 
 Device     Boot Start   End Sectors Size Id Type
 <removed>1       2048  4095    2048   1M 83 Linux
-
 -------------------
 
 Create 2st primary partition
@@ -46,13 +43,13 @@ Disk identifier: <removed>
 Device     Boot Start   End Sectors Size Id Type
 <removed>1       2048  4095    2048   1M 83 Linux
 <removed>2       4096 20479   16384   8M a5 FreeBSD
-
 -------------------
 
 Create default BSD
 2e1cee529cb59c9341afef0443f196a1 bsd.img
 
 ---layout----------
+
 Welcome to fdisk <removed>.
 Changes will remain in memory only, until you decide to write them.
 Be careful before using the write command.
@@ -82,6 +79,7 @@ Command (m for help):
 b5c121c2091b2ff26b880551feac7112 bsd.img
 
 ---layout----------
+
 Welcome to fdisk <removed>.
 Changes will remain in memory only, until you decide to write them.
 Be careful before using the write command.

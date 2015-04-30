@@ -7,6 +7,15 @@
  */
 
 /*
+ * This command is deprecated.  The utility is in maintenance mode,
+ * meaning we keep them in source tree for backward compatibility
+ * only.  Do not waste time making this command better, unless the
+ * fix is about security or other very critical issue.
+ *
+ * See Documentation/deprecated.txt for more information.
+ */
+
+/*
  * $Log: tunelp.c,v $
  * Revision 1.9  1998/06/08 19:37:11  janl
  * Thus compiles tunelp with 2.1.103 kernels
@@ -78,6 +87,9 @@ static void __attribute__((__noreturn__)) print_usage(FILE *out)
 {
 	fputs(USAGE_HEADER, out);
 	fprintf(out, _(" %s [options] <device>\n"), program_invocation_short_name);
+
+	fputs(USAGE_SEPARATOR, out);
+	fputs(_("Set various parameters for the line printer.\n"), out);
 
 	fputs(USAGE_OPTIONS, out);
 	fputs(_(" -i, --irq <num>              specify parallel port irq\n"), out);
@@ -246,8 +258,7 @@ int main(int argc, char **argv)
 #endif
 		case 'v':
 		case 'V':
-			printf(_("%s from %s\n"),
-			       program_invocation_short_name, PACKAGE_STRING);
+			printf(UTIL_LINUX_VERSION);
 			return EXIT_SUCCESS;
 		default:
 			print_usage(stderr);
