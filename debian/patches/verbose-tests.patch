@@ -22,10 +22,10 @@ index 61798c9..efdc5b0 100644
  	--srcdir=$(abs_top_srcdir) --builddir=$(abs_top_builddir) \
  	--parallel $(TS_OPTS)
 diff --git a/tests/functions.sh b/tests/functions.sh
-index 6ac59c4..b0c0bfe 100644
+index a624c3e..e782bb8 100644
 --- a/tests/functions.sh
 +++ b/tests/functions.sh
-@@ -94,6 +94,17 @@ function ts_failed_subtest {
+@@ -111,6 +111,17 @@ function ts_failed_subtest {
  		ts_report " $msg ($1)"
  	fi
  

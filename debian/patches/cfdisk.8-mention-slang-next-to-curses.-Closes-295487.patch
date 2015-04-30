@@ -9,7 +9,7 @@ Conflicts:
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/disk-utils/cfdisk.8 b/disk-utils/cfdisk.8
-index 6471de6..ea34f21 100644
+index 79f85cf..1a607e9 100644
 --- a/disk-utils/cfdisk.8
 +++ b/disk-utils/cfdisk.8
 @@ -20,7 +20,7 @@ cfdisk \- display or manipulate a disk partition table
