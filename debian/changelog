@@ -1,10 +1,58 @@
-util-linux (2.26.2-1) UNRELEASED; urgency=medium
+util-linux (2.26.2-1) experimental; urgency=medium
 
   * Update gbp.conf for 2.26 branches
   * Imported Upstream version 2.26.2
     - this version includes a complete rewrite of sfdisk
+    A selection of some other notable fixes:
+    - libmount: allow unspecified source on remount (Closes: #772977)
+    - hwclock: regression fix (Closes: #782726)
+    - logger: warn when --file and command line message are combined
+      (Closes: #467244)
+    - logger: add hostname to rfc3164 message (Closes: #705217)
+    - bash-completion: stop being clever when listing block devices
+      (Closes: #764488)
+    - libfdisk: fix partition names on GNU Hurd. (Closes: #769897)
+    - fsck.minix: fix segmentation fault (Closes: #773892)
+    - libblkid: (bcache) fix keys usage (Closes: #775374)
+    - libfdisk: (gpt) check header size before verify CRC (Closes: #780834)
+    - uuidd: Fixed a typo in daemon logging message (Closes: #766064)
+    - docs: mention nice(1) in renice(1) manual page (Closes: #260984)
+    - bash-completion: Invoke actual commands to be completed, not basenames
+      (Closes: #769462)
+  * Rebase debian/patches on top of new upstream release
+    - Drop patches cherry-picked from upstream:
+      unshare-Fix-map-root-user-to-work-on-new-kernels.patch
+      libblkid-care-about-unsafe-chars-in-cache.patch
+    - Drop translation updates which should now be part of upstream:
+      Trivial-unfuzzy.patch
+      Update-Brazilian-Portuguese-translation.patch
+      Update-Chinese-simplified-translation.patch
+      Update-Danish-translation.patch
+      Update-Finnish-translation.patch
+      Update-French-translation.patch
+      Update-German-translation.patch
+      Update-Japanese-translation.patch
+      Update-PO-files.patch
+      Update-POT-file.patch
+      Update-Russian-translation.patch
+      Update-Spanish-translation.patch
+      Update-Ukrainian-translation.patch
+    - Refresh remaining patches:
+      Disable-the-fallback-clause-in-hwclock-when-dev-rtc-.patch
+      Multiarch-support-in-util-linux-build.patch
+      cfdisk.8-mention-slang-next-to-curses.-Closes-295487.patch
+      man-page-tweaks-cleanup-my_dev_t.h-ancient-stuff.patch
+      verbose-tests.patch
+    - Update series file
+  * Add po/stamp-po to debian/clean
+    - to make sure po/*.gmo actually gets rebuilt
+  * Update libmount1.symbols with 11 newly introduced symbols
+  * Add libfdisk1, libfdisk-dev and libfdisk-udeb packages
+  * Add Breaks on cloud-utils since it uses now-removed sfdisk options.
+    - this should be made a versioned breaks once Bug#783826 gets fixed.
+  * Upload to experimental for now.
 
- -- Andreas Henriksson <andreas@fatal.se>  Thu, 30 Apr 2015 14:05:27 +0200
+ -- Andreas Henriksson <andreas@fatal.se>  Thu, 30 Apr 2015 18:09:43 +0200
 
 util-linux (2.25.2-6) unstable; urgency=medium
 
