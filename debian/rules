@@ -20,6 +20,11 @@ CONFOPTS += --localstatedir=/run
 CONFOPTS += --disable-silent-rules
 CONFOPTS += --without-python
 
+# never use /etc/mtab, it should be a link to /proc/mounts
+# but in case it isn't - just don't use it, go straight for
+# /proc/self/mountinfo or /proc/mounts.
+CONFOPTS += --enable-libmount-force-mountinfo
+
 # disable utilities shipped by other packages
 # => login
 CONFOPTS += --disable-login
