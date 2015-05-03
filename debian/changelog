@@ -1,3 +1,15 @@
+util-linux (2.26.2-2) unstable; urgency=medium
+
+  * debian/rules: Add special handling for libfdisk1-udeb
+  * Bump libmount1 shlibs to say >= 2.26
+  * Add configure flag to make libmount skip /etc/mtab.
+    Thanks to Martin Pitt for the suggestion and pointers to background info.
+  * Revert "Attempt to avoid dumb term problem in "more: regexp" test"
+    - No longer needed since the test now sets TERM itself.
+  * Upload to unstable.
+
+ -- Andreas Henriksson <andreas@fatal.se>  Mon, 04 May 2015 00:22:30 +0200
+
 util-linux (2.26.2-1) experimental; urgency=medium
 
   * Update gbp.conf for 2.26 branches
