@@ -1,9 +1,11 @@
 bin/findmnt
 bin/mount
 bin/umount
+bin/mountpoint
 sbin/losetup
 sbin/swapoff
 sbin/swapon
+usr/share/man/man1/mountpoint.1
 usr/share/man/man5/fstab.5
 usr/share/man/man8/findmnt.8
 usr/share/man/man8/losetup.8
