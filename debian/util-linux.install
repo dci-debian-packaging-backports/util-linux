@@ -27,6 +27,7 @@ sbin/mkfs.cramfs
 sbin/mkfs.minix
 sbin/runuser
 sbin/sfdisk                                                     [!sparc]
+sbin/sulogin
 sbin/swaplabel
 sbin/wipefs
 usr/bin/chrt
@@ -37,8 +38,11 @@ usr/bin/ipcmk
 usr/bin/ipcrm
 usr/bin/ipcs
 usr/bin/isosize sbin/
+usr/bin/last
+usr/bin/lastb
 usr/bin/line
 usr/bin/mcookie
+usr/bin/mesg
 usr/bin/mips                                                    [mips mipsel]
 usr/bin/mips32                                                  [mips mipsel]
 usr/bin/mips64                                                  [mips mipsel]

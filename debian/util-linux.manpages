@@ -15,8 +15,11 @@ debian/tmp/usr/share/man/man1/getopt.1
 debian/tmp/usr/share/man/man1/ipcmk.1
 debian/tmp/usr/share/man/man1/ipcrm.1
 debian/tmp/usr/share/man/man1/ipcs.1
+debian/tmp/usr/share/man/man1/last.1
+debian/tmp/usr/share/man/man1/lastb.1
 debian/tmp/usr/share/man/man1/line.1
 debian/tmp/usr/share/man/man1/mcookie.1
+debian/tmp/usr/share/man/man1/mesg.1
 debian/tmp/usr/share/man/man1/more.1
 debian/tmp/usr/share/man/man1/namei.1
 debian/tmp/usr/share/man/man1/pg.1
@@ -50,6 +53,7 @@ debian/tmp/usr/share/man/man8/ppc64.8                 [powerpc ppc64 ppc64el]
 debian/tmp/usr/share/man/man8/s390.8                            [s390x]
 debian/tmp/usr/share/man/man8/s390x.8                           [s390x]
 debian/tmp/usr/share/man/man8/sfdisk.8                          [!sparc]
+debian/tmp/usr/share/man/man8/sulogin.8
 debian/tmp/usr/share/man/man8/swaplabel.8
 debian/tmp/usr/share/man/man8/wipefs.8
 debian/tmp/usr/share/man/man8/x86_64.8                          [amd64]
