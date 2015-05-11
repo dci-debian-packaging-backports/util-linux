@@ -112,7 +112,7 @@ Section: libs
 Pre-Depends: ${misc:Pre-Depends}
 Depends: ${misc:Depends}, ${shlibs:Depends}
 Multi-Arch: same
-Description: fdisk partitioning library
+Description: block device id library
  The blkid library which allows system programs like fsck and
  mount to quickly and easily find block devices by filesystem UUID and
  LABEL.  This allows system administrators to avoid specifying
