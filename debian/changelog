@@ -1,3 +1,22 @@
+util-linux (2.26.2-3) unstable; urgency=medium
+
+  * The "moving in on sysvinit(-utils) turf" release.
+
+  [ Andreas Henriksson ]
+  * Make Breaks against cloud-utils versioned
+    - cloud-utils 0.27-1 should now be fixed (see Bug#783826)
+  * mount: ship mountpoint utility (Closes: #753779)
+  * util-linux: ship sulogin, last, lastb, mesg utilities (Closes: #784566)
+  * Ship dmesg and renice completions
+
+  [ Pino Toscano ]
+  * Update libmount1.symbols for non-linux archs (Closes: #784728)
+
+  [ Andreas Henriksson ]
+  * Revert mistake in libblkid1 short description (Closes: #784822)
+
+ -- Andreas Henriksson <andreas@fatal.se>  Fri, 15 May 2015 16:35:20 +0200
+
 util-linux (2.26.2-2) unstable; urgency=medium
 
   * debian/rules: Add special handling for libfdisk1-udeb
