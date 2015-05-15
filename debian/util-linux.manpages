@@ -30,6 +30,7 @@ debian/tmp/usr/share/man/man5/terminal-colors.d.5
 debian/tmp/usr/share/man/man8/agetty.8
 debian/tmp/usr/share/man/man8/blkid.8
 debian/tmp/usr/share/man/man8/cfdisk.8
+debian/tmp/usr/share/man/man8/fdisk.8
 debian/tmp/usr/share/man/man8/findfs.8
 debian/tmp/usr/share/man/man8/fsck.8
 debian/tmp/usr/share/man/man8/fsck.cramfs.8

@@ -13,6 +13,7 @@ bin/more
 sbin/agetty
 sbin/blkid
 sbin/cfdisk
+sbin/fdisk
 sbin/findfs
 sbin/fsck
 sbin/fsck.cramfs
