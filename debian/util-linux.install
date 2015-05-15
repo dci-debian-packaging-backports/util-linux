@@ -3,9 +3,6 @@ debian/hwclock.rules => /lib/udev/rules.d/85-hwclock.rules
 debian/hwclock-set => /lib/udev/hwclock-set
 # perl gets to do rename, not us.
 debian/tmp/usr/bin/rename => /usr/bin/rename.ul
-# Rename fdisk to ddisk on PowerPC
-[powerpc powerpcspe ppc64 ppc64el] debian/tmp/sbin/fdisk => /sbin/ddisk
-[!powerpc !powerpcspe !ppc64 !ppc64el] sbin/fdisk
 # Rename mkswap to mkswap.linux on non-linux.
 [linux-any] sbin/mkswap
 [!linux-any] debian/tmp/sbin/mkswap => /sbin/mkswap.linux
