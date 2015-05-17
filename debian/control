@@ -37,8 +37,18 @@ Essential: yes
 Pre-Depends: ${misc:Pre-Depends}, ${shlibs:Depends}
 Depends: initscripts, lsb-base (>= 3.0-6), tzdata (>=2006c-2), ${misc:Depends}
 Suggests: dosfstools, kbd | console-tools, util-linux-locales
-Replaces: bash-completion (<< 1:2.1-4.1~), sysvinit-utils (<< 2.88dsf-59.1~)
-Breaks: bash-completion (<< 1:2.1-4.1~), grml-debootstrap (<< 0.68), cloud-utils (<< 0.27-1~), sysvinit-utils (<< 2.88dsf-59.1~)
+Replaces: bash-completion (<< 1:2.1-4.1~),
+          sysvinit-utils (<< 2.88dsf-59.1~),
+          initscripts (<< 2.88dsf-59.2~),
+          mount (= 2.26.2-3),
+          mount (= 2.26.2-3ubuntu1)
+Breaks: bash-completion (<< 1:2.1-4.1~),
+          grml-debootstrap (<< 0.68),
+          cloud-utils (<< 0.27-1~),
+          sysvinit-utils (<< 2.88dsf-59.1~),
+          initscripts (<< 2.88dsf-59.2~),
+          mount (= 2.26.2-3),
+          mount (= 2.26.2-3ubuntu1)
 Multi-Arch: foreign
 Description: Miscellaneous system utilities
  This package contains a number of important utilities, most of which
@@ -66,8 +76,6 @@ Section: admin
 Pre-Depends: ${misc:Pre-Depends}, ${shlibs:Depends}
 Depends: ${misc:Depends}
 Suggests: nfs-common (>=1:1.1.0-13)
-Replaces: initscripts (<< 2.88dsf-59.1~)
-Breaks: initscripts (<< 2.88dsf-59.1~)
 Multi-Arch: foreign
 Description: Tools for mounting and manipulating filesystems
  This package provides the mount(8), umount(8), swapon(8),
