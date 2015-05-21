@@ -1,3 +1,16 @@
+util-linux (2.26.2-4) unstable; urgency=medium
+
+  [ Andreas Henriksson ]
+  * Drop now obsolete purging of fstrim timer unit helper
+  * Reclaim /sbin/fdisk on PowerPC
+  * Ship mountpoint in util-linux package instead
+    - This suits non-linux archs better, since mount is linux-any.
+
+  [ Martin Pitt ]
+  * Avoid cyclic Breaks in initscripts vs util-linux
+
+ -- Andreas Henriksson <andreas@fatal.se>  Thu, 21 May 2015 14:49:31 +0200
+
 util-linux (2.26.2-3) unstable; urgency=medium
 
   * The "moving in on sysvinit(-utils) turf" release.
