@@ -1,8 +1,17 @@
-util-linux (2.26.2-6) UNRELEASED; urgency=medium
+util-linux (2.26.2-6) unstable; urgency=medium
 
+  [ Martin Pitt ]
   * debian/gbp.conf: Update deprecated section names.
 
- -- Martin Pitt <mpitt@debian.org>  Fri, 22 May 2015 11:48:03 +0200
+  [ Andreas Henriksson ]
+  * Add patches to fix kFreeBSD FTBFS
+    - 0002-lib-fileutils-Add-new-dup_fd_cloexec-function.patch
+    - 0003-lib-sysfs-Use-dup_fd_cloexec-instead-of-direct-call-.patch
+    This is a temporary workaround until glibc gets fixed (see #785796).
+    Thanks to Guillem Jover for patches and Steven Chamberlain for testing.
+    (Closes: #787042)
+
+ -- Andreas Henriksson <andreas@fatal.se>  Sun, 31 May 2015 16:56:45 +0200
 
 util-linux (2.26.2-5) unstable; urgency=medium
 
