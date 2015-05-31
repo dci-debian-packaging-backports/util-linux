@@ -1,0 +1,27 @@
+From 53e0536299ae17540a465fe3f71a636676abb965 Mon Sep 17 00:00:00 2001
+From: Guillem Jover <guillem@hadrons.org>
+Date: Thu, 28 May 2015 17:52:33 +0200
+Subject: [PATCH 3/3] lib/sysfs: Use dup_fd_cloexec instead of direct call to
+ fcntl
+
+Signed-off-by: Guillem Jover <guillem@hadrons.org>
+---
+ lib/sysfs.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/lib/sysfs.c b/lib/sysfs.c
+index 1ea2e77..975e264 100644
+--- a/lib/sysfs.c
++++ b/lib/sysfs.c
+@@ -265,7 +265,7 @@ DIR *sysfs_opendir(struct sysfs_cxt *cxt, const char *attr)
+ 		 * -- we cannot use cxt->sysfs_fd directly, because closedir()
+ 		 * will close this our persistent file descriptor.
+ 		 */
+-		fd = fcntl(cxt->dir_fd, F_DUPFD_CLOEXEC, STDERR_FILENO + 1);
++		fd = dup_fd_cloexec(cxt->dir_fd, STDERR_FILENO + 1);
+ 
+ 	if (fd < 0)
+ 		return NULL;
+-- 
+2.2.1.209.g41e5f3a
+
