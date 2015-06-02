@@ -3,7 +3,6 @@
 include /usr/share/dpkg/architecture.mk
 include /usr/share/dpkg/pkg-info.mk
 
-CONFOPTS = --with-slang
 CONFOPTS += --enable-line
 CONFOPTS += --libdir=/lib/$(DEB_HOST_MULTIARCH)
 CONFOPTS += --libexecdir=\$${prefix}/lib/$(DEB_HOST_MULTIARCH)
