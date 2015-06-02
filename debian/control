@@ -105,15 +105,6 @@ XC-Package-Type: udeb
 XB-Installer-Menu-Item: 99999
 Description: Manually partition a hard drive (fdisk)
 
-Package: cfdisk-udeb
-Architecture: hurd-any linux-any
-Priority: extra
-Section: debian-installer
-Depends: ${misc:Depends}, ${shlibs:Depends}
-XC-Package-Type: udeb
-XB-Installer-Menu-Item: 99999
-Description: Manually partition a hard drive (cfdisk)
-
 Package: libblkid1
 Architecture: any
 Section: libs
