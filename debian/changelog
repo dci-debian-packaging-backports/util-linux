@@ -1,3 +1,16 @@
+util-linux (2.26.2-7) experimental; urgency=medium
+
+  * Remove the cfdisk-udeb package
+    - in preparation for switch to ncurses (which has no udeb)
+  * Build with ncurses instead of slang (Closes: #581631)
+  * Drop obsolete patch explicitly mentioning slang in manpage
+    - cfdisk.8-mention-slang-next-to-curses.-Closes-295487.patch
+  * Add debhelper token to util-linux.preinst maint-script
+  * Drop long-obsolete mount.preinst, NFS-related pre-upgrade check
+  * Drop completed handling of doc symlinking removals
+
+ -- Andreas Henriksson <andreas@fatal.se>  Wed, 03 Jun 2015 13:52:26 +0200
+
 util-linux (2.26.2-6) unstable; urgency=medium
 
   [ Martin Pitt ]
