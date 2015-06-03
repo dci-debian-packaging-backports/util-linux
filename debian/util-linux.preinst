@@ -7,3 +7,5 @@ set -e
 if [ -L /sbin/fdisk ]; then
 	rm /sbin/fdisk
 fi
+
+#DEBHELPER#
