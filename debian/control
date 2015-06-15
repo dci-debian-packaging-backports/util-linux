@@ -101,7 +101,7 @@ Architecture: hurd-any linux-any
 Priority: extra
 Section: debian-installer
 Depends: ${misc:Depends}, ${shlibs:Depends}
-XC-Package-Type: udeb
+Package-Type: udeb
 XB-Installer-Menu-Item: 99999
 Description: Manually partition a hard drive (fdisk)
 
@@ -123,7 +123,7 @@ Architecture: any
 Section: debian-installer
 Priority: optional
 Depends: ${misc:Depends}, ${shlibs:Depends}
-XC-Package-Type: udeb
+Package-Type: udeb
 Description: stripped down block device id library, for debian-installer
  The blkid library which allows system programs like fsck and
  mount to quickly and easily find block devices by filesystem UUID and
@@ -167,7 +167,7 @@ Architecture: any
 Section: debian-installer
 Priority: optional
 Depends: ${misc:Depends}, ${shlibs:Depends}
-XC-Package-Type: udeb
+Package-Type: udeb
 Description: stripped down fdisk partitioning library, for debian-installer
  The libfdisk library is used for manipulating with partition tables.
  The library is the core of the fdisk, cfdisk and sfdisk tools.
@@ -228,7 +228,7 @@ Architecture: any
 Section: debian-installer
 Priority: optional
 Depends: ${misc:Depends}, ${shlibs:Depends}
-XC-Package-Type: udeb
+Package-Type: udeb
 Description: stripped down smart column output aligment library, for debian-installer
  The smart column output alignment library, used by fdisk utilities.
  .
@@ -296,7 +296,7 @@ Architecture: any
 Section: debian-installer
 Priority: optional
 Depends: ${misc:Depends}, ${shlibs:Depends}
-XC-Package-Type: udeb
+Package-Type: udeb
 Description: stripped down universally unique id library, for debian-installer
  libuuid generates and parses 128-bit universally unique ids (UUIDs).
  See RFC 4122 for more information.
@@ -321,7 +321,7 @@ Architecture: any
 Priority: optional
 Section: debian-installer
 Depends: ${misc:Depends}, ${shlibs:Depends}
-XC-Package-Type: udeb
+Package-Type: udeb
 Description: stripped down miscellaneous system utilities, for debian-installer
  This is a minimal version of util-linux for debian-installer. It only
  contains the blkid binary at the moment.
