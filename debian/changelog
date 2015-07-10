@@ -1,3 +1,15 @@
+util-linux (2.26.2-8) experimental; urgency=medium
+
+  * Use canonical url in Vcs-Git field
+  * Drop obsolete XC- prefix for Package-Type: udeb
+  * Bump Standards-Version to 3.9.6
+  * Add autopkgtest oversized-chunks.
+    Thanks to RjY for spotting the original issue. (Closes: #785075)
+  * Add stage1 build profile for bootstrapping.
+    Thanks to Helmut Grohne (Closes: #757147)
+
+ -- Andreas Henriksson <andreas@fatal.se>  Fri, 10 Jul 2015 12:13:29 +0200
+
 util-linux (2.26.2-7) experimental; urgency=medium
 
   * Remove the cfdisk-udeb package
