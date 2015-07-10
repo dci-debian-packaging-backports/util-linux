@@ -2,22 +2,22 @@ Source: util-linux
 Build-Depends: autoconf,
                automake,
                autopoint,
-               debhelper (>= 9),
+               debhelper (>= 9.20141010),
                dh-autoreconf,
                dh-exec (>= 0.13),
                dh-systemd (>= 1.5),
-               dpkg-dev (>=1.16.0),
+               dpkg-dev (>= 1.17.14),
                gettext,
                libncurses5-dev,
                libncursesw5-dev,
-               libpam0g-dev,
+               libpam0g-dev <!stage1>,
                libselinux1-dev [linux-any],
-               libsystemd-dev [linux-any],
+               libsystemd-dev [linux-any] <!stage1>,
                libtool,
                lsb-release,
                pkg-config,
                po-debconf,
-               systemd [linux-any],
+               systemd [linux-any] <!stage1>,
                zlib1g-dev
 Section: base
 Priority: required
@@ -32,6 +32,7 @@ Vcs-Git: git://anonscm.debian.org/collab-maint/pkg-util-linux.git
 
 Package: util-linux
 Architecture: any
+Build-Profiles: <!stage1>
 Section: utils
 Essential: yes
 Pre-Depends: ${misc:Pre-Depends}, ${shlibs:Depends}
@@ -58,6 +59,7 @@ Description: Miscellaneous system utilities
 
 Package: util-linux-locales
 Architecture: all
+Build-Profiles: <!stage1>
 Section: localization
 Priority: optional
 Depends: util-linux (>= ${source:Upstream-Version}), ${misc:Depends}
@@ -71,6 +73,7 @@ Description: Locales files for util-linux
 
 Package: mount
 Architecture: linux-any
+Build-Profiles: <!stage1>
 Essential: yes
 Section: admin
 Pre-Depends: ${misc:Pre-Depends}, ${shlibs:Depends}
@@ -83,6 +86,7 @@ Description: Tools for mounting and manipulating filesystems
 
 Package: bsdutils
 Architecture: any
+Build-Profiles: <!stage1>
 Essential: yes
 Section: utils
 Pre-Depends: ${misc:Pre-Depends}, ${shlibs:Depends}
@@ -98,6 +102,7 @@ Description: basic utilities from 4.4BSD-Lite
 
 Package: fdisk-udeb
 Architecture: hurd-any linux-any
+Build-Profiles: <!stage1>
 Priority: extra
 Section: debian-installer
 Depends: ${misc:Depends}, ${shlibs:Depends}
@@ -267,6 +272,7 @@ Description: Universally Unique ID library
 
 Package: uuid-runtime
 Architecture: any
+Build-Profiles: <!stage1>
 Section: utils
 Priority: optional
 Pre-Depends: libuuid1 (>= 2.25-5~), ${misc:Pre-Depends}
@@ -318,6 +324,7 @@ Description: universally unique id library - headers and static libraries
 
 Package: util-linux-udeb
 Architecture: any
+Build-Profiles: <!stage1>
 Priority: optional
 Section: debian-installer
 Depends: ${misc:Depends}, ${shlibs:Depends}

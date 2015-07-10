@@ -11,7 +11,11 @@ ifeq ($(DEB_HOST_ARCH_OS),linux)
 CONFOPTS += --enable-raw
 CONFOPTS += --with-selinux
 CONFOPTS += --enable-partx
-CONFOPTS += --with-systemd
+ifneq ($(filter stage1,$(DEB_BUILD_PROFILES)),)
+	CONFOPTS += --without-systemd
+else
+	CONFOPTS += --with-systemd
+endif
 CONFOPTS += --enable-tunelp
 endif
 
@@ -56,6 +60,14 @@ override_dh_auto_build:
 
 override_dh_auto_install:
 	dh_auto_install
+ifneq ($(filter stage1,$(DEB_BUILD_PROFILES)),)
+	# Manually generate and install units to avoid missing files when
+        # util-linux.install gets executed in stage1 builds.
+	install -d debian/tmp/lib/systemd/system
+	make PATHFILES=sys-utils/fstrim.service sys-utils/fstrim.service
+	install -m644 sys-utils/fstrim.service debian/tmp/lib/systemd/system/fstrim.service
+	install -m644 sys-utils/fstrim.timer debian/tmp/lib/systemd/system/fstrim.timer
+endif
 	#
 	# the version in bsdmainutils seems newer.
 	rm -f debian/tmp/usr/bin/look debian/tmp/usr/share/man/man1/look.1
@@ -113,7 +125,9 @@ override_dh_installman:
 	dh_installman --language=C
 
 override_dh_gencontrol:
+ifeq ($(filter stage1,$(DEB_BUILD_PROFILES)),)
 	dh_gencontrol --package=bsdutils -- -v1:$(DEB_VERSION_UPSTREAM_REVISION)
+endif
 	dh_gencontrol --remaining-packages
 
 override_dh_installinit:
