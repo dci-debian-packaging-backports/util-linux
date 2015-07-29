@@ -1,3 +1,15 @@
+util-linux (2.26.2-9) unstable; urgency=medium
+
+  * Add lintian override for hwclock.sh missing service file
+    - systemd itself installs a /dev/null override for the init script
+      since systemd handles the hardware clock internally.
+  * Add lintian overrides for dh-exec features not detected
+  * Drop specialcasing of sfdisk on sparc
+  * Upload to unstable with approval from debian-boot@lists.debian.org
+    for going ahead with cfdisk-udeb removal.
+
+ -- Andreas Henriksson <andreas@fatal.se>  Wed, 29 Jul 2015 16:20:44 +0200
+
 util-linux (2.26.2-8) experimental; urgency=medium
 
   * Use canonical url in Vcs-Git field
