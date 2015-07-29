@@ -25,7 +25,7 @@ sbin/mkfs.bfs
 sbin/mkfs.cramfs
 sbin/mkfs.minix
 sbin/runuser
-sbin/sfdisk                                                     [!sparc]
+sbin/sfdisk
 sbin/sulogin
 sbin/swaplabel
 sbin/wipefs
