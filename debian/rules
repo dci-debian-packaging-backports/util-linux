@@ -25,17 +25,14 @@ CONFOPTS += --enable-static-programs=fdisk,sfdisk,blkid
 # See http://bugs.debian.org/811361
 CONFOPTS += --without-python
 
+# Disabled by default, fedora uses newgrp from src:shadow
+CONFOPTS += --enable-newgrp
+
 # disable utilities shipped by other packages
-# => login
-CONFOPTS += --disable-login
-CONFOPTS += --disable-nologin
-CONFOPTS += --disable-su
 # => procps
 CONFOPTS += --disable-kill
 # => eject
 CONFOPTS += --disable-eject
-# => passwd
-CONFOPTS += --disable-chfn-chsh
 # => bsdmainutils
 CONFOPTS += --disable-look
 CONFOPTS += --disable-hexdump

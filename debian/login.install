@@ -1,0 +1,10 @@
+#!/usr/bin/dh-exec --with=install
+bin/login
+#etc/login.defs
+#etc/pam.d/login
+usr/bin/newgrp
+# Install into path where src:shadow login package used to install nologin:
+sbin/nologin => usr/sbin/nologin
+# ----- manpages -----
+usr/share/man/man1/login.1
+usr/share/man/man1/newgrp.1

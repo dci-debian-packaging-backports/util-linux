@@ -11,6 +11,7 @@ Build-Depends: debhelper (>= 10),
                libsystemd-dev [linux-any] <!stage1>,
                libtool,
                libudev-dev [linux-any] <!stage1>,
+               libuser1-dev <!stage1>,
                pkg-config,
                po-debconf,
                systemd [linux-any] <!stage1>,
@@ -33,12 +34,14 @@ Essential: yes
 Pre-Depends: ${misc:Pre-Depends}, ${shlibs:Depends}
 Depends: ${misc:Depends},
 Suggests: dosfstools, kbd | console-tools, util-linux-locales
-Replaces: bash-completion (<< 1:2.1-4.1~),
+Replaces: login (<< 1:4.9999999),
+          bash-completion (<< 1:2.1-4.1~),
           sysvinit-utils (<< 2.88dsf-59.1~),
           initscripts (<< 2.88dsf-59.2~),
           mount (= 2.26.2-3),
           mount (= 2.26.2-3ubuntu1)
-Breaks: bash-completion (<< 1:2.1-4.1~),
+Breaks: login (<< 1:4.99999999),
+          bash-completion (<< 1:2.1-4.1~),
           grml-debootstrap (<< 0.68),
           cloud-utils (<< 0.27-1~),
           sysvinit-utils (<< 2.88dsf-59.4~),
@@ -95,6 +98,39 @@ Description: basic utilities from 4.4BSD-Lite
  This package contains the bare minimum of BSD utilities needed for a
  Debian system: logger, renice, script, scriptreplay, and wall. The
  remaining standard BSD utilities are provided by bsdmainutils.
+
+Package: login
+Architecture: any
+Build-Profiles: <!stage1>
+Essential: yes
+Section: admin
+Pre-Depends: ${misc:Pre-Depends}, ${shlibs:Depends}
+Depends: ${misc:Depends}
+Multi-Arch: foreign
+Description: system login tools
+ These tools are required to be able to login and use your system. The
+ login program invokes your user shell and enables command execution.
+ .
+ This package contains the variant from the util-linux suite.
+
+Package: passwd-utils
+Architecture: any
+Build-Profiles: <!stage1>
+Section: admin
+Pre-Depends: ${misc:Pre-Depends}, ${shlibs:Depends}
+Depends: ${misc:Depends}
+Multi-Arch: foreign
+# FIXME: Use divert instead of Conflict/Replaces?
+Replaces: passwd (<< 1:4.9999999)
+Breaks: passwd (<< 1:4.9999999)
+Description: change and administer password and group data
+ This package includes chsh and chfn to allow users to alter user information
+ in password database.
+ .
+ This package contains the variant from the util-linux suite. The main
+ difference from the variants provided by src:shadow (passwd) package is
+ that these can also access Kerberos, LDAP, etc since the util-linux
+ version can and is be built against libuser.
 
 Package: fdisk-udeb
 Architecture: hurd-any linux-any

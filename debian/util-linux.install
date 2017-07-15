@@ -11,6 +11,7 @@ debian/tmp/usr/bin/rename => /usr/bin/rename.ul
 [linux-any] lib/systemd/system/fstrim.service => /usr/share/doc/util-linux/examples/fstrim.service
 bin/more
 bin/mountpoint
+bin/su
 sbin/agetty
 sbin/blkid
 sbin/cfdisk
