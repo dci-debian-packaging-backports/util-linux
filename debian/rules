@@ -29,7 +29,6 @@ CONFOPTS += --without-python
 # => login
 CONFOPTS += --disable-login
 CONFOPTS += --disable-nologin
-CONFOPTS += --disable-su
 # => procps
 CONFOPTS += --disable-kill
 # => eject
