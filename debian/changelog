@@ -1,3 +1,11 @@
+util-linux (2.29.2-1+deb9u1) stretch-security; urgency=high
+
+  * Non-maintainer upload by the Security Team.
+  * bash-completion: (umount) use findmnt, escape a space in paths
+    (CVE-2018-7738) (Closes: #892179)
+
+ -- Salvatore Bonaccorso <carnil@debian.org>  Wed, 07 Mar 2018 19:29:09 +0100
+
 util-linux (2.29.2-1) unstable; urgency=medium
 
   * New upstream release.
